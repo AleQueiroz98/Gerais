@@ -556,9 +556,9 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
   <div class="ls-section" style="margin-bottom:8px;">
     <p style="font-size:12px; color:var(--ls-text-helper); max-width:760px;">
       Este painel suporta <strong>edição colaborativa em tempo real</strong>. Clique em "Compartilhar" no cabeçalho para
-      copiar o link — qualquer pessoa com o link entra na mesma sala e vê as edições ao vivo. As alterações ficam salvas
-      localmente em cada navegador via IndexedDB e sincronizam automaticamente entre todos os participantes conectados.
-      IDs de milestones seguem a numeração das alavancas do memorando estratégico "Lead to Sale" (Aceleração Seminovos).
+      copiar o link — qualquer pessoa com o link entra na mesma sala e vê as edições ao vivo. Os dados ficam gravados em
+      um banco central (Supabase), então você pode fechar o navegador e voltar depois de outro computador que os números
+      continuam lá. IDs de milestones seguem a numeração das alavancas do memorando "Lead to Sale" (Aceleração Seminovos).
     </p>
   </div>
   <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
@@ -602,126 +602,196 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
 })();
 </script>
 
-<script type="module">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
 /* ============================================================
-   MÓDULO DE COLABORAÇÃO EM TEMPO REAL
-   Usa Y.js (CRDT) + y-webrtc (P2P) + y-indexeddb (persistência local).
+   COLABORAÇÃO EM TEMPO REAL — Supabase
+   ------------------------------------------------------------
+   PREENCHA AS DUAS CONSTANTES ABAIXO com os dados do seu
+   projeto Supabase (Settings → API):
    ============================================================ */
-import * as Y from 'https://esm.sh/yjs@13';
-import { WebrtcProvider } from 'https://esm.sh/y-webrtc@10';
-import { IndexeddbPersistence } from 'https://esm.sh/y-indexeddb@9';
+window.SUPABASE_URL = 'COLE_AQUI_SUA_PROJECT_URL';
+window.SUPABASE_KEY = 'COLE_AQUI_SUA_PUBLISHABLE_KEY';
 
-// Room: URL param ?room=xxx OU gera um novo e persiste no localStorage
 (function () {
-  const params = new URLSearchParams(location.search);
-  let roomId = params.get('room');
-  if (!roomId) {
-    try {
-      roomId = localStorage.getItem('ls-dashboard-room');
-      if (!roomId) {
-        roomId = 'ls-painel-' + Math.random().toString(36).slice(2, 10);
-        localStorage.setItem('ls-dashboard-room', roomId);
-      }
-    } catch (e) {
-      roomId = 'ls-painel-' + Math.random().toString(36).slice(2, 10);
-    }
-  }
-  // Atualiza URL sem recarregar
-  try {
-    const url = new URL(location.href);
-    if (!url.searchParams.get('room')) {
-      url.searchParams.set('room', roomId);
-      history.replaceState(null, '', url.toString());
-    }
-  } catch (e) { /* ignore */ }
-
-  const ydoc = new Y.Doc();
-  const ystore = ydoc.getMap('store');
-
-  // Persistência local via IndexedDB (sobrevive ao refresh)
-  const persistence = new IndexeddbPersistence('ls-dashboard-' + roomId, ydoc);
-
-  // Sync P2P via WebRTC (servidor de sinalização público do Y.js)
-  const provider = new WebrtcProvider(roomId, ydoc, {
-    signaling: ['wss://signaling.yjs.dev'],
-  });
-
-  // Awareness (presença)
-  const awareness = provider.awareness;
-  const COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
-  const myColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-  const myName = (() => {
-    try { return localStorage.getItem('ls-user-name') || null; } catch(e) { return null; }
-  })() || 'Usuário';
-  awareness.setLocalStateField('user', { name: myName, color: myColor, joined: Date.now() });
-
-  // Expõe collab globals para o app principal
+  // ---- Sala (id da linha no banco) --------------------------------
+  var params = new URLSearchParams(location.search);
+  var roomId = params.get('room') || 'seminovos';
   window.collabRoomId = roomId;
-  window.collabYdoc = ydoc;
-  window.collabAwareness = awareness;
 
-  // Interface window.storage compatível com o app existente
+  var CLIENT_ID = Math.random().toString(36).slice(2, 10);
+  var COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+  var myUser = {
+    id: CLIENT_ID,
+    name: 'Usuário',
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+  };
+  window.collabMyUser = myUser;
+  window.collabPeers = {};
+
+  var configured = window.SUPABASE_URL.indexOf('COLE_AQUI') === -1 &&
+                   window.SUPABASE_KEY.indexOf('COLE_AQUI') === -1;
+
+  // Mapeia as chaves usadas pelo app para colunas do banco
+  var KEY_TO_COL = {
+    'pnl-values': 'pnl',
+    'frentes-values': 'frentes',
+    'dashboard-meta': 'meta',
+  };
+  var COL_TO_KEY = { pnl: 'pnl-values', frentes: 'frentes-values', meta: 'dashboard-meta' };
+
+  // Cache local — serve de fallback e evita ida ao banco em cada get
+  var cache = {};
+  var LS_PREFIX = 'ls-' + roomId + ':';
+
+  function lsGet(key) {
+    try { return localStorage.getItem(LS_PREFIX + key); } catch (e) { return null; }
+  }
+  function lsSet(key, value) {
+    try { localStorage.setItem(LS_PREFIX + key, value); } catch (e) { /* quota */ }
+  }
+
+  // ---- Sem Supabase configurado: modo local ------------------------
+  if (!configured || typeof supabase === 'undefined') {
+    window.storage = {
+      get: async function (key) {
+        var raw = lsGet(key);
+        return raw !== null ? { value: raw } : null;
+      },
+      set: async function (key, value) { lsSet(key, value); return { ok: true }; },
+    };
+    window.collabMode = 'local';
+    window.collabReady = Promise.resolve();
+    setTimeout(function () {
+      window.dispatchEvent(new CustomEvent('collab:synced'));
+    }, 0);
+    return;
+  }
+
+  // ---- Cliente Supabase --------------------------------------------
+  var sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+  window.collabMode = 'supabase';
+  window.collabSb = sb;
+
+  var loaded = false;
+
+  // Carrega o estado inicial do banco
+  var readyPromise = (async function () {
+    try {
+      var res = await sb.from('dashboards').select('*').eq('id', roomId).maybeSingle();
+      if (res.error) throw res.error;
+      if (res.data) {
+        Object.keys(COL_TO_KEY).forEach(function (col) {
+          if (res.data[col] != null) {
+            var key = COL_TO_KEY[col];
+            var raw = JSON.stringify(res.data[col]);
+            cache[key] = raw;
+            lsSet(key, raw);
+          }
+        });
+      }
+      loaded = true;
+      window.collabError = null;
+    } catch (e) {
+      // Falhou o banco → segue com o que houver em localStorage
+      console.warn('[collab] falha ao carregar do Supabase:', e.message || e);
+      window.collabError = e.message || String(e);
+    }
+  })();
+
+  window.collabReady = readyPromise;
+
+  // ---- Interface window.storage ------------------------------------
   window.storage = {
     get: async function (key) {
-      const val = ystore.get(key);
-      return val !== undefined ? { value: val } : null;
+      if (cache[key] !== undefined) return { value: cache[key] };
+      var raw = lsGet(key);
+      return raw !== null ? { value: raw } : null;
     },
     set: async function (key, value) {
-      ydoc.transact(function () { ystore.set(key, value); });
-      return { ok: true };
+      cache[key] = value;
+      lsSet(key, value);
+
+      var col = KEY_TO_COL[key];
+      if (!col) return { ok: true };
+
+      var payload = { id: roomId, updated_at: new Date().toISOString() };
+      try {
+        payload[col] = JSON.parse(value);
+      } catch (e) {
+        return { ok: false };
+      }
+
+      try {
+        var res = await sb.from('dashboards').upsert(payload, { onConflict: 'id' });
+        if (res.error) throw res.error;
+        window.collabError = null;
+        window.dispatchEvent(new CustomEvent('collab:saved'));
+        return { ok: true };
+      } catch (e) {
+        console.warn('[collab] falha ao salvar:', e.message || e);
+        window.collabError = e.message || String(e);
+        window.dispatchEvent(new CustomEvent('collab:save-error'));
+        return { ok: false };
+      }
     },
   };
 
-  // BroadcastChannel: sincroniza abas no mesmo navegador de forma instantânea
-  var bc = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('ls-' + roomId) : null;
-  if (bc) {
-    bc.onmessage = function (e) {
-      if (!e.data || e.data.type !== 'store-update') return;
-      // Aplica no Y.js sem re-broadcast
-      ydoc.transact(function () {
-        Object.keys(e.data.updates).forEach(function (k) {
-          ystore.set(k, e.data.updates[k]);
-        });
-      });
-      // Notifica o app diretamente
-      window.dispatchEvent(new CustomEvent('collab:remote-change', {
-        detail: { keys: Object.keys(e.data.updates) },
-      }));
-    };
-  }
-
-  // Intercepta storage.set para broadcast imediato
-  var _origSet = window.storage.set;
-  window.storage.set = async function (key, value) {
-    var result = await _origSet(key, value);
-    if (bc) {
-      bc.postMessage({ type: 'store-update', updates: { [key]: value } });
-    }
-    return result;
-  };
-
-  // Notifica o app quando mudanças REMOTAS chegam via WebRTC
-  ystore.observe(function (event, txn) {
-    if (txn.local) return;
-    window.dispatchEvent(new CustomEvent('collab:remote-change', {
-      detail: { keys: Array.from(event.keysChanged) },
-    }));
+  // ---- Realtime: mudanças de outras pessoas -------------------------
+  var channel = sb.channel('dashboard-' + roomId, {
+    config: { presence: { key: CLIENT_ID } },
   });
 
-  // Notifica o app quando a presença muda
-  awareness.on('change', function () {
+  channel.on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'dashboards',
+    filter: 'id=eq.' + roomId,
+  }, function (payload) {
+    var row = payload.new;
+    if (!row) return;
+    var changedKeys = [];
+    Object.keys(COL_TO_KEY).forEach(function (col) {
+      if (row[col] == null) return;
+      var key = COL_TO_KEY[col];
+      var raw = JSON.stringify(row[col]);
+      if (cache[key] !== raw) {
+        cache[key] = raw;
+        lsSet(key, raw);
+        changedKeys.push(key);
+      }
+    });
+    if (changedKeys.length) {
+      window.dispatchEvent(new CustomEvent('collab:remote-change', {
+        detail: { keys: changedKeys },
+      }));
+    }
+  });
+
+  // ---- Presença: quem está online -----------------------------------
+  channel.on('presence', { event: 'sync' }, function () {
+    var state = channel.presenceState();
+    var peers = {};
+    Object.keys(state).forEach(function (k) {
+      var entries = state[k];
+      if (!entries || !entries.length) return;
+      var u = entries[0];
+      if (u.id && u.id !== CLIENT_ID) peers[u.id] = { user: u, lastSeen: Date.now() };
+    });
+    window.collabPeers = peers;
     window.dispatchEvent(new CustomEvent('collab:presence-change'));
   });
 
-  // Promise que resolve quando o IndexedDB terminou de carregar
-  window.collabReady = persistence.whenSynced;
-
-  // Atualiza dot de status
-  persistence.whenSynced.then(function () {
-    window.dispatchEvent(new CustomEvent('collab:synced'));
+  channel.subscribe(function (status) {
+    window.collabChannelStatus = status;
+    if (status === 'SUBSCRIBED') {
+      channel.track(myUser);
+    }
+    window.dispatchEvent(new CustomEvent('collab:status', { detail: { status: status } }));
   });
-  provider.on('status', function (e) {
-    window.dispatchEvent(new CustomEvent('collab:peer-status', { detail: e }));
+
+  readyPromise.then(function () {
+    window.dispatchEvent(new CustomEvent('collab:synced'));
   });
 })();
 </script>
@@ -1450,13 +1520,21 @@ const FRENTE_MARCA = {
   function updateSaveIndicator(ok) {
     const el = document.getElementById('save-indicator');
     if (!el) return;
-    if (storageAvailable === false) {
-      el.textContent = 'Edição local nesta sessão (arquivo aberto fora do Claude — as alterações não são salvas ao recarregar).';
+
+    if (window.collabMode !== 'supabase') {
+      el.textContent = 'Modo local — Supabase não configurado. As edições ficam salvas só neste navegador e não são compartilhadas.';
       el.className = 'ls-save-indicator ls-save-indicator--local';
       return;
     }
-    el.textContent = ok ? 'Alterações salvas.' : 'Não foi possível salvar agora — a edição continua válida nesta sessão.';
-    el.className = 'ls-save-indicator' + (ok ? '' : ' ls-save-indicator--warn');
+
+    if (!ok || window.collabError) {
+      el.textContent = 'Não foi possível salvar no servidor' + (window.collabError ? ' (' + window.collabError + ')' : '') + ' — a edição continua válida nesta sessão.';
+      el.className = 'ls-save-indicator ls-save-indicator--warn';
+      return;
+    }
+
+    el.textContent = 'Alterações salvas e compartilhadas com o time.';
+    el.className = 'ls-save-indicator';
   }
 
   async function loadState() {
@@ -1569,30 +1647,37 @@ const FRENTE_MARCA = {
     const list = document.getElementById('presence-list');
     const count = document.getElementById('presence-count');
     const dot = document.getElementById('sync-dot');
-    if (!window.collabAwareness) return;
 
-    const states = window.collabAwareness.getStates();
-    const myId = window.collabAwareness.clientID;
-    const others = [];
-    states.forEach(function (state, clientId) {
-      if (clientId === myId) return;
-      if (state && state.user) others.push(state.user);
-    });
+    const peers = window.collabPeers || {};
+    const others = Object.keys(peers).map(function (id) { return peers[id].user; });
 
     if (dot) {
-      dot.className = 'ls-sync-dot ls-sync-dot--online';
-      dot.title = 'Conectado à sala: ' + (window.collabRoomId || '');
+      if (window.collabMode !== 'supabase') {
+        dot.className = 'ls-sync-dot';
+        dot.title = 'Modo local — Supabase não configurado. As edições ficam só neste navegador.';
+      } else if (window.collabError) {
+        dot.className = 'ls-sync-dot ls-sync-dot--syncing';
+        dot.title = 'Erro de conexão: ' + window.collabError;
+      } else {
+        dot.className = 'ls-sync-dot ls-sync-dot--online';
+        dot.title = 'Conectado à sala: ' + (window.collabRoomId || '');
+      }
     }
 
-    if (!list) return;
-    list.innerHTML = others.slice(0, 6).map(function (u) {
-      const initials = (u.name || '?').split(' ').map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase();
-      return '<div class="ls-presence-avatar" style="background:' + (u.color || '#888') + ';" title="' + escapeHTML(u.name || 'Usuário') + '">' + escapeHTML(initials) + '</div>';
-    }).join('');
+    if (list) {
+      list.innerHTML = others.slice(0, 6).map(function (u) {
+        const initials = (u.name || '?').split(' ').map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase();
+        return '<div class="ls-presence-avatar" style="background:' + (u.color || '#888') + ';" title="' + escapeHTML(u.name || 'Usuário') + '">' + escapeHTML(initials) + '</div>';
+      }).join('');
+    }
 
     if (count) {
-      const n = others.length;
-      count.textContent = n === 0 ? 'Só você' : n === 1 ? '+ 1 pessoa' : '+ ' + n + ' pessoas';
+      if (window.collabMode !== 'supabase') {
+        count.textContent = 'Modo local';
+      } else {
+        const n = others.length;
+        count.textContent = n === 0 ? 'Só você' : n === 1 ? '+ 1 pessoa' : '+ ' + n + ' pessoas';
+      }
     }
   }
 
@@ -1620,9 +1705,18 @@ const FRENTE_MARCA = {
       } catch (err) { /* ignore */ }
     });
 
-    // Presença
+    // Presença e status de conexão
     window.addEventListener('collab:presence-change', renderPresence);
     window.addEventListener('collab:synced', renderPresence);
+    window.addEventListener('collab:status', renderPresence);
+    window.addEventListener('collab:saved', function () {
+      renderPresence();
+      updateSaveIndicator(true);
+    });
+    window.addEventListener('collab:save-error', function () {
+      renderPresence();
+      updateSaveIndicator(false);
+    });
 
     // Botão Compartilhar
     const copyBtn = document.getElementById('copy-link-btn');
