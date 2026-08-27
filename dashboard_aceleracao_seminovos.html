@@ -344,6 +344,55 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
 }
 
 /* ============================================================
+   TELA DE SENHA
+   ============================================================ */
+.ls-auth-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--ls-gray-x-light);
+  display: flex; align-items: center; justify-content: center;
+}
+.ls-auth-card {
+  background: var(--ls-white);
+  border: 1px solid var(--ls-stroke);
+  border-radius: 14px;
+  box-shadow: var(--ls-shadow-card);
+  padding: 40px 36px;
+  width: 100%; max-width: 360px;
+  text-align: center;
+}
+.ls-auth-logo {
+  width: 40px; height: 40px; margin: 0 auto 16px;
+  background: var(--ls-green); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ls-auth-logo svg { width: 22px; height: 22px; }
+.ls-auth-title { font-size: 17px; font-weight: 700; color: var(--ls-black); margin-bottom: 4px; }
+.ls-auth-sub { font-size: 12px; color: var(--ls-text-regular); margin-bottom: 24px; }
+.ls-auth-input {
+  width: 100%; font-family: var(--ls-font); font-size: 14px;
+  border: 1.5px solid var(--ls-stroke); border-radius: 8px;
+  padding: 10px 14px; outline: none; color: var(--ls-text-dark);
+  transition: border-color 150ms;
+  letter-spacing: 0.08em;
+}
+.ls-auth-input:focus { border-color: var(--ls-green-deep); }
+.ls-auth-input--error { border-color: var(--ls-error) !important; animation: ls-shake 300ms; }
+@keyframes ls-shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-6px); }
+  40%,80% { transform: translateX(6px); }
+}
+.ls-auth-error { font-size: 12px; color: var(--ls-error-text); margin-top: 8px; min-height: 16px; }
+.ls-auth-btn {
+  margin-top: 16px; width: 100%;
+  font-family: var(--ls-font); font-size: 14px; font-weight: 700;
+  background: var(--ls-green-deep); color: var(--ls-white);
+  border: none; border-radius: 8px; padding: 11px;
+  cursor: pointer; transition: background 120ms;
+}
+.ls-auth-btn:hover { background: var(--ls-green-deep-hover); }
+
+/* ============================================================
    COLABORAÇÃO EM TEMPO REAL
    ============================================================ */
 .ls-collab-bar {
@@ -395,6 +444,19 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
 </style>
 </head>
 <body>
+
+<div id="auth-overlay" class="ls-auth-overlay">
+  <div class="ls-auth-card">
+    <div class="ls-auth-logo">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M11 8 L21 16 L11 24" stroke="#1A1A1A" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="ls-auth-title">Painel de Controle</div>
+    <div class="ls-auth-sub">Aceleração Seminovos · Lead-to-Sales</div>
+    <input type="password" id="auth-input" class="ls-auth-input" placeholder="Senha de acesso" autocomplete="current-password">
+    <div class="ls-auth-error" id="auth-error"></div>
+    <button type="button" class="ls-auth-btn" id="auth-btn">Entrar</button>
+  </div>
+</div>
 
 <header class="ls-header">
   <div class="ls-wordmark" aria-hidden="false">
@@ -504,6 +566,41 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
     <span id="generated-stamp"></span>
   </div>
 </footer>
+
+<script>
+(function () {
+  var PWD = 'Lead2sales';
+  var SK = 'ls-auth-ok';
+  var overlay = document.getElementById('auth-overlay');
+  var input = document.getElementById('auth-input');
+  var btn = document.getElementById('auth-btn');
+  var err = document.getElementById('auth-error');
+
+  function unlock() {
+    try { sessionStorage.setItem(SK, '1'); } catch(e) {}
+    overlay.style.display = 'none';
+  }
+
+  function attempt() {
+    if (input.value === PWD) {
+      unlock();
+    } else {
+      err.textContent = 'Senha incorreta. Tente novamente.';
+      input.classList.add('ls-auth-input--error');
+      input.value = '';
+      setTimeout(function () { input.classList.remove('ls-auth-input--error'); }, 400);
+      input.focus();
+    }
+  }
+
+  try {
+    if (sessionStorage.getItem(SK) === '1') { unlock(); return; }
+  } catch(e) {}
+
+  btn.addEventListener('click', attempt);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') attempt(); });
+})();
+</script>
 
 <script type="module">
 /* ============================================================
