@@ -672,7 +672,35 @@ import { IndexeddbPersistence } from 'https://esm.sh/y-indexeddb@9';
     },
   };
 
-  // Notifica o app quando mudanças REMOTAS chegam
+  // BroadcastChannel: sincroniza abas no mesmo navegador de forma instantânea
+  var bc = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('ls-' + roomId) : null;
+  if (bc) {
+    bc.onmessage = function (e) {
+      if (!e.data || e.data.type !== 'store-update') return;
+      // Aplica no Y.js sem re-broadcast
+      ydoc.transact(function () {
+        Object.keys(e.data.updates).forEach(function (k) {
+          ystore.set(k, e.data.updates[k]);
+        });
+      });
+      // Notifica o app diretamente
+      window.dispatchEvent(new CustomEvent('collab:remote-change', {
+        detail: { keys: Object.keys(e.data.updates) },
+      }));
+    };
+  }
+
+  // Intercepta storage.set para broadcast imediato
+  var _origSet = window.storage.set;
+  window.storage.set = async function (key, value) {
+    var result = await _origSet(key, value);
+    if (bc) {
+      bc.postMessage({ type: 'store-update', updates: { [key]: value } });
+    }
+    return result;
+  };
+
+  // Notifica o app quando mudanças REMOTAS chegam via WebRTC
   ystore.observe(function (event, txn) {
     if (txn.local) return;
     window.dispatchEvent(new CustomEvent('collab:remote-change', {
