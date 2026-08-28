@@ -4,6 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lead-to-Sales — Painel de Controle · Aceleração Seminovos</title>
+
+<!-- ==========================================================
+     >>> CONFIGURAÇÃO DO BANCO DE DADOS — EDITE AS 2 LINHAS ABAIXO <<<
+
+     Cole aqui os dados do seu projeto Supabase.
+     Onde achar: supabase.com -> seu projeto -> engrenagem
+     (Project Settings) -> API
+
+       SUPABASE_URL  = campo "Project URL"
+                       (parece com https://abcdefgh.supabase.co)
+
+       SUPABASE_KEY  = chave "anon" / "public"
+                       (texto longo comecando com eyJhbGci...)
+
+     NAO use a chave "service_role". Só a "anon".
+     Mantenha as aspas simples ao redor de cada valor.
+     ========================================================== -->
+<script>
+  window.SUPABASE_URL = 'https://hffesvfwspwuloknackf.supabase.co';
+  window.SUPABASE_KEY = 'COLE_AQUI_SUA_PUBLISHABLE_KEY';
+</script>
+<!-- ====== FIM DA CONFIGURAÇÃO — nao precisa mexer em mais nada ====== -->
+
 <style>
 /* ============================================================
    TOKENS — identidade visual Localiza (verde institucional).
@@ -607,13 +630,15 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
 /* ============================================================
    COLABORAÇÃO EM TEMPO REAL — Supabase
    ------------------------------------------------------------
-   PREENCHA AS DUAS CONSTANTES ABAIXO com os dados do seu
-   projeto Supabase (Settings → API):
+   As credenciais são definidas no TOPO deste arquivo (dentro do
+   <head>), não aqui.
    ============================================================ */
-window.SUPABASE_URL = 'COLE_AQUI_SUA_PROJECT_URL';
-window.SUPABASE_KEY = 'COLE_AQUI_SUA_PUBLISHABLE_KEY';
-
 (function () {
+  // Segurança: se o bloco de configuração do topo tiver sido
+  // removido, evita erro e cai no modo local.
+  window.SUPABASE_URL = window.SUPABASE_URL || 'COLE_AQUI_SUA_PROJECT_URL';
+  window.SUPABASE_KEY = window.SUPABASE_KEY || 'COLE_AQUI_SUA_PUBLISHABLE_KEY';
+
   // ---- Sala (id da linha no banco) --------------------------------
   var params = new URLSearchParams(location.search);
   var roomId = params.get('room') || 'seminovos';
