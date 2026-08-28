@@ -548,7 +548,11 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
   var fileHandle = null;
   var fileName = null;
 
-  var supportsFS = (typeof window.showSaveFilePicker === 'function');
+  // A File System Access API não funciona em páginas abertas direto do
+  // disco (file://) — o navegador expõe a função mas ela lança erro. Aí
+  // o caminho válido é o download normal.
+  var origemLocal = (location.protocol === 'file:');
+  var supportsFS = (typeof window.showSaveFilePicker === 'function') && !origemLocal;
 
   window.LSFile = {
     supported: supportsFS,
@@ -662,8 +666,12 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
   // Salvar: regrava o mesmo arquivo se já houver um; senão pergunta onde
   window.LSFile.save = async function (forcarEscolha) {
     emit('file:saving');
-    try {
-      if (supportsFS) {
+
+    // Caminho 1 — gravar direto no arquivo. Só é tentado quando a API
+    // está de fato disponível; qualquer falha dela cai para o download,
+    // porque sair daqui sem salvar é o pior desfecho possível.
+    if (supportsFS) {
+      try {
         if (!fileHandle || forcarEscolha) {
           fileHandle = await window.showSaveFilePicker({
             suggestedName: fileName || 'dashboard_aceleracao_seminovos.html',
@@ -673,14 +681,28 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
           await idb('readwrite', function (s) { return s.put(fileHandle, 'file'); });
         }
         await writeTo(fileHandle);
-      } else {
-        downloadHtml();
+        window.LSFile.dirty = false;
+        window.LSFile.viaDownload = false;
+        emit('file:saved');
+        return true;
+      } catch (e) {
+        // Cancelou a janela de salvar: não é erro, não faz nada.
+        if (e && e.name === 'AbortError') { emit('file:idle'); return false; }
+        // Falhou por qualquer outro motivo (permissão, origem, disco):
+        // desiste da API e baixa o arquivo.
+        fileHandle = null;
+        supportsFS = false;
       }
+    }
+
+    // Caminho 2 — download pelo navegador. Sempre funciona.
+    try {
+      downloadHtml();
       window.LSFile.dirty = false;
+      window.LSFile.viaDownload = true;
       emit('file:saved');
       return true;
     } catch (e) {
-      if (e && e.name === 'AbortError') { emit('file:idle'); return false; }
       emit('file:error', { message: e.message || String(e) });
       return false;
     }
@@ -1485,9 +1507,9 @@ const FRENTE_MARCA = {
       return;
     }
     if (lastSaveState === 'saved') {
-      el.textContent = F.supported
-        ? 'Arquivo atualizado' + (F.name ? ' (' + F.name + ')' : '') + '. Quem abrir este arquivo verá estes dados.'
-        : 'Arquivo baixado. Substitua o antigo pela versão nova para o time ver os dados.';
+      el.textContent = F.viaDownload
+        ? 'Arquivo baixado. Substitua o antigo por esta versão para o time ver os dados.'
+        : 'Arquivo atualizado' + (F.name ? ' (' + F.name + ')' : '') + '. Quem abrir este arquivo verá estes dados.';
       el.className = 'ls-save-indicator';
       return;
     }
@@ -1659,7 +1681,7 @@ const FRENTE_MARCA = {
     window.addEventListener('file:dirty',  function () { renderFileStatus(); updateSaveIndicator('dirty'); });
     window.addEventListener('file:saving', function () { updateSaveIndicator('saving'); });
     window.addEventListener('file:saved',  function () { renderFileStatus(); updateSaveIndicator('saved'); });
-    window.addEventListener('file:idle',   function () { renderFileStatus(); updateSaveIndicator(); });
+    window.addEventListener('file:idle',   function () { renderFileStatus(); updateSaveIndicator(window.LSFile.dirty ? 'dirty' : 'idle'); });
     window.addEventListener('file:error',  function () { renderFileStatus(); updateSaveIndicator('error'); });
 
     const saveBtn = document.getElementById('save-file-btn');
