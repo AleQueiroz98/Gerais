@@ -23,7 +23,7 @@
      ========================================================== -->
 <script>
   window.SUPABASE_URL = 'https://hffesvfwspwuloknackf.supabase.co';
-  window.SUPABASE_KEY = 'COLE_AQUI_SUA_PUBLISHABLE_KEY';
+  window.SUPABASE_KEY = 'sb_publishable_GKLMw-eYZqUA8u7GtIk1NQ_7njv6eMb';
 </script>
 <!-- ====== FIM DA CONFIGURAÇÃO — nao precisa mexer em mais nada ====== -->
 
@@ -698,25 +698,42 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
   window.collabMode = 'supabase';
   window.collabSb = sb;
 
-  var loaded = false;
+  // A tabela nasce com pnl/frentes/meta = '{}' (default do SQL). Esse
+  // objeto vazio significa "nunca foi preenchido" — se ele fosse
+  // aplicado por cima do estado, o dashboard abriria em branco, porque
+  // o app espera arrays. Então tratamos {} como ausência de dado.
+  function hasData(v) {
+    if (v == null) return false;
+    if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === 'object') return Object.keys(v).length > 0;
+    return true;
+  }
 
-  // Carrega o estado inicial do banco
-  var readyPromise = (async function () {
+  // Carrega o estado inicial do banco.
+  var loadPromise = (async function () {
     try {
       var res = await sb.from('dashboards').select('*').eq('id', roomId).maybeSingle();
       if (res.error) throw res.error;
+      var changed = [];
       if (res.data) {
         Object.keys(COL_TO_KEY).forEach(function (col) {
-          if (res.data[col] != null) {
+          if (hasData(res.data[col])) {
             var key = COL_TO_KEY[col];
             var raw = JSON.stringify(res.data[col]);
             cache[key] = raw;
             lsSet(key, raw);
+            changed.push(key);
           }
         });
       }
-      loaded = true;
       window.collabError = null;
+      // Se a resposta chegou depois do painel já ter renderizado (por
+      // causa do timeout abaixo), avisa a UI para se atualizar.
+      if (changed.length) {
+        window.dispatchEvent(new CustomEvent('collab:remote-change', {
+          detail: { keys: changed },
+        }));
+      }
     } catch (e) {
       // Falhou o banco → segue com o que houver em localStorage
       console.warn('[collab] falha ao carregar do Supabase:', e.message || e);
@@ -724,7 +741,13 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
     }
   })();
 
-  window.collabReady = readyPromise;
+  // O painel NUNCA deve ficar preso esperando a rede: se o banco não
+  // responder em 8s, renderiza com o que há em cache e aplica os dados
+  // depois, quando (e se) a resposta chegar.
+  window.collabReady = Promise.race([
+    loadPromise,
+    new Promise(function (resolve) { setTimeout(resolve, 8000); }),
+  ]);
 
   // ---- Interface window.storage ------------------------------------
   window.storage = {
@@ -777,7 +800,7 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
     if (!row) return;
     var changedKeys = [];
     Object.keys(COL_TO_KEY).forEach(function (col) {
-      if (row[col] == null) return;
+      if (!hasData(row[col])) return;
       var key = COL_TO_KEY[col];
       var raw = JSON.stringify(row[col]);
       if (cache[key] !== raw) {
@@ -815,7 +838,7 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
     window.dispatchEvent(new CustomEvent('collab:status', { detail: { status: status } }));
   });
 
-  readyPromise.then(function () {
+  window.collabReady.then(function () {
     window.dispatchEvent(new CustomEvent('collab:synced'));
   });
 })();
@@ -1573,9 +1596,16 @@ const FRENTE_MARCA = {
         storageGet('frentes-values'),
         storageGet('dashboard-meta'),
       ]);
-      if (pnlRaw) STATE.pnl.rows = JSON.parse(pnlRaw);
-      if (frentesRaw) STATE.frentes = JSON.parse(frentesRaw);
-      if (metaRaw) STATE.meta = JSON.parse(metaRaw);
+      // Só aceita o formato esperado — um valor inesperado (ex.: o '{}'
+      // que a tabela traz por padrão) deixaria o painel em branco.
+      const pnlParsed = pnlRaw ? JSON.parse(pnlRaw) : null;
+      const frentesParsed = frentesRaw ? JSON.parse(frentesRaw) : null;
+      const metaParsed = metaRaw ? JSON.parse(metaRaw) : null;
+      if (Array.isArray(pnlParsed) && pnlParsed.length) STATE.pnl.rows = pnlParsed;
+      if (Array.isArray(frentesParsed) && frentesParsed.length) STATE.frentes = frentesParsed;
+      if (metaParsed && typeof metaParsed === 'object' && !Array.isArray(metaParsed)) {
+        STATE.meta = Object.assign({}, STATE.meta, metaParsed);
+      }
     } catch (e) {
       // dados salvos inválidos/corrompidos — segue com o ilustrativo
     }
