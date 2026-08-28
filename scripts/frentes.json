@@ -1,0 +1,714 @@
+[
+  {
+    "id": 1,
+    "slug": "planejamento",
+    "nome": "Planejamento integrado mkt | vendas",
+    "objetivo": "Aprimorar o planejamento integrado e colaborativo entre marketing e vendas para dimensionar a necessidade de vendas de curto prazo, desdobrando-a em planos de geração de leads e planos comerciais de conversão, com ambições compartilhadas entre as áreas.",
+    "lideres": "Leonardo Viali, Luiz Santi e João Azevedo",
+    "time": "Vitor Moraes, Juliana Ribas",
+    "valorGerado": "Frente habilitadora — sem atribuição direta de valor no bridge de ~R$300M/ano.",
+    "status": "Primeira versão simplificada da rotina de planejamento integrado entre Marketing e Vendas iniciada, com alinhamento em alto nível entre necessidades de vendas e de geração de leads.",
+    "okrs": [
+      {
+        "label": "Lançamento do MVP do planejamento integrado",
+        "baseline": "Não iniciado",
+        "current": "Em desenvolvimento",
+        "meta": "Lançado (início de set/26)",
+        "unit": "milestone"
+      },
+      {
+        "label": "% de aderência da geração de leads ao plano desenhado",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "% de aderência da conversão de leads ao plano desenhado",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      }
+    ],
+    "entregaveis": [
+      {
+        "id": "1.1.1",
+        "desc": "Planejamento de vendas de curto prazo melhorado e em execução, com necessidade de vendas definida por loja, tipo de veículo e mês",
+        "owner": "Vitor Moraes",
+        "prazo": "S4 ago/26 (TBC)",
+        "status": "amarelo"
+      },
+      {
+        "id": "1.2.1",
+        "desc": "Planejamento de geração de leads melhorado e em execução",
+        "owner": "Juliana Ribas",
+        "prazo": "S4 ago/26 (TBC)",
+        "status": "amarelo"
+      },
+      {
+        "id": "1.3.1",
+        "desc": "Planejamento de conversão de leads em vendas evoluído, com dimensionamento de capacidade, produtividade e conversão das estruturas de venda",
+        "owner": "Juliana Ribas",
+        "prazo": "S3 set/26 (TBC)",
+        "status": "vermelho"
+      },
+      {
+        "id": "1.4.1 / 1.5.1",
+        "desc": "Telemetria de geração e conversão de leads aprimorada",
+        "owner": "Vitor Moraes",
+        "prazo": "S4 set/26 (TBC)",
+        "status": "vermelho"
+      },
+      {
+        "id": "1.6.1",
+        "desc": "Fóruns, governança e rotina recorrente de planejamento mensal integrado implantados",
+        "owner": "Glauco Zebral + Dico Gomes",
+        "prazo": "S1 set/26",
+        "status": "vermelho"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "slug": "tratamento-alocacao",
+    "nome": "Tratamento, priorização e alocação de leads",
+    "objetivo": "Melhorar a experiência dos clientes em prospecção, o entendimento de suas necessidades, a priorização dos leads com maior potencial de conversão e a alocação às estruturas de vendas com maior chance de conversão.",
+    "lideres": "Eloah Aguiar",
+    "time": "Thais Pimenta, Luma Gomes e João Azevedo",
+    "valorGerado": "Aumento da conversão de leads (xpp), gerando aumento de vendas no varejo e margem incremental de R$xM/ano (delta varejo vs. atacado de ~R$5 mil/carro).",
+    "status": "Coleta de CEP obrigatória nas landing pages implementada e escalada para todos os leads do site; piloto de alocação em lojas mais próximas e/ou escolhidas pelo cliente lançado e expandido para 10 lojas.",
+    "okrs": [
+      {
+        "label": "Informações completas capturadas: % de clientes com dados de carro, CEP e CPF",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Fricção zero: % de clientes que desistem do cadastro em lead",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": false
+      },
+      {
+        "label": "Alocação perfeita: % de clientes alocados em lojas dentro da faixa de km ideal",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Alocação perfeita: % de clientes alocados em lojas com o carro desejado",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Alocação perfeita: % de vendedores com excesso de leads",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": false
+      },
+      {
+        "label": "Alocação perfeita: % de top vendedores sem leads",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": false
+      },
+      {
+        "label": "Alocação perfeita: % de carros movimentados entre lojas",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": false
+      },
+      {
+        "label": "Priorização efetiva: acurácia do lead score (previsto x realizado)",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Transbordo perfeito: % de leads disponibilizados ao canal seguinte com dados e histórico completos",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      }
+    ],
+    "entregaveis": [
+      {
+        "id": "2.1.1",
+        "desc": "Ativos de captação melhorados (landing pages, WhatsApp)",
+        "owner": "Luma Gomes e Thais Pimenta",
+        "prazo": "S3 ago/26",
+        "status": "amarelo"
+      },
+      {
+        "id": "2.2.1",
+        "desc": "Informações capturadas no site (ex.: localização por IP) integradas e disponíveis para todos os canais de atendimento",
+        "owner": "Luma Gomes",
+        "prazo": "S1 set/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "2.3.1",
+        "desc": "Lead score evoluído com novas variáveis (score B3 de propensão a financiamento, renda presumida etc.)",
+        "owner": "João Azevedo",
+        "prazo": "S3 out/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "2.4.1",
+        "desc": "Novo modelo de alocação em lojas desenhado",
+        "owner": "Luma Gomes e Yure Cangussu",
+        "prazo": "S1 ago/26",
+        "status": "amarelo"
+      },
+      {
+        "id": "2.4.2",
+        "desc": "Piloto com nova lógica de roteamento lançado",
+        "owner": "Luma Gomes",
+        "prazo": "S2 ago/26",
+        "status": "verde"
+      },
+      {
+        "id": "2.4.3",
+        "desc": "Novo modelo de alocação de leads em lojas escalado para todas as lojas",
+        "owner": "Luma Gomes",
+        "prazo": "S2 out/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "2.4.4",
+        "desc": "Piloto de alocação total dos leads na Liza, com transbordo para a Central, lançado",
+        "owner": "Luma Gomes e Yure Cangussu",
+        "prazo": "S4 out/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "2.4.5",
+        "desc": "Modelo de clusterização revisado com base nas distâncias entre lojas e leads alocados",
+        "owner": "João Azevedo",
+        "prazo": "S2 set/26",
+        "status": "vermelho"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "slug": "liza",
+    "nome": "Atendimento agêntico (Liza)",
+    "objetivo": "Usar a Liza para entender a necessidade do cliente, direcioná-lo à loja mais aderente e maximizar, inicialmente, a conversão em comparecimento — além de aumentar a produtividade do vendedor humano no primeiro atendimento.",
+    "lideres": "Isadora Barreto",
+    "time": "Lucas Lima",
+    "valorGerado": "Aumento do NPS da jornada de agendamento e da conversão em agendamento/comparecimento/vendas; redução de leads não atendidos (~30% para ~0%) e do custo médio por atendimento.",
+    "status": "Jornadas de qualificação básica, identificação da intenção de compra e busca de carro/loja para agendamento já implementadas, com oportunidades de melhoria identificadas.",
+    "okrs": [
+      {
+        "label": "% de leads atendidos com qualidade — total",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento imediato: % de clientes atendidos em até 2 min",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento imediato: tempo médio de resposta (min)",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "min",
+        "decimals": 1,
+        "hib": false
+      },
+      {
+        "label": "Atendimento imediato: taxa de abandono da conversa",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": false
+      },
+      {
+        "label": "Informações completas: % de conversas com carro de interesse e localização capturados",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento efetivo: % de leads agendados dentre os gerados",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento efetivo: % de comparecimentos dentre os agendamentos",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento efetivo: % de conversão dentre os comparecimentos",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Transbordo fluido: % de transbordos para atendimento humano com histórico completo",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Transbordo fluido: % de clientes contatados simultaneamente pela Liza e por humano",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": false
+      }
+    ],
+    "entregaveis": [
+      {
+        "id": "3.1.1 / 3.2.1 / 3.3.1",
+        "desc": "Melhorias dos pontos críticos da jornada: captura e validação de informações, condução da conversa, recomendações de veículos/lojas e simulação financeira",
+        "owner": "Isadora Barreto e Lucas Lima",
+        "prazo": "ago/26 – set/26",
+        "status": "amarelo"
+      },
+      {
+        "id": "3.4.1",
+        "desc": "Entendimento das situações de troca de veículo (trade-in) implementado",
+        "owner": "Isadora Barreto e Lucas Lima",
+        "prazo": "out/26 – nov/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "3.5.1",
+        "desc": "Limites de interação e regras de encerramento ou transbordo das conversas definidos e implementados",
+        "owner": "Isadora Barreto e Lucas Lima",
+        "prazo": "set/26 – out/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "3.6.1",
+        "desc": "Integração entre Liza e atendimento humano, com transbordo inteligente, implementada",
+        "owner": "Isadora Barreto e Lucas Lima",
+        "prazo": "nov/26 – jan/27",
+        "status": "vermelho"
+      },
+      {
+        "id": "3.7.1",
+        "desc": "Expansão da Liza para atendimento dos ~120 mil leads gerados pelas campanhas Meta WhatsApp",
+        "owner": "Isadora Barreto e Lucas Lima",
+        "prazo": "jan/27",
+        "status": "vermelho"
+      },
+      {
+        "id": "3.8.1",
+        "desc": "Gestão de performance da Liza aprimorada com uso de agentes de IA (ex.: Alethe.IA)",
+        "owner": "Isadora Barreto e Lucas Lima",
+        "prazo": "jan/27 – fev/27",
+        "status": "vermelho"
+      },
+      {
+        "id": "3.9.1",
+        "desc": "Ferramenta de IA consultiva implementada, com recomendações de abordagem integradas ao fluxo de vendas",
+        "owner": "Isadora Barreto e Lucas Lima",
+        "prazo": "mar/27 – abr/27",
+        "status": "vermelho"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "slug": "central",
+    "nome": "Atendimento pela Central",
+    "objetivo": "Melhorar a experiência dos clientes atendidos pela Central (via transbordo da Liza ou escolha do cliente), direcioná-los à loja mais aderente e maximizar, inicialmente, a conversão em comparecimento.",
+    "lideres": "Rafael Vidal",
+    "time": "Vitor Sueth (time do João Azevedo), Luis Dutra (time da Eloah Aguiar) e Rômulo Rodrigo",
+    "valorGerado": "Aumento da conversão em vendas dos leads atendidos pela Central (xpp), com melhoria no agendamento e no comparecimento, gerando margem incremental de R$xM/ano.",
+    "status": "Migração da plataforma de atendimento para o Blip e revisão preliminar de scripts/templates implementadas; piloto de expansão da Central para o varejo lançado.",
+    "okrs": [
+      {
+        "label": "% de leads atendidos com qualidade — total",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Todos os leads conectados: % de leads conectados na Central",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento imediato: tempo médio até o primeiro contato (min)",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "min",
+        "hib": false
+      },
+      {
+        "label": "Atendimento imediato: tempo médio de resposta (min)",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "min",
+        "hib": false
+      },
+      {
+        "label": "Atendimento efetivo: % de leads convertidos em agendamento",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento efetivo: % de agendamentos convertidos em comparecimento",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento efetivo: % de comparecimentos convertidos em venda",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento eficiente: nº de RDVs (vendas) por CV",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "count",
+        "decimals": 1,
+        "hib": true
+      }
+    ],
+    "entregaveis": [
+      {
+        "id": "4.1.1",
+        "desc": "Melhores práticas de atendimento na Central mapeadas",
+        "owner": "Luis Dutra",
+        "prazo": "S4 ago/26",
+        "status": "amarelo"
+      },
+      {
+        "id": "4.2.1",
+        "desc": "Modelo de treinamento e nova rotina de gestão de performance dos RDVs evoluídos",
+        "owner": "Rômulo Rodrigo",
+        "prazo": "S2 set/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "4.3.1",
+        "desc": "Teste com contratação de atendentes mais qualificados (classe 13 vs. classe 10) realizado",
+        "owner": "Eloah Aguiar e Rômulo Rodrigo",
+        "prazo": "S3 set/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "4.4.1",
+        "desc": "Rotina de gestão de performance implementada",
+        "owner": "Vitor Sueth",
+        "prazo": "S4 ago/26",
+        "status": "amarelo"
+      },
+      {
+        "id": "4.5.1",
+        "desc": "Piloto de atendimento da Central em lojas do varejo lançado",
+        "owner": "Rômulo Rodrigo",
+        "prazo": "S4 ago/26",
+        "status": "verde"
+      },
+      {
+        "id": "4.5.2",
+        "desc": "Piloto de atendimento da Central em lojas do varejo expandido (condicionado a resultados favoráveis)",
+        "owner": "Rômulo Rodrigo",
+        "prazo": "S4 dez/26",
+        "status": "vermelho"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "slug": "loja",
+    "nome": "Atendimento em loja",
+    "objetivo": "Melhorar a experiência dos clientes nos atendimentos realizados pelos CVs e aumentar a conversão em venda, via melhores práticas de atendimento, treinamento e gestão de performance com visibilidade completa do funil.",
+    "lideres": "Eloah Aguiar",
+    "time": "Pablo Chaves e Isadora Savaget",
+    "valorGerado": "Aumento da conversão de leads em vendas (xpp) e do NPS da jornada em loja, gerando margem incremental de R$xM/ano.",
+    "status": "Ferramenta de telemetria do funil de vendas e gestão da performance dos CVs selecionada, contratada e implementada em 5 lojas, com plano de expansão definido.",
+    "okrs": [
+      {
+        "label": "Produtividade dos CVs: vendas por CV",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "count",
+        "decimals": 1,
+        "hib": true
+      },
+      {
+        "label": "Produtividade dos CVs: dispersão da conversão entre CVs",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pp",
+        "hib": false
+      },
+      {
+        "label": "% de leads atendidos com qualidade — total",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento imediato: % de clientes contatados em até 5 min",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Visibilidade do funil: % de leads com etapas corretamente registradas",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Visibilidade do funil: % de agendamentos/comparecimentos corretamente registrados",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Atendimento efetivo: % de comparecimentos convertidos em vendas",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      }
+    ],
+    "entregaveis": [
+      {
+        "id": "5.1.1",
+        "desc": "Solução de atendimento via WhatsApp Business integrado ao Slack expandida para todas as lojas do varejo, em ondas mensais (1 loja jul., 28 ago., 80 set., 156 out., 235 nov., 256 dez.)",
+        "owner": "Isadora Savaget e Denys Damm",
+        "prazo": "dez/26 (TBC)",
+        "status": "amarelo"
+      },
+      {
+        "id": "5.2.1",
+        "desc": "Inteligência de gestão da performance dos CVs implementada, combinando indicadores do funil e dados qualitativos via Alethe.IA",
+        "owner": "Isadora Savaget",
+        "prazo": "S4 set/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "5.3.1",
+        "desc": "Ritos e rotina de gestão das equipes de loja revisados e implantados",
+        "owner": "Pablo Chaves",
+        "prazo": "S4 set/26",
+        "status": "vermelho"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "slug": "geracao-leads",
+    "nome": "Geração de leads",
+    "objetivo": "Aumentar a eficácia e a eficiência da geração de leads, reduzindo o CAC (geral e por região/categoria), mantendo ou aumentando o volume gerado e elevando a qualidade dos leads a um menor custo.",
+    "lideres": "Juliana Ribas e Thaise Leocadio",
+    "time": "—",
+    "valorGerado": "Redução do CAC e do CPL, e aumento da conversão de leads em vendas, gerando redução de custo e margem incremental de R$xM/ano.",
+    "status": "Realocação inicial dos investimentos em mídia realizada, com redução nas campanhas de pior performance; oportunidades prioritárias de melhoria de curto prazo identificadas.",
+    "okrs": [
+      {
+        "label": "Necessidade atendida: volume de leads únicos por canal, como % do planejamento",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Investimento rastreável: % de leads com tagueamento granular (keywords/criativos)",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "hib": true
+      },
+      {
+        "label": "Geração eficiente: custo por lead (CPL)",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "currency",
+        "hib": false
+      },
+      {
+        "label": "Campanhas eficazes: taxa de conversão de cliques em leads",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "decimals": 1,
+        "hib": true
+      },
+      {
+        "label": "Campanhas eficazes: taxa de conversão de leads em vendas por campanha",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "pct",
+        "decimals": 1,
+        "hib": true
+      },
+      {
+        "label": "Campanhas eficazes: custo por venda por campanha",
+        "baseline": null,
+        "current": null,
+        "meta": null,
+        "unit": "currency",
+        "hib": false
+      }
+    ],
+    "entregaveis": [
+      {
+        "id": "6.1.1",
+        "desc": "Modelo de atribuição aprimorado",
+        "owner": "Juliana Ribas",
+        "prazo": "S4 ago/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "6.1.2",
+        "desc": "BI gerencial e rotina mensal de apuração implementados",
+        "owner": "Juliana Ribas",
+        "prazo": "S4 ago/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "6.2.1",
+        "desc": "Processo de revisão do plano de investimento em mídia implantado",
+        "owner": "A definir",
+        "prazo": "S4 ago/26",
+        "status": "amarelo"
+      },
+      {
+        "id": "6.3.1",
+        "desc": "Diagnóstico das campanhas Google concluído e plano de melhoria das táticas implementado",
+        "owner": "Leticia Medina",
+        "prazo": "S3 set/26",
+        "status": "amarelo"
+      },
+      {
+        "id": "6.4.1",
+        "desc": "Diagnóstico das campanhas Meta concluído e plano de melhoria das táticas implementado",
+        "owner": "Jessica Guimarães",
+        "prazo": "S3 set/26",
+        "status": "amarelo"
+      },
+      {
+        "id": "6.5.1",
+        "desc": "Diagnóstico e revisão das demais campanhas (afiliados, programática etc.) concluídos",
+        "owner": "Thaise Leocadio",
+        "prazo": "S3 set/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "6.6.1",
+        "desc": "Novas campanhas para segmentos prioritários (classe média/alta e SUVs) lançadas",
+        "owner": "Thaise Leocadio",
+        "prazo": "S2 out/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "6.7.1",
+        "desc": "Modelo de produção e melhoria contínua de conteúdo revisado",
+        "owner": "Thaise Leocadio",
+        "prazo": "S4 set/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "6.8.1",
+        "desc": "Ativos prioritários de conversão (landing pages, conteúdos, páginas de cadastro) revisados e aprimorados",
+        "owner": "A definir",
+        "prazo": "S4 out/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "6.9.1",
+        "desc": "Modelo de experimentação implantado",
+        "owner": "A definir",
+        "prazo": "S4 set/26",
+        "status": "vermelho"
+      },
+      {
+        "id": "6.10.1",
+        "desc": "Oportunidades de geração de leads via parcerias e ativações comerciais mapeadas, priorizadas e testadas",
+        "owner": "A definir",
+        "prazo": "S4 out/26",
+        "status": "vermelho"
+      }
+    ]
+  }
+]

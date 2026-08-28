@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lead-to-Sales — Painel de Controle · Aceleração Seminovos</title>
+<style>
+/* ============================================================
+   TOKENS — identidade visual Localiza (verde institucional).
+   Paleta calibrada para contraste WCAG 2.1 AA:
+   - verde vívido (--ls-green, #78DE1F "Lima") p/ uso decorativo/grandes áreas
+   - verde "seguro para texto" (--ls-green-deep) ~5.1:1 em branco
+   ============================================================ */
+:root {
+  /* Tipografia — stack de sistema, sem dependências externas */
+  --ls-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Marca */
+  --ls-green: #78DE1F;         /* vívido (verde Localiza) — fundos, gráficos, destaques grandes */
+  --ls-green-deep: #3F7C0E;    /* seguro p/ texto e botões com texto branco (5.1:1) */
+  --ls-green-deep-hover: #2F5E0A;
+  --ls-green-tint: #EFFAE3;    /* fundo suave */
+  --ls-green-tint-strong: #DFF4C7;
+
+  /* Neutros */
+  --ls-black: #1A1A1A;
+  --ls-text-dark: #333333;
+  --ls-text-regular: #6B6B6B;
+  --ls-text-helper: #757575;
+  --ls-white: #FFFFFF;
+  --ls-gray-x-light: #F7F7F7;
+  --ls-gray-light: #ECECEC;
+  --ls-gray-medium: #D5D5D5;
+  --ls-gray-dark: #A3A3A3;
+  --ls-stroke: #E2E2E2;
+
+  /* Status semântico (tons de verde/azul-esverdeado distintos do verde de marca) */
+  --ls-success: #1E9E5A;
+  --ls-success-text: #146A3D;
+  --ls-success-light: #E6F7EE;
+  --ls-warning: #C9A100;
+  --ls-warning-text: #6B5700;
+  --ls-warning-light: #FFF8E1;
+  --ls-error: #D6303D;
+  --ls-error-text: #A30000;
+  --ls-error-light: #FCEAEA;
+
+  /* Espaçamento — escala base-2 */
+  --ls-sp-01: 2px;  --ls-sp-02: 4px;  --ls-sp-03: 8px;  --ls-sp-04: 16px;
+  --ls-sp-05: 24px; --ls-sp-06: 32px; --ls-sp-07: 40px; --ls-sp-08: 48px;
+  --ls-sp-09: 64px;
+
+  --ls-shadow-card: 0 14px 42px 0 rgba(20, 10, 0, 0.07);
+  --ls-nav-height: 56px;
+  --ls-subnav-height: 44px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  font-family: var(--ls-font);
+  color: var(--ls-text-dark);
+  background: var(--ls-gray-x-light);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p, ul, ol { margin: 0; }
+
+::selection { background: var(--ls-green-tint-strong); }
+
+a { color: var(--ls-green-deep); text-underline-offset: 2px; }
+a:hover { color: var(--ls-green-deep-hover); }
+
+button { font-family: inherit; }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.ls-header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--ls-white);
+  border-bottom: 1px solid var(--ls-stroke);
+  height: var(--ls-nav-height);
+  display: flex; align-items: center;
+  padding: 0 var(--ls-sp-05);
+  gap: var(--ls-sp-05);
+}
+.ls-wordmark { display: flex; align-items: center; gap: var(--ls-sp-03); flex-shrink: 0; }
+.ls-wordmark-mark { width: 30px; height: 30px; flex-shrink: 0; }
+.ls-wordmark-text { font-weight: 700; font-size: 17px; color: var(--ls-black); letter-spacing: -0.2px; white-space: nowrap; }
+.ls-wordmark-text span { color: var(--ls-green-deep); }
+.ls-header-divider { width: 1px; height: 28px; background: var(--ls-stroke); flex-shrink: 0; }
+.ls-header-titles { min-width: 0; flex: 1; }
+.ls-header-title { font-weight: 700; font-size: 14.5px; color: var(--ls-black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ls-header-subtitle { font-size: 12px; color: var(--ls-text-regular); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ls-header-right { display: flex; align-items: center; gap: var(--ls-sp-03); flex-shrink: 0; }
+
+.ls-last-updated { font-size: 11px; color: var(--ls-text-helper); white-space: nowrap; }
+
+.ls-analysis-label { font-size: 11px; color: var(--ls-text-helper); font-weight: 700; white-space: nowrap; }
+.ls-analysis-select {
+  font-family: var(--ls-font); font-size: 12px; font-weight: 700; color: var(--ls-text-dark);
+  background: var(--ls-white); border: 1px solid var(--ls-stroke); border-radius: 6px;
+  padding: 5px 22px 5px 9px; height: 28px;
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6' fill='none'><path d='M1 1L4.5 4.5L8 1' stroke='%236B6B6B' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat; background-position: right 7px center; cursor: pointer;
+}
+.ls-analysis-select:focus-visible { outline: 2px solid var(--ls-green-deep); outline-offset: 1px; }
+
+.ls-reset-btn {
+  font-family: var(--ls-font); font-size: 11.5px; font-weight: 700; color: var(--ls-text-regular);
+  background: var(--ls-white); border: 1px solid var(--ls-stroke); border-radius: 6px;
+  padding: 6px 12px; height: 30px; cursor: pointer; white-space: nowrap;
+}
+.ls-reset-btn:hover { border-color: var(--ls-gray-dark); color: var(--ls-text-dark); }
+.ls-reset-btn:focus-visible { outline: 2px solid var(--ls-green-deep); outline-offset: 1px; }
+
+/* ============================================================
+   TAB NAV
+   ============================================================ */
+.ls-tabnav {
+  position: sticky; top: var(--ls-nav-height); z-index: 90;
+  background: var(--ls-white);
+  border-bottom: 1px solid var(--ls-stroke);
+  display: flex; overflow-x: auto;
+  margin: 0 calc(-1 * var(--ls-sp-05));
+  padding: 0 var(--ls-sp-05);
+  scrollbar-width: thin;
+  height: var(--ls-subnav-height);
+}
+.ls-tab-btn {
+  flex-shrink: 0;
+  background: transparent; border: none; cursor: pointer;
+  font-family: var(--ls-font); font-size: 13px; font-weight: 700; color: var(--ls-text-regular);
+  padding: 0 var(--ls-sp-04);
+  height: var(--ls-subnav-height);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: color 120ms, border-color 120ms;
+}
+.ls-tab-btn:hover { color: var(--ls-black); background: var(--ls-green-tint); border-radius: 6px 6px 0 0; }
+.ls-tab-btn.is-active { color: var(--ls-green-deep); border-bottom-color: var(--ls-green-deep); }
+.ls-tab-btn:focus-visible { outline: 2px solid var(--ls-green-deep); outline-offset: -2px; }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.ls-main { max-width: 1680px; margin: 0 auto; padding: var(--ls-sp-04) var(--ls-sp-05) var(--ls-sp-06); }
+.ls-tab-panel { display: none; }
+.ls-tab-panel.is-active { display: block; animation: ls-fade 160ms ease-out; }
+@keyframes ls-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Painel inicial (Visão Geral) — sempre visível, não é mais uma aba */
+.ls-overview-fixed { padding-bottom: var(--ls-sp-04); margin-bottom: 2px; border-bottom: 1px solid var(--ls-stroke); }
+
+.ls-section { margin-bottom: var(--ls-sp-04); }
+#app-root { padding-top: var(--ls-sp-04); }
+.ls-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ls-sp-04); margin-bottom: var(--ls-sp-02); flex-wrap: wrap; }
+.ls-h2 { font-size: 18px; font-weight: 700; color: var(--ls-black); }
+.ls-h3 { font-size: 14.5px; font-weight: 700; color: var(--ls-black); margin-bottom: var(--ls-sp-02); }
+.ls-eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ls-text-regular); margin-bottom: 2px; }
+.ls-lede { font-size: 12.5px; color: var(--ls-text-regular); max-width: none; }
+.ls-footnote { font-size: 11px; color: var(--ls-text-helper); margin-top: var(--ls-sp-02); max-width: none; }
+
+.ls-overview-header { margin-bottom: var(--ls-sp-03); }
+.ls-overview-header .ls-lede { margin-top: 2px; }
+
+/* Título simples acima de cada tabela de frente (sem sub-abas) */
+.ls-subsection-title { font-size: 12px; font-weight: 700; color: var(--ls-black); margin: var(--ls-sp-03) 0 var(--ls-sp-02); }
+.ls-subsection-title:first-of-type { margin-top: var(--ls-sp-03); }
+
+/* ============================================================
+   CARD (cabeçalho de frente) — visual mais "cute": borda de
+   destaque verde à esquerda, cantos mais arredondados, número
+   com anel suave.
+   ============================================================ */
+.ls-card {
+  background: var(--ls-white); border: 1px solid var(--ls-stroke); border-radius: 10px;
+  box-shadow: var(--ls-shadow-card); padding: var(--ls-sp-04) var(--ls-sp-05);
+}
+.ls-frente-head {
+  display: flex; gap: var(--ls-sp-05); flex-wrap: wrap; margin-bottom: var(--ls-sp-04);
+  border-left: 4px solid var(--ls-green); border-radius: 4px 10px 10px 4px;
+}
+.ls-frente-head--compact { padding: var(--ls-sp-03) var(--ls-sp-04); margin-bottom: var(--ls-sp-03); }
+.ls-frente-head-main { flex: 2; min-width: 280px; }
+.ls-frente-number {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%; background: var(--ls-green);
+  box-shadow: 0 0 0 3px var(--ls-gray-light);
+  color: var(--ls-black); font-weight: 700; font-size: 12px; margin-right: var(--ls-sp-03);
+  flex-shrink: 0;
+}
+.ls-frente-title { font-size: 16.5px; font-weight: 700; color: var(--ls-black); display: inline-flex; align-items: center; margin-bottom: 3px; }
+.ls-frente-objetivo { font-size: 12.5px; color: var(--ls-text-dark); margin-bottom: 0; max-width: 640px; }
+.ls-frente-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--ls-sp-03); flex: 1.2; min-width: 220px; max-width: 460px; align-content: center; }
+.ls-frente-meta-item .label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ls-text-helper); margin-bottom: 2px; }
+.ls-frente-meta-item .value { font-size: 12px; color: var(--ls-text-dark); }
+
+/* ============================================================
+   TABELAS
+   ============================================================ */
+.ls-table-scroll { overflow-x: auto; background: var(--ls-white); border: 1px solid var(--ls-stroke); border-radius: 10px; box-shadow: var(--ls-shadow-card); }
+.ls-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 900px; }
+.ls-table th {
+  text-align: left; font-weight: 700; color: var(--ls-black);
+  padding: 6px var(--ls-sp-04); border-bottom: 2px solid var(--ls-black);
+  background: var(--ls-white); position: sticky; top: 0;
+  white-space: nowrap;
+}
+.ls-table td { padding: 5px var(--ls-sp-04); border-bottom: 1px solid var(--ls-stroke); color: var(--ls-text-dark); vertical-align: top; }
+.ls-table tr:hover td { background: var(--ls-gray-x-light); }
+.ls-table .num { text-align: center; font-variant-numeric: tabular-nums; }
+.ls-table .ls-id-cell { color: var(--ls-text-helper); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ls-table .ls-indicator-cell { min-width: 260px; max-width: 360px; }
+.ls-table .ls-prazo-cell { white-space: nowrap; color: var(--ls-text-regular); }
+.ls-del-table { min-width: 1300px; }
+.ls-del-table .ls-indicator-cell { min-width: 260px; }
+.ls-del-table td:nth-child(6), .ls-del-table td:nth-child(7), .ls-del-table td:nth-child(8) { min-width: 190px; }
+.ls-pnl-table { min-width: 1080px; }
+.ls-pnl-table td:first-child, .ls-pnl-table th:first-child { min-width: 220px; }
+.ls-pnl-subhead th { border-bottom: 2px solid var(--ls-black); padding-top: 0; color: var(--ls-text-helper); font-size: 11px; font-weight: 700; }
+
+/* Coluna do "mês de análise" selecionado — indicação discreta,
+   sem caixa/verde chapado (achado feio no feedback): só o texto
+   do cabeçalho fica mais forte. */
+.ls-col-current { }
+th.ls-col-current { font-weight: 800; color: var(--ls-black); }
+
+/* Célula computada (YTD Realizado) — nao editável, distinta das celulas com input */
+.ytd-realizado-cell { font-weight: 700; color: var(--ls-black); background: var(--ls-gray-x-light); }
+
+.ls-row-subtotal td { border-top: 1px solid var(--ls-gray-dark); font-weight: 700; }
+.ls-row-total td { border-top: 2px solid var(--ls-black); font-weight: 700; background: var(--ls-gray-x-light); }
+.ls-row-subitem td:first-child { color: var(--ls-text-regular); font-size: 11.5px; }
+.ls-row-subitem td { background: var(--ls-gray-x-light); }
+.ls-row-hidden { display: none; }
+.ls-tree-connector { display: inline-block; width: 16px; color: var(--ls-gray-dark); }
+
+/* Toggle de expandir/colapsar (Despesas comerciais) */
+.ls-row-toggle {
+  background: none; border: none; cursor: pointer; padding: 0 4px 0 0; vertical-align: middle;
+  color: var(--ls-text-regular); display: inline-flex; align-items: center;
+}
+.ls-row-toggle:hover { color: var(--ls-green-deep); }
+.ls-row-toggle:focus-visible { outline: 2px solid var(--ls-green-deep); outline-offset: 1px; }
+.ls-chevron { width: 11px; height: 11px; transition: transform 140ms ease-out; }
+.ls-row-toggle.is-expanded .ls-chevron { transform: rotate(180deg); }
+
+/* Campo editável numérico — sublinhado tracejado neutro (sem fundo
+   verde chapado); o verde fica só como sinal de foco ao clicar/editar */
+.ls-td-editable { background: transparent; }
+.ls-input-affix { display: inline-flex; align-items: baseline; gap: 3px; justify-content: center; }
+.ls-affix { font-size: 10.5px; color: var(--ls-text-helper); }
+.ls-edit-input {
+  width: 58px; text-align: center; font-variant-numeric: tabular-nums;
+  font-family: var(--ls-font); font-size: 12px; color: var(--ls-text-dark);
+  background: transparent; border: none; border-bottom: 1.5px dashed var(--ls-gray-dark);
+  padding: 2px 1px;
+}
+.ls-edit-input--text { width: 170px; text-align: left; }
+.ls-edit-input:focus { outline: none; background: var(--ls-green-tint); border-bottom-style: solid; border-bottom-color: var(--ls-green-deep); box-shadow: 0 1px 0 0 var(--ls-green-deep); }
+.ls-edit-input:focus-visible { outline: 2px solid var(--ls-green-deep); outline-offset: 1px; }
+
+/* Deltas */
+.ls-delta { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; white-space: nowrap; }
+.ls-delta svg { width: 9px; height: 9px; flex-shrink: 0; }
+.ls-delta--good { color: var(--ls-success-text); }
+.ls-delta--bad { color: var(--ls-error-text); }
+.ls-delta--flat { color: var(--ls-text-helper); font-weight: 400; }
+
+.ls-gap-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.ls-gap-pill svg { width: 11px; height: 11px; flex-shrink: 0; }
+.ls-gap-pill--achieved { background: var(--ls-success-light); color: var(--ls-success-text); }
+.ls-gap-pill--pending { background: var(--ls-gray-x-light); color: var(--ls-text-regular); border: 1px solid var(--ls-stroke); }
+.ls-gap-pill--flat { background: var(--ls-gray-x-light); color: var(--ls-text-helper); }
+
+/* Status select (badge colorido) */
+.ls-status-select {
+  font-family: var(--ls-font); font-size: 11.5px; font-weight: 700;
+  border: none; border-radius: 12px; padding: 4px 24px 4px 10px; cursor: pointer;
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-repeat: no-repeat; background-position: right 8px center;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6' fill='none'><path d='M1 1L4.5 4.5L8 1' stroke='%23333333' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+.ls-status-select:focus-visible { outline: 2px solid var(--ls-green-deep); outline-offset: 1px; }
+.ls-status-select--verde { background-color: var(--ls-success-light); color: var(--ls-success-text); }
+.ls-status-select--amarelo { background-color: var(--ls-warning-light); color: var(--ls-warning-text); }
+.ls-status-select--vermelho { background-color: var(--ls-error-light); color: var(--ls-error-text); }
+
+/* Textareas editáveis */
+.ls-textarea {
+  width: 100%; min-height: 54px; resize: vertical;
+  font-family: var(--ls-font); font-size: 11.5px; color: var(--ls-text-dark);
+  background: var(--ls-gray-x-light); border: 1px dashed var(--ls-gray-dark); border-radius: 6px;
+  padding: var(--ls-sp-02) var(--ls-sp-03);
+}
+.ls-textarea::placeholder { color: var(--ls-text-helper); font-style: italic; }
+.ls-textarea:focus { outline: none; background: var(--ls-white); border-style: solid; border-color: var(--ls-green-deep); }
+
+/* ============================================================
+   LEGENDA / RODAPÉ
+   ============================================================ */
+.ls-legend { display: flex; flex-wrap: wrap; gap: var(--ls-sp-05); font-size: 11.5px; color: var(--ls-text-regular); }
+.ls-legend-item { display: flex; align-items: center; gap: 6px; }
+.ls-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.ls-legend-dot--verde { background: var(--ls-success); }
+.ls-legend-dot--amarelo { background: var(--ls-warning); }
+.ls-legend-dot--vermelho { background: var(--ls-error); }
+.ls-legend-dot--illustrative { background: var(--ls-green); }
+
+.ls-footer { max-width: 1680px; margin: 0 auto; padding: var(--ls-sp-05) var(--ls-sp-05) var(--ls-sp-07); border-top: 1px solid var(--ls-stroke); margin-top: var(--ls-sp-06); }
+.ls-save-indicator { font-size: 11px; color: var(--ls-text-helper); }
+.ls-save-indicator--warn { color: var(--ls-warning-text); }
+.ls-save-indicator--local { color: var(--ls-text-helper); }
+#generated-stamp { font-size: 11px; color: var(--ls-text-helper); }
+
+/* ============================================================
+   EMPTY STATE (Frente 7 — Marca)
+   ============================================================ */
+.ls-empty-state { text-align: center; padding: var(--ls-sp-08) var(--ls-sp-05); background: var(--ls-white); border: 1px dashed var(--ls-gray-dark); border-radius: 10px; }
+.ls-empty-state svg { width: 36px; height: 36px; fill: var(--ls-gray-dark); margin-bottom: var(--ls-sp-03); }
+.ls-empty-state h3 { font-size: 15px; color: var(--ls-black); margin-bottom: var(--ls-sp-02); }
+.ls-empty-state p { font-size: 12px; color: var(--ls-text-regular); max-width: 480px; margin: 0 auto; }
+
+/* ============================================================
+   RESPONSIVO
+   ============================================================ */
+@media (max-width: 640px) {
+  .ls-header { padding: 0 var(--ls-sp-03); gap: var(--ls-sp-03); }
+  .ls-header-subtitle { display: none; }
+  .ls-tabnav { padding: 0 var(--ls-sp-03); }
+  .ls-main { padding: var(--ls-sp-05) var(--ls-sp-03) var(--ls-sp-08); }
+  .ls-frente-head { gap: var(--ls-sp-04); }
+}
+
+@media print {
+  .ls-header, .ls-tabnav, .ls-reset-btn { display: none; }
+  .ls-tab-panel { display: block !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="ls-header">
+  <div class="ls-wordmark" aria-hidden="false">
+    <svg class="ls-wordmark-mark" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Símbolo Localiza Seminovos">
+      <rect width="32" height="32" rx="8" fill="var(--ls-green)"/>
+      <path d="M11 8 L21 16 L11 24" fill="none" stroke="#1A1A1A" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="ls-wordmark-text">Localiza <span>Seminovos</span></span>
+  </div>
+  <div class="ls-header-divider"></div>
+  <div class="ls-header-titles">
+    <div class="ls-header-title">Lead-to-Sales — Painel de Controle</div>
+    <div class="ls-header-subtitle">Aceleração de vendas de seminovos no varejo · modelo em branco para preenchimento</div>
+  </div>
+  <div class="ls-header-right">
+    <span id="last-updated" class="ls-last-updated">Última atualização: —</span>
+    <label for="analysis-month-select" class="ls-analysis-label">Mês de análise</label>
+    <select id="analysis-month-select" class="ls-analysis-select">
+      <option value="1">Jan</option>
+      <option value="2">Fev</option>
+      <option value="3">Mar</option>
+      <option value="4">Abr</option>
+      <option value="5">Mai</option>
+      <option value="6" selected>Jun</option>
+    </select>
+    <button type="button" id="reset-btn" class="ls-reset-btn" title="Limpar todos os campos preenchidos e voltar ao modelo em branco">Limpar tudo</button>
+  </div>
+</header>
+
+<main class="ls-main">
+
+  <section id="panel-overview" class="ls-overview-fixed">
+
+    <div class="ls-overview-header">
+      <div class="ls-eyebrow">P&amp;L da iniciativa</div>
+      <h1 class="ls-h2">P&amp;L Resumida</h1>
+      <p class="ls-lede">Realizado mês a mês (jan–jun) vs. orçamento do mesmo período. Todos os campos começam em branco — preencha à medida que os números forem apurados. Ambição do memorando: ~180 mil veículos/ano no varejo, ~R$300M/ano de ganho.</p>
+    </div>
+
+    <div class="ls-section" style="margin-bottom:0;">
+      <div class="ls-table-scroll">
+        <table class="ls-table ls-pnl-table">
+          <thead><tr>
+            <th>Linha (R$ M, exceto onde indicado)</th>
+            <th class="num" colspan="6">Realizado</th>
+            <th class="num" id="pnl-ytd-head-label">YTD Realizado</th>
+            <th class="num">Orçamento (mesmo período)</th>
+            <th>&Delta; YTD Realizado vs. Orçado</th>
+          </tr>
+          <tr class="ls-pnl-subhead">
+            <th></th>
+            <th class="num">Jan</th>
+            <th class="num">Fev</th>
+            <th class="num">Mar</th>
+            <th class="num">Abr</th>
+            <th class="num">Mai</th>
+            <th class="num">Jun</th>
+            <th class="num"></th>
+            <th class="num"></th>
+            <th></th>
+          </tr></thead>
+          <tbody id="pnl-tbody"></tbody>
+        </table>
+      </div>
+      <p class="ls-footnote">Todas as colunas Jan–Jun são <strong>realizado</strong> (dado real apurado, não projeção). O botão "Mês de análise" no topo define até onde o YTD Realizado soma — mude-o conforme os meses forem fechando. Orçamento é editável e representa o mesmo período do YTD Realizado. Clique na seta ao lado de "Custo dos veículos vendidos", "Despesas comerciais" e "Despesas G&amp;A" para abrir o detalhamento por linha.</p>
+    </div>
+
+  </section>
+
+  <nav class="ls-tabnav" id="tab-nav-list" role="tablist" aria-label="Frentes do programa"></nav>
+
+  <div id="app-root"></div>
+
+
+</main>
+
+<footer class="ls-footer">
+  <div class="ls-section">
+    <h3 class="ls-h3">Legenda</h3>
+    <div class="ls-legend">
+      <span class="ls-legend-item"><span class="ls-legend-dot ls-legend-dot--verde"></span>Concluído</span>
+      <span class="ls-legend-item"><span class="ls-legend-dot ls-legend-dot--amarelo"></span>Em progresso</span>
+      <span class="ls-legend-item"><span class="ls-legend-dot ls-legend-dot--vermelho"></span>Não iniciado</span>
+      <span class="ls-legend-item"><span class="ls-legend-dot ls-legend-dot--illustrative"></span>Campo editável</span>
+    </div>
+  </div>
+  <div class="ls-section" style="margin-bottom:8px;">
+    <p style="font-size:12px; color:var(--ls-text-helper); max-width:760px;">
+      Este painel foi montado a partir do memorando estratégico "Lead to Sale" (Aceleração Seminovos). IDs de milestones
+      seguem a numeração das alavancas do memorando. Todos os campos numéricos e de texto começam em branco e ficam salvos
+      <strong>de forma compartilhada</strong> entre todas as pessoas que abrirem este painel pelo Claude — ou seja, qualquer
+      edição feita por alguém do time fica visível para os demais. Se o arquivo for aberto fora do Claude (por exemplo, ao
+      baixar e enviar por e-mail), a edição funciona normalmente mas não é salva ao recarregar a página.
+    </p>
+  </div>
+  <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+    <span id="save-indicator" class="ls-save-indicator"></span>
+    <span id="generated-stamp"></span>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   DADOS DO PROGRAMA — extraídos do memorando estratégico
+   "Lead to Sale" (Aceleração Seminovos).
+   Todos os valores numéricos de baseline/realizado/ambição são
+   ILUSTRATIVOS (o memorando não traz números finais — usa
+   placeholders "x"/"y"). As âncoras REAIS citadas no memorando são:
+   volume 150k -> 180k carros/ano, valor total ~R$300M/ano, e delta
+   varejo-atacado de ~R$5 mil/carro. Todo o restante foi estimado
+   com bom senso para fins de ilustração do painel.
+   ============================================================ */
+
+// ---------- DRE resumida (P&L) ----------
+// Visão mês a mês (jan–jun), sinalizada como REALIZADO (dado real/histórico,
+// não projeção), comparada ao Orçamento YTD (fasing linear = meta anual/2
+// para linhas de fluxo; para razões [R$/veículo] o orçamento é a própria
+// meta, que não é "fasing"). O Δ YTD Realizado vs. Orçado é a soma dos 6
+// meses realizados menos o orçamento YTD. "meta" (ambição anual) fica nos
+// dados como referência/rodapé, mesmo sem coluna própria na tabela.
+// Âncoras reais do memorando: volume meta 180 mil veículos/ano, ticket médio
+// implícito ~R$78 mil/veículo, ambição total ~R$300M/ano (na distância entre
+// Margem Bruta e Despesas Comerciais+G&A na meta vs. baseline implícita).
+const PNL = {
+  unitLabel: 'R$ M, exceto onde indicado',
+  meses: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+  rows: [
+    { id: 'volume', label: 'Volume varejo (mil veículos)', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 180.0, unit: 'count', decimals: 1, hib: true, kind: 'normal' },
+    { id: 'receita', label: 'Receita líquida', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 14040, unit: 'currency_m', decimals: 0, hib: true, kind: 'normal' },
+    { id: 'cmv', label: '(–) Custo dos veículos vendidos', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 12790, unit: 'currency_m', decimals: 0, hib: false, kind: 'cost', collapsible: true },
+    { id: 'cmv_aquisicao', label: 'Aquisição dos veículos (compra/leilão)', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: null, unit: 'currency_m', decimals: 0, hib: false, kind: 'subitem', parent: 'cmv' },
+    { id: 'cmv_recondicionamento', label: 'Recondicionamento e preparação', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: null, unit: 'currency_m', decimals: 0, hib: false, kind: 'subitem', parent: 'cmv' },
+    { id: 'margem_bruta', label: '(=) Margem bruta', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 1250, unit: 'currency_m', decimals: 0, hib: true, kind: 'subtotal' },
+    { id: 'desp_coml', label: '(–) Despesas comerciais', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 250, unit: 'currency_m', decimals: 0, hib: false, kind: 'cost', collapsible: true },
+    { id: 'midia', label: 'Mídia / geração de leads', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 75, unit: 'currency_m', decimals: 0, hib: false, kind: 'subitem', parent: 'desp_coml' },
+    { id: 'atendimento', label: 'Atendimento / conversão', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 125, unit: 'currency_m', decimals: 0, hib: false, kind: 'subitem', parent: 'desp_coml' },
+    { id: 'outras_coml', label: 'Outras despesas comerciais', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 50, unit: 'currency_m', decimals: 0, hib: false, kind: 'subitem', parent: 'desp_coml' },
+    { id: 'ga', label: '(–) Despesas G&A / operacionais', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 180, unit: 'currency_m', decimals: 0, hib: false, kind: 'cost', collapsible: true },
+    { id: 'ga_estrutura', label: 'Estrutura administrativa e overhead', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: null, unit: 'currency_m', decimals: 0, hib: false, kind: 'subitem', parent: 'ga' },
+    { id: 'ga_tech', label: 'Tecnologia e sistemas', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: null, unit: 'currency_m', decimals: 0, hib: false, kind: 'subitem', parent: 'ga' },
+    { id: 'ebitda', label: 'EBITDA', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 820, unit: 'currency_m', decimals: 0, hib: true, kind: 'total' },
+    { id: 'cac_veiculo', label: 'CAC / veículo vendido (R$/veículo)', meses: [null, null, null, null, null, null], orcamentoYtd: null, meta: 1389, unit: 'currency', decimals: 0, hib: false, kind: 'ratio' },
+  ],
+};
+
+// ============================================================
+// FRENTES 1–6 — objetivo, liderança, status, OKRs e entregáveis
+// ============================================================
+const FRENTES = [
+  // ---------------------------------------------------------
+  {
+    id: 1,
+    slug: 'planejamento',
+    nome: 'Planejamento integrado mkt | vendas',
+    objetivo: 'Aprimorar o planejamento integrado e colaborativo entre marketing e vendas para dimensionar a necessidade de vendas de curto prazo, desdobrando-a em planos de geração de leads e planos comerciais de conversão, com ambições compartilhadas entre as áreas.',
+    lideres: 'Leonardo Viali, Luiz Santi e João Azevedo',
+    time: 'Vitor Moraes, Juliana Ribas',
+    valorGerado: 'Frente habilitadora — sem atribuição direta de valor no bridge de ~R$300M/ano.',
+    status: 'Primeira versão simplificada da rotina de planejamento integrado entre Marketing e Vendas iniciada, com alinhamento em alto nível entre necessidades de vendas e de geração de leads.',
+    okrs: [
+      { label: 'Lançamento do MVP do planejamento integrado', baseline: 'Não iniciado', current: 'Em desenvolvimento', meta: 'Lançado (início de set/26)', unit: 'milestone' },
+      { label: '% de aderência da geração de leads ao plano desenhado', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: '% de aderência da conversão de leads ao plano desenhado', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+    ],
+    entregaveis: [
+      { id: '1.1.1', desc: 'Planejamento de vendas de curto prazo melhorado e em execução, com necessidade de vendas definida por loja, tipo de veículo e mês', owner: 'Vitor Moraes', prazo: 'S4 ago/26 (TBC)', status: 'amarelo' },
+      { id: '1.2.1', desc: 'Planejamento de geração de leads melhorado e em execução', owner: 'Juliana Ribas', prazo: 'S4 ago/26 (TBC)', status: 'amarelo' },
+      { id: '1.3.1', desc: 'Planejamento de conversão de leads em vendas evoluído, com dimensionamento de capacidade, produtividade e conversão das estruturas de venda', owner: 'Juliana Ribas', prazo: 'S3 set/26 (TBC)', status: 'vermelho' },
+      { id: '1.4.1 / 1.5.1', desc: 'Telemetria de geração e conversão de leads aprimorada', owner: 'Vitor Moraes', prazo: 'S4 set/26 (TBC)', status: 'vermelho' },
+      { id: '1.6.1', desc: 'Fóruns, governança e rotina recorrente de planejamento mensal integrado implantados', owner: 'Glauco Zebral + Dico Gomes', prazo: 'S1 set/26', status: 'vermelho' },
+    ],
+  },
+  // ---------------------------------------------------------
+  {
+    id: 2,
+    slug: 'tratamento-alocacao',
+    nome: 'Tratamento, priorização e alocação de leads',
+    objetivo: 'Melhorar a experiência dos clientes em prospecção, o entendimento de suas necessidades, a priorização dos leads com maior potencial de conversão e a alocação às estruturas de vendas com maior chance de conversão.',
+    lideres: 'Eloah Aguiar',
+    time: 'Thais Pimenta, Luma Gomes e João Azevedo',
+    valorGerado: 'Aumento da conversão de leads (xpp), gerando aumento de vendas no varejo e margem incremental de R$xM/ano (delta varejo vs. atacado de ~R$5 mil/carro).',
+    status: 'Coleta de CEP obrigatória nas landing pages implementada e escalada para todos os leads do site; piloto de alocação em lojas mais próximas e/ou escolhidas pelo cliente lançado e expandido para 10 lojas.',
+    okrs: [
+      { label: 'Informações completas capturadas: % de clientes com dados de carro, CEP e CPF', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Fricção zero: % de clientes que desistem do cadastro em lead', baseline: null, current: null, meta: null, unit: 'pct', hib: false },
+      { label: 'Alocação perfeita: % de clientes alocados em lojas dentro da faixa de km ideal', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Alocação perfeita: % de clientes alocados em lojas com o carro desejado', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Alocação perfeita: % de vendedores com excesso de leads', baseline: null, current: null, meta: null, unit: 'pct', hib: false },
+      { label: 'Alocação perfeita: % de top vendedores sem leads', baseline: null, current: null, meta: null, unit: 'pct', hib: false },
+      { label: 'Alocação perfeita: % de carros movimentados entre lojas', baseline: null, current: null, meta: null, unit: 'pct', hib: false },
+      { label: 'Priorização efetiva: acurácia do lead score (previsto x realizado)', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Transbordo perfeito: % de leads disponibilizados ao canal seguinte com dados e histórico completos', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+    ],
+    entregaveis: [
+      { id: '2.1.1', desc: 'Ativos de captação melhorados (landing pages, WhatsApp)', owner: 'Luma Gomes e Thais Pimenta', prazo: 'S3 ago/26', status: 'amarelo' },
+      { id: '2.2.1', desc: 'Informações capturadas no site (ex.: localização por IP) integradas e disponíveis para todos os canais de atendimento', owner: 'Luma Gomes', prazo: 'S1 set/26', status: 'vermelho' },
+      { id: '2.3.1', desc: 'Lead score evoluído com novas variáveis (score B3 de propensão a financiamento, renda presumida etc.)', owner: 'João Azevedo', prazo: 'S3 out/26', status: 'vermelho' },
+      { id: '2.4.1', desc: 'Novo modelo de alocação em lojas desenhado', owner: 'Luma Gomes e Yure Cangussu', prazo: 'S1 ago/26', status: 'amarelo' },
+      { id: '2.4.2', desc: 'Piloto com nova lógica de roteamento lançado', owner: 'Luma Gomes', prazo: 'S2 ago/26', status: 'verde' },
+      { id: '2.4.3', desc: 'Novo modelo de alocação de leads em lojas escalado para todas as lojas', owner: 'Luma Gomes', prazo: 'S2 out/26', status: 'vermelho' },
+      { id: '2.4.4', desc: 'Piloto de alocação total dos leads na Liza, com transbordo para a Central, lançado', owner: 'Luma Gomes e Yure Cangussu', prazo: 'S4 out/26', status: 'vermelho' },
+      { id: '2.4.5', desc: 'Modelo de clusterização revisado com base nas distâncias entre lojas e leads alocados', owner: 'João Azevedo', prazo: 'S2 set/26', status: 'vermelho' },
+    ],
+  },
+  // ---------------------------------------------------------
+  {
+    id: 3,
+    slug: 'liza',
+    nome: 'Atendimento agêntico (Liza)',
+    objetivo: 'Usar a Liza para entender a necessidade do cliente, direcioná-lo à loja mais aderente e maximizar, inicialmente, a conversão em comparecimento — além de aumentar a produtividade do vendedor humano no primeiro atendimento.',
+    lideres: 'Isadora Barreto',
+    time: 'Lucas Lima',
+    valorGerado: 'Aumento do NPS da jornada de agendamento e da conversão em agendamento/comparecimento/vendas; redução de leads não atendidos (~30% para ~0%) e do custo médio por atendimento.',
+    status: 'Jornadas de qualificação básica, identificação da intenção de compra e busca de carro/loja para agendamento já implementadas, com oportunidades de melhoria identificadas.',
+    okrs: [
+      { label: '% de leads atendidos com qualidade — total', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento imediato: % de clientes atendidos em até 2 min', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento imediato: tempo médio de resposta (min)', baseline: null, current: null, meta: null, unit: 'min', decimals: 1, hib: false },
+      { label: 'Atendimento imediato: taxa de abandono da conversa', baseline: null, current: null, meta: null, unit: 'pct', hib: false },
+      { label: 'Informações completas: % de conversas com carro de interesse e localização capturados', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento efetivo: % de leads agendados dentre os gerados', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento efetivo: % de comparecimentos dentre os agendamentos', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento efetivo: % de conversão dentre os comparecimentos', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Transbordo fluido: % de transbordos para atendimento humano com histórico completo', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Transbordo fluido: % de clientes contatados simultaneamente pela Liza e por humano', baseline: null, current: null, meta: null, unit: 'pct', hib: false },
+    ],
+    entregaveis: [
+      { id: '3.1.1 / 3.2.1 / 3.3.1', desc: 'Melhorias dos pontos críticos da jornada: captura e validação de informações, condução da conversa, recomendações de veículos/lojas e simulação financeira', owner: 'Isadora Barreto e Lucas Lima', prazo: 'ago/26 – set/26', status: 'amarelo' },
+      { id: '3.4.1', desc: 'Entendimento das situações de troca de veículo (trade-in) implementado', owner: 'Isadora Barreto e Lucas Lima', prazo: 'out/26 – nov/26', status: 'vermelho' },
+      { id: '3.5.1', desc: 'Limites de interação e regras de encerramento ou transbordo das conversas definidos e implementados', owner: 'Isadora Barreto e Lucas Lima', prazo: 'set/26 – out/26', status: 'vermelho' },
+      { id: '3.6.1', desc: 'Integração entre Liza e atendimento humano, com transbordo inteligente, implementada', owner: 'Isadora Barreto e Lucas Lima', prazo: 'nov/26 – jan/27', status: 'vermelho' },
+      { id: '3.7.1', desc: 'Expansão da Liza para atendimento dos ~120 mil leads gerados pelas campanhas Meta WhatsApp', owner: 'Isadora Barreto e Lucas Lima', prazo: 'jan/27', status: 'vermelho' },
+      { id: '3.8.1', desc: 'Gestão de performance da Liza aprimorada com uso de agentes de IA (ex.: Alethe.IA)', owner: 'Isadora Barreto e Lucas Lima', prazo: 'jan/27 – fev/27', status: 'vermelho' },
+      { id: '3.9.1', desc: 'Ferramenta de IA consultiva implementada, com recomendações de abordagem integradas ao fluxo de vendas', owner: 'Isadora Barreto e Lucas Lima', prazo: 'mar/27 – abr/27', status: 'vermelho' },
+    ],
+  },
+  // ---------------------------------------------------------
+  {
+    id: 4,
+    slug: 'central',
+    nome: 'Atendimento pela Central',
+    objetivo: 'Melhorar a experiência dos clientes atendidos pela Central (via transbordo da Liza ou escolha do cliente), direcioná-los à loja mais aderente e maximizar, inicialmente, a conversão em comparecimento.',
+    lideres: 'Rafael Vidal',
+    time: 'Vitor Sueth (time do João Azevedo), Luis Dutra (time da Eloah Aguiar) e Rômulo Rodrigo',
+    valorGerado: 'Aumento da conversão em vendas dos leads atendidos pela Central (xpp), com melhoria no agendamento e no comparecimento, gerando margem incremental de R$xM/ano.',
+    status: 'Migração da plataforma de atendimento para o Blip e revisão preliminar de scripts/templates implementadas; piloto de expansão da Central para o varejo lançado.',
+    okrs: [
+      { label: '% de leads atendidos com qualidade — total', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Todos os leads conectados: % de leads conectados na Central', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento imediato: tempo médio até o primeiro contato (min)', baseline: null, current: null, meta: null, unit: 'min', hib: false },
+      { label: 'Atendimento imediato: tempo médio de resposta (min)', baseline: null, current: null, meta: null, unit: 'min', hib: false },
+      { label: 'Atendimento efetivo: % de leads convertidos em agendamento', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento efetivo: % de agendamentos convertidos em comparecimento', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento efetivo: % de comparecimentos convertidos em venda', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento eficiente: nº de RDVs (vendas) por CV', baseline: null, current: null, meta: null, unit: 'count', decimals: 1, hib: true },
+    ],
+    entregaveis: [
+      { id: '4.1.1', desc: 'Melhores práticas de atendimento na Central mapeadas', owner: 'Luis Dutra', prazo: 'S4 ago/26', status: 'amarelo' },
+      { id: '4.2.1', desc: 'Modelo de treinamento e nova rotina de gestão de performance dos RDVs evoluídos', owner: 'Rômulo Rodrigo', prazo: 'S2 set/26', status: 'vermelho' },
+      { id: '4.3.1', desc: 'Teste com contratação de atendentes mais qualificados (classe 13 vs. classe 10) realizado', owner: 'Eloah Aguiar e Rômulo Rodrigo', prazo: 'S3 set/26', status: 'vermelho' },
+      { id: '4.4.1', desc: 'Rotina de gestão de performance implementada', owner: 'Vitor Sueth', prazo: 'S4 ago/26', status: 'amarelo' },
+      { id: '4.5.1', desc: 'Piloto de atendimento da Central em lojas do varejo lançado', owner: 'Rômulo Rodrigo', prazo: 'S4 ago/26', status: 'verde' },
+      { id: '4.5.2', desc: 'Piloto de atendimento da Central em lojas do varejo expandido (condicionado a resultados favoráveis)', owner: 'Rômulo Rodrigo', prazo: 'S4 dez/26', status: 'vermelho' },
+    ],
+  },
+  // ---------------------------------------------------------
+  {
+    id: 5,
+    slug: 'loja',
+    nome: 'Atendimento em loja',
+    objetivo: 'Melhorar a experiência dos clientes nos atendimentos realizados pelos CVs e aumentar a conversão em venda, via melhores práticas de atendimento, treinamento e gestão de performance com visibilidade completa do funil.',
+    lideres: 'Eloah Aguiar',
+    time: 'Pablo Chaves e Isadora Savaget',
+    valorGerado: 'Aumento da conversão de leads em vendas (xpp) e do NPS da jornada em loja, gerando margem incremental de R$xM/ano.',
+    status: 'Ferramenta de telemetria do funil de vendas e gestão da performance dos CVs selecionada, contratada e implementada em 5 lojas, com plano de expansão definido.',
+    okrs: [
+      { label: 'Produtividade dos CVs: vendas por CV', baseline: null, current: null, meta: null, unit: 'count', decimals: 1, hib: true },
+      { label: 'Produtividade dos CVs: dispersão da conversão entre CVs', baseline: null, current: null, meta: null, unit: 'pp', hib: false },
+      { label: '% de leads atendidos com qualidade — total', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento imediato: % de clientes contatados em até 5 min', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Visibilidade do funil: % de leads com etapas corretamente registradas', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Visibilidade do funil: % de agendamentos/comparecimentos corretamente registrados', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Atendimento efetivo: % de comparecimentos convertidos em vendas', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+    ],
+    entregaveis: [
+      { id: '5.1.1', desc: 'Solução de atendimento via WhatsApp Business integrado ao Slack expandida para todas as lojas do varejo, em ondas mensais (1 loja jul., 28 ago., 80 set., 156 out., 235 nov., 256 dez.)', owner: 'Isadora Savaget e Denys Damm', prazo: 'dez/26 (TBC)', status: 'amarelo' },
+      { id: '5.2.1', desc: 'Inteligência de gestão da performance dos CVs implementada, combinando indicadores do funil e dados qualitativos via Alethe.IA', owner: 'Isadora Savaget', prazo: 'S4 set/26', status: 'vermelho' },
+      { id: '5.3.1', desc: 'Ritos e rotina de gestão das equipes de loja revisados e implantados', owner: 'Pablo Chaves', prazo: 'S4 set/26', status: 'vermelho' },
+    ],
+  },
+  // ---------------------------------------------------------
+  {
+    id: 6,
+    slug: 'geracao-leads',
+    nome: 'Geração de leads',
+    objetivo: 'Aumentar a eficácia e a eficiência da geração de leads, reduzindo o CAC (geral e por região/categoria), mantendo ou aumentando o volume gerado e elevando a qualidade dos leads a um menor custo.',
+    lideres: 'Juliana Ribas e Thaise Leocadio',
+    time: '—',
+    valorGerado: 'Redução do CAC e do CPL, e aumento da conversão de leads em vendas, gerando redução de custo e margem incremental de R$xM/ano.',
+    status: 'Realocação inicial dos investimentos em mídia realizada, com redução nas campanhas de pior performance; oportunidades prioritárias de melhoria de curto prazo identificadas.',
+    okrs: [
+      { label: 'Necessidade atendida: volume de leads únicos por canal, como % do planejamento', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Investimento rastreável: % de leads com tagueamento granular (keywords/criativos)', baseline: null, current: null, meta: null, unit: 'pct', hib: true },
+      { label: 'Geração eficiente: custo por lead (CPL)', baseline: null, current: null, meta: null, unit: 'currency', hib: false },
+      { label: 'Campanhas eficazes: taxa de conversão de cliques em leads', baseline: null, current: null, meta: null, unit: 'pct', decimals: 1, hib: true },
+      { label: 'Campanhas eficazes: taxa de conversão de leads em vendas por campanha', baseline: null, current: null, meta: null, unit: 'pct', decimals: 1, hib: true },
+      { label: 'Campanhas eficazes: custo por venda por campanha', baseline: null, current: null, meta: null, unit: 'currency', hib: false },
+    ],
+    entregaveis: [
+      { id: '6.1.1', desc: 'Modelo de atribuição aprimorado', owner: 'Juliana Ribas', prazo: 'S4 ago/26', status: 'vermelho' },
+      { id: '6.1.2', desc: 'BI gerencial e rotina mensal de apuração implementados', owner: 'Juliana Ribas', prazo: 'S4 ago/26', status: 'vermelho' },
+      { id: '6.2.1', desc: 'Processo de revisão do plano de investimento em mídia implantado', owner: 'A definir', prazo: 'S4 ago/26', status: 'amarelo' },
+      { id: '6.3.1', desc: 'Diagnóstico das campanhas Google concluído e plano de melhoria das táticas implementado', owner: 'Leticia Medina', prazo: 'S3 set/26', status: 'amarelo' },
+      { id: '6.4.1', desc: 'Diagnóstico das campanhas Meta concluído e plano de melhoria das táticas implementado', owner: 'Jessica Guimarães', prazo: 'S3 set/26', status: 'amarelo' },
+      { id: '6.5.1', desc: 'Diagnóstico e revisão das demais campanhas (afiliados, programática etc.) concluídos', owner: 'Thaise Leocadio', prazo: 'S3 set/26', status: 'vermelho' },
+      { id: '6.6.1', desc: 'Novas campanhas para segmentos prioritários (classe média/alta e SUVs) lançadas', owner: 'Thaise Leocadio', prazo: 'S2 out/26', status: 'vermelho' },
+      { id: '6.7.1', desc: 'Modelo de produção e melhoria contínua de conteúdo revisado', owner: 'Thaise Leocadio', prazo: 'S4 set/26', status: 'vermelho' },
+      { id: '6.8.1', desc: 'Ativos prioritários de conversão (landing pages, conteúdos, páginas de cadastro) revisados e aprimorados', owner: 'A definir', prazo: 'S4 out/26', status: 'vermelho' },
+      { id: '6.9.1', desc: 'Modelo de experimentação implantado', owner: 'A definir', prazo: 'S4 set/26', status: 'vermelho' },
+      { id: '6.10.1', desc: 'Oportunidades de geração de leads via parcerias e ativações comerciais mapeadas, priorizadas e testadas', owner: 'A definir', prazo: 'S4 out/26', status: 'vermelho' },
+    ],
+  },
+];
+
+// Frente 7 — Marca: 100% TBD no memorando (objetivos, alavancas, valor
+// gerado, indicadores e cronograma "a definir"). Mantida fora do array
+// FRENTES acima e tratada como estado vazio na aba correspondente.
+const FRENTE_MARCA = {
+  id: 7,
+  nome: 'Reposicionamento de marca',
+  status: 'TBD',
+};
+/* ============================================================
+   APP.JS — formatação, cálculo de deltas, renderização e
+   interatividade (edição inline + persistência opcional).
+   ============================================================ */
+
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------
+  // Estado em memória — nasce como cópia dos dados ilustrativos
+  // e pode ser sobrescrito por window.storage, se disponível.
+  // ---------------------------------------------------------
+  const STATE = {
+    pnl: JSON.parse(JSON.stringify(PNL)),
+    frentes: JSON.parse(JSON.stringify(FRENTES)),
+    meta: { mes: 'ago/26', atualizadoEm: '' },
+  };
+
+  let storageAvailable = null; // null = ainda não testado
+  let saveTimer = null;
+  const pendingSaveKinds = new Set();
+
+  // ---------------------------------------------------------
+  // Formatação numérica pt-BR
+  // ---------------------------------------------------------
+  function fmtNum(value, decimals) {
+    if (typeof value !== 'number' || Number.isNaN(value)) return '—';
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+
+  function defaultDecimals(unit) {
+    switch (unit) {
+      case 'min': return 1;
+      case 'count': return 0;
+      default: return 0;
+    }
+  }
+
+  function displayValue(value, unit, decimals) {
+    if (unit === 'milestone' || typeof value === 'string') return value;
+    const d = decimals === undefined || decimals === null ? defaultDecimals(unit) : decimals;
+    switch (unit) {
+      case 'pct': return fmtNum(value, d) + '%';
+      case 'pp': return fmtNum(value, d) + 'pp';
+      case 'min': return fmtNum(value, d) + ' min';
+      case 'currency': return 'R$ ' + fmtNum(value, d);
+      case 'currency_m': return fmtNum(value, d);
+      case 'count': return fmtNum(value, d);
+      default: return String(value);
+    }
+  }
+
+  function signedText(raw, unit, decimals) {
+    const d = decimals === undefined || decimals === null ? defaultDecimals(unit) : decimals;
+    if (raw === 0) return '±' + displayValue(0, unit, d).replace(/^0+/, '0');
+    const sign = raw > 0 ? '+' : '−';
+    return sign + displayValue(Math.abs(raw), unit, d);
+  }
+
+  function escapeHTML(str) {
+    if (str === undefined || str === null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ---------------------------------------------------------
+  // SVG helpers (setas de delta — sem emoji, cor via currentColor)
+  // ---------------------------------------------------------
+  const ARROW_UP = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2 L11 10 L1 10 Z" fill="currentColor"/></svg>';
+  const ARROW_DOWN = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10 L1 2 L11 2 Z" fill="currentColor"/></svg>';
+  const ARROW_FLAT = '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="1" y="5" width="10" height="2" fill="currentColor"/></svg>';
+  const ICON_CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ICON_PENDING = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.2v5l3.3 1.9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ICON_INFO = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="7.2" y="6.8" width="1.6" height="5" rx="0.8" fill="currentColor"/><rect x="7.2" y="4.2" width="1.6" height="1.6" rx="0.8" fill="currentColor"/></svg>';
+
+  // ---------------------------------------------------------
+  // Cálculo e render de deltas
+  // ---------------------------------------------------------
+  function pctText(value) {
+    if (typeof value !== 'number' || Number.isNaN(value) || !isFinite(value)) return '—';
+    const sign = value > 0 ? '+' : (value < 0 ? '−' : '');
+    return sign + Math.abs(value).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+  }
+
+  function pctChange(current, base) {
+    if (typeof current !== 'number' || typeof base !== 'number' || base === 0) return NaN;
+    return (current - base) / Math.abs(base) * 100;
+  }
+
+  function deltaVsBaselineHTML(current, baseline, hib) {
+    const pct = pctChange(current, baseline);
+    if (Number.isNaN(pct)) return '<span class="ls-delta ls-delta--flat">—</span>';
+    let cls = 'flat', arrow = ARROW_FLAT;
+    if (pct !== 0) {
+      const favorable = hib ? pct > 0 : pct < 0;
+      cls = favorable ? 'good' : 'bad';
+      arrow = pct > 0 ? ARROW_UP : ARROW_DOWN;
+    }
+    return '<span class="ls-delta ls-delta--' + cls + '">' + arrow + '<span>' + pctText(pct) + '</span></span>';
+  }
+
+  function deltaVsMetaHTML(current, meta, hib) {
+    const pct = pctChange(current, meta);
+    if (Number.isNaN(pct) || typeof current !== 'number' || typeof meta !== 'number') {
+      return '<span class="ls-gap-pill ls-gap-pill--flat">—</span>';
+    }
+    const achieved = hib ? current >= meta : current <= meta;
+    if (achieved) {
+      const overTxt = pct !== 0 ? ' (' + pctText(pct) + ')' : '';
+      return '<span class="ls-gap-pill ls-gap-pill--achieved">' + ICON_CHECK + '<span>Meta atingida' + overTxt + '</span></span>';
+    }
+    return '<span class="ls-gap-pill ls-gap-pill--pending">Faltam ' + Math.abs(pct).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%</span>';
+  }
+
+  function unitAffix(unit) {
+    switch (unit) {
+      case 'pct': return { suffix: '%' };
+      case 'pp': return { suffix: 'pp' };
+      case 'min': return { suffix: 'min' };
+      case 'currency': return { prefix: 'R$' };
+      case 'currency_m': return { prefix: 'R$M' };
+      default: return {};
+    }
+  }
+
+  // ---------------------------------------------------------
+  // Célula editável numérica (baseline / atual / meta)
+  // ---------------------------------------------------------
+  function editableNumCell(value, unit, decimals, dataAttrs, placeholder) {
+    if (unit === 'milestone') {
+      return '<td class="ls-td-editable">' +
+        '<input type="text" class="ls-edit-input ls-edit-input--text" ' + dataAttrs + ' value="' + escapeHTML(value == null ? '' : value) + '" placeholder="' + escapeHTML(placeholder || '—') + '">' +
+        '</td>';
+    }
+    const affix = unitAffix(unit);
+    const d = decimals === undefined || decimals === null ? defaultDecimals(unit) : decimals;
+    const raw = typeof value === 'number' ? value.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }) : '';
+    return '<td class="ls-td-editable num">' +
+      '<span class="ls-input-affix">' +
+      (affix.prefix ? '<span class="ls-affix">' + affix.prefix + '</span>' : '') +
+      '<input type="text" inputmode="decimal" class="ls-edit-input" ' + dataAttrs + ' value="' + raw + '" placeholder="' + escapeHTML(placeholder || '—') + '">' +
+      (affix.suffix ? '<span class="ls-affix">' + affix.suffix + '</span>' : '') +
+      '</span></td>';
+  }
+
+  function parseLocaleNumber(str) {
+    if (typeof str !== 'string') return NaN;
+    const cleaned = str.trim().replace(/\./g, '').replace(',', '.');
+    return parseFloat(cleaned);
+  }
+
+  // ---------------------------------------------------------
+  // Badge de status (entregáveis)
+  // ---------------------------------------------------------
+  const STATUS_LABELS = { verde: 'Concluído', amarelo: 'Em progresso', vermelho: 'Não iniciado' };
+
+  function statusSelectHTML(status, dataAttrs) {
+    const opts = ['vermelho', 'amarelo', 'verde'].map(function (s) {
+      return '<option value="' + s + '"' + (s === status ? ' selected' : '') + '>' + STATUS_LABELS[s] + '</option>';
+    }).join('');
+    return '<select class="ls-status-select ls-status-select--' + status + '" ' + dataAttrs + '>' + opts + '</select>';
+  }
+
+  function editableTextArea(value, placeholder, dataAttrs) {
+    return '<textarea class="ls-textarea" placeholder="' + escapeHTML(placeholder) + '" ' + dataAttrs + '>' + escapeHTML(value || '') + '</textarea>';
+  }
+
+  const ICON_CHEVRON = '<svg viewBox="0 0 12 12" class="ls-chevron" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // ---------------------------------------------------------
+  // Mês de análise selecionado no topo → define até qual mês
+  // (1=Jan .. 6=Jun) o YTD Realizado soma, e destaca a coluna.
+  // ---------------------------------------------------------
+  function currentAnalysisN() {
+    const sel = document.getElementById('analysis-month-select');
+    const n = sel ? parseInt(sel.value, 10) : 6;
+    return (n >= 1 && n <= 6) ? n : 6;
+  }
+
+  // ---------------------------------------------------------
+  // P&L: YTD Realizado (soma dos meses até o mês de análise
+  // selecionado, para linhas de fluxo; média para razões
+  // R$/veículo) vs. Orçamento (editável, mesmo período).
+  // ---------------------------------------------------------
+  function pnlYtdRealizado(row, uptoN) {
+    const n = uptoN || currentAnalysisN();
+    const janAteN = row.meses.slice(0, n);
+    const nums = janAteN.filter(function (v) { return typeof v === 'number'; });
+    if (nums.length === 0) return null;
+    const sum = nums.reduce(function (a, b) { return a + b; }, 0);
+    return row.kind === 'ratio' ? sum / nums.length : sum;
+  }
+
+  function pnlDeltaHTML(row) {
+    return deltaVsMetaHTML(pnlYtdRealizado(row), row.orcamentoYtd, row.hib);
+  }
+
+  function updatePnlRowDelta(idx) {
+    const row = STATE.pnl.rows[idx];
+    const tr = document.querySelector('#pnl-tbody tr[data-pnl-row="' + idx + '"]');
+    if (!tr) return;
+    const ytdCell = tr.querySelector('.ytd-realizado-cell');
+    if (ytdCell) ytdCell.textContent = displayValue(pnlYtdRealizado(row), row.unit, row.decimals);
+    const cell = tr.querySelector('.delta-ytd-cell');
+    if (cell) cell.innerHTML = pnlDeltaHTML(row);
+  }
+
+  // ---------------------------------------------------------
+  // Render: tabela do P&L Resumida (mês a mês, jan–jun,
+  // realizado, com linhas de despesa colapsáveis em subitens)
+  // ---------------------------------------------------------
+  function renderPNL() {
+    const tbody = document.getElementById('pnl-tbody');
+    if (!tbody) return;
+    const n = currentAnalysisN();
+    tbody.innerHTML = STATE.pnl.rows.map(function (row, idx) {
+      const isChild = row.kind === 'subitem';
+      let rowCls = row.kind === 'total' ? 'ls-row-total' : (row.kind === 'subtotal' ? 'ls-row-subtotal' : (isChild ? 'ls-row-subitem ls-row-hidden' : ''));
+      const monthCells = row.meses.map(function (v, mIdx) {
+        const highlightCls = (mIdx === n - 1) ? ' ls-col-current' : '';
+        return editableNumCell(v, row.unit, row.decimals, 'data-pnl="' + idx + '" data-field="meses" data-month-idx="' + mIdx + '"').replace('<td class="ls-td-editable num">', '<td class="ls-td-editable num' + highlightCls + '">');
+      }).join('');
+      const ytdCell = '<td class="num ytd-realizado-cell">' + displayValue(pnlYtdRealizado(row, n), row.unit, row.decimals) + '</td>';
+      const orcCell = editableNumCell(row.orcamentoYtd, row.unit, row.decimals, 'data-pnl="' + idx + '" data-field="orcamentoYtd"');
+      const toggleHTML = row.collapsible ? '<button type="button" class="ls-row-toggle" data-toggle="' + row.id + '" aria-expanded="false" title="Ver detalhamento por linha">' + ICON_CHEVRON + '</button>' : '';
+      const treeHTML = isChild ? '<span class="ls-tree-connector">└</span>' : '';
+      const labelHTML = toggleHTML + treeHTML + escapeHTML(row.label);
+      const parentAttr = row.parent ? ' data-parent="' + row.parent + '"' : '';
+      return '<tr class="' + rowCls + '" data-pnl-row="' + idx + '"' + parentAttr + '>' +
+        '<td>' + labelHTML + '</td>' +
+        monthCells +
+        ytdCell +
+        orcCell +
+        '<td class="delta-ytd-cell num">' + pnlDeltaHTML(row) + '</td>' +
+        '</tr>';
+    }).join('');
+    const ytdHeadLabel = document.getElementById('pnl-ytd-head-label');
+    if (ytdHeadLabel) ytdHeadLabel.textContent = 'YTD Realizado (até ' + PNL.meses[n - 1] + ')';
+    document.querySelectorAll('.ls-pnl-subhead th').forEach(function (th, i) {
+      th.classList.toggle('ls-col-current', i === n); // i=0 e a coluna do label, meses comecam em i=1
+    });
+  }
+
+  function onPnlToggleClick(e) {
+    const btn = e.target.closest('.ls-row-toggle');
+    if (!btn) return;
+    const parentId = btn.getAttribute('data-toggle');
+    const wasExpanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
+    btn.classList.toggle('is-expanded', !wasExpanded);
+    document.querySelectorAll('#pnl-tbody tr[data-parent="' + parentId + '"]').forEach(function (tr) {
+      tr.classList.toggle('ls-row-hidden', wasExpanded);
+    });
+  }
+
+  // ---------------------------------------------------------
+  // Render: tabela de OKRs de uma frente
+  // ---------------------------------------------------------
+  function renderOKRTable(fIdx) {
+    const frente = STATE.frentes[fIdx];
+    const tbody = document.getElementById('okr-tbody-' + frente.id);
+    if (!tbody) return;
+    tbody.innerHTML = frente.okrs.map(function (okr, oIdx) {
+      const attrsFor = function (field) { return 'data-frente="' + fIdx + '" data-okr="' + oIdx + '" data-field="' + field + '"'; };
+      const isMilestone = okr.unit === 'milestone';
+      return '<tr data-okr-row="' + fIdx + '-' + oIdx + '">' +
+        '<td class="num ls-id-cell">' + (oIdx + 1) + '</td>' +
+        '<td class="ls-indicator-cell">' + escapeHTML(okr.label) + '</td>' +
+        editableNumCell(okr.current, okr.unit, okr.decimals, attrsFor('current')) +
+        editableNumCell(okr.baseline, okr.unit, okr.decimals, attrsFor('baseline')) +
+        editableNumCell(okr.meta, okr.unit, okr.decimals, attrsFor('meta')) +
+        '<td class="delta-baseline-cell num">' + (isMilestone ? '<span class="ls-delta ls-delta--flat">—</span>' : deltaVsBaselineHTML(okr.current, okr.baseline, okr.hib)) + '</td>' +
+        '<td class="delta-meta-cell num">' + (isMilestone ? '<span class="ls-gap-pill ls-gap-pill--flat">—</span>' : deltaVsMetaHTML(okr.current, okr.meta, okr.hib)) + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function updateOkrRowDeltas(fIdx, oIdx) {
+    const okr = STATE.frentes[fIdx].okrs[oIdx];
+    const row = document.querySelector('tr[data-okr-row="' + fIdx + '-' + oIdx + '"]');
+    if (!row) return;
+    const isMilestone = okr.unit === 'milestone';
+    const bCell = row.querySelector('.delta-baseline-cell');
+    const mCell = row.querySelector('.delta-meta-cell');
+    if (bCell) bCell.innerHTML = isMilestone ? '<span class="ls-delta ls-delta--flat">—</span>' : deltaVsBaselineHTML(okr.current, okr.baseline, okr.hib);
+    if (mCell) mCell.innerHTML = isMilestone ? '<span class="ls-gap-pill ls-gap-pill--flat">—</span>' : deltaVsMetaHTML(okr.current, okr.meta, okr.hib);
+  }
+
+  // ---------------------------------------------------------
+  // Render: tabela de entregáveis de uma frente
+  // ---------------------------------------------------------
+  function renderDeliverablesTable(fIdx) {
+    const frente = STATE.frentes[fIdx];
+    const tbody = document.getElementById('del-tbody-' + frente.id);
+    if (!tbody) return;
+    tbody.innerHTML = frente.entregaveis.map(function (item, dIdx) {
+      const attrsFor = function (field) { return 'data-frente="' + fIdx + '" data-del="' + dIdx + '" data-field="' + field + '"'; };
+      return '<tr>' +
+        '<td class="ls-id-cell">' + escapeHTML(item.id) + '</td>' +
+        '<td class="ls-indicator-cell">' + escapeHTML(item.desc) + '</td>' +
+        '<td>' + escapeHTML(item.owner) + '</td>' +
+        '<td class="ls-prazo-cell">' + escapeHTML(item.prazo) + '</td>' +
+        '<td>' + statusSelectHTML(item.status, attrsFor('status')) + '</td>' +
+        '<td>' + editableTextArea(item.progresso, 'Adicionar atualização do mês…', attrsFor('progresso')) + '</td>' +
+        '<td>' + editableTextArea(item.proximosPassos, 'Adicionar próximos passos…', attrsFor('proximosPassos')) + '</td>' +
+        '<td>' + editableTextArea(item.riscos, 'Adicionar pontos a escalar, se houver…', attrsFor('riscos')) + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ---------------------------------------------------------
+  // Render completo de todas as frentes (chamado 1x no init)
+  // ---------------------------------------------------------
+  function renderAllFrentes() {
+    STATE.frentes.forEach(function (frente, fIdx) {
+      renderOKRTable(fIdx);
+      renderDeliverablesTable(fIdx);
+    });
+  }
+
+  // ---------------------------------------------------------
+  // Geração dinâmica da navegação e dos painéis (evita repetir
+  // markup quase idêntico 6 vezes e mantém as abas consistentes)
+  // ---------------------------------------------------------
+  function renderNav() {
+    const nav = document.getElementById('tab-nav-list');
+    if (!nav) return;
+    const items = STATE.frentes.map(function (f) { return { tab: 'f' + f.id, label: f.id + '. ' + f.nome }; })
+      .concat([{ tab: 'marca', label: '7. Marca' }]);
+    nav.innerHTML = items.map(function (it, i) {
+      return '<button type="button" class="ls-tab-btn' + (i === 0 ? ' is-active' : '') + '" data-tab="' + it.tab + '" role="tab" aria-selected="' + (i === 0 ? 'true' : 'false') + '">' + escapeHTML(it.label) + '</button>';
+    }).join('');
+  }
+
+  function frenteMetaGridHTML(f) {
+    return '<div class="ls-frente-meta-grid">' +
+      '<div class="ls-frente-meta-item"><span class="label">Líder(es)</span><span class="value">' + escapeHTML(f.lideres) + '</span></div>' +
+      '<div class="ls-frente-meta-item"><span class="label">Time de trabalho</span><span class="value">' + escapeHTML(f.time) + '</span></div>' +
+      '</div>';
+  }
+
+  function renderFrentePanelShell(f) {
+    return '<section id="panel-f' + f.id + '" class="ls-tab-panel" role="tabpanel" aria-labelledby="tabbtn-f' + f.id + '">' +
+      '<div class="ls-card ls-frente-head ls-frente-head--compact">' +
+      '<div class="ls-frente-head-main">' +
+      '<div class="ls-frente-title"><span class="ls-frente-number">' + f.id + '</span>' + escapeHTML(f.nome) + '</div>' +
+      '<p class="ls-frente-objetivo">' + escapeHTML(f.objetivo) + '</p>' +
+      '</div>' +
+      frenteMetaGridHTML(f) +
+      '</div>' +
+
+      '<div class="ls-subsection-title">OKRs</div>' +
+      '<div class="ls-table-scroll"><table class="ls-table"><thead><tr>' +
+      '<th>#</th><th>Indicador</th><th class="num">Realizado</th><th class="num">Baseline</th><th class="num">Ambição</th><th>&Delta; Realizado vs. Baseline</th><th>&Delta; Realizado vs. Ambição</th>' +
+      '</tr></thead><tbody id="okr-tbody-' + f.id + '"></tbody></table></div>' +
+
+      '<div class="ls-subsection-title">Milestones</div>' +
+      '<div class="ls-table-scroll"><table class="ls-table ls-del-table"><thead><tr>' +
+      '<th>#</th><th>Milestone</th><th>Responsável</th><th>Prazo</th><th>Status</th><th>Progresso recente</th><th>Próximos passos</th><th>Pontos a escalar</th>' +
+      '</tr></thead><tbody id="del-tbody-' + f.id + '"></tbody></table></div>' +
+      '</section>';
+  }
+
+  function renderMarcaPanelShell() {
+    return '<section id="panel-marca" class="ls-tab-panel" role="tabpanel" aria-labelledby="tabbtn-marca">' +
+      '<div class="ls-card ls-frente-head" style="margin-bottom:24px;">' +
+      '<div class="ls-frente-head-main">' +
+      '<div class="ls-frente-title"><span class="ls-frente-number">7</span>Reposicionamento de marca</div>' +
+      '<p class="ls-frente-objetivo">Frente ainda não estruturada no memorando estratégico — todos os campos constam como "TBD".</p>' +
+      '</div>' +
+      '</div>' +
+      '<div class="ls-empty-state">' + ICON_PENDING +
+      '<h3>Objetivos, alavancas, valor gerado, indicadores e cronograma a definir</h3>' +
+      '<p>Assim que o escopo desta frente for definido, esta aba deve ser estruturada com o mesmo padrão de OKRs e entregáveis usado nas demais frentes.</p>' +
+      '</div>' +
+      '</section>';
+  }
+
+  function renderShell() {
+    const root = document.getElementById('app-root');
+    if (!root) return;
+    const html = STATE.frentes.map(renderFrentePanelShell).join('') + renderMarcaPanelShell();
+    root.insertAdjacentHTML('beforeend', html);
+  }
+
+  // ---------------------------------------------------------
+  // Abas (tabs)
+  // ---------------------------------------------------------
+  function switchTab(tabId) {
+    document.querySelectorAll('.ls-tab-panel').forEach(function (el) {
+      el.classList.toggle('is-active', el.id === 'panel-' + tabId);
+    });
+    document.querySelectorAll('.ls-tab-btn').forEach(function (btn) {
+      btn.classList.toggle('is-active', btn.getAttribute('data-tab') === tabId);
+      btn.setAttribute('aria-selected', btn.getAttribute('data-tab') === tabId ? 'true' : 'false');
+    });
+    try { window.location.hash = tabId; } catch (e) { /* ignore */ }
+    const panel = document.getElementById('panel-' + tabId);
+    if (panel && typeof panel.scrollIntoView === 'function') {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function initTabs() {
+    document.querySelectorAll('.ls-tab-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        switchTab(btn.getAttribute('data-tab'));
+      });
+    });
+    const initial = (window.location.hash || '').replace('#', '') || 'f1';
+    switchTab(document.getElementById('panel-' + initial) ? initial : 'f1');
+  }
+
+  // ---------------------------------------------------------
+  // Persistência (window.storage, com fallback silencioso)
+  // ---------------------------------------------------------
+  async function storageGet(key) {
+    if (!window.storage || typeof window.storage.get !== 'function') return null;
+    try {
+      const res = await window.storage.get(key, true);
+      return res ? res.value : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function storageSet(key, value) {
+    if (!window.storage || typeof window.storage.set !== 'function') return false;
+    try {
+      const res = await window.storage.set(key, value, true);
+      return !!res;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function formatDateTimeBR(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mi = String(d.getMinutes()).padStart(2, '0');
+    return dd + '/' + mm + '/' + yyyy + ' às ' + hh + ':' + mi;
+  }
+
+  function renderLastUpdated() {
+    const el = document.getElementById('last-updated');
+    if (!el) return;
+    const formatted = formatDateTimeBR(STATE.meta.atualizadoEm);
+    el.textContent = formatted ? 'Última atualização: ' + formatted : 'Última atualização: —';
+  }
+
+  function touchLastUpdated() {
+    STATE.meta.atualizadoEm = new Date().toISOString();
+    renderLastUpdated();
+    scheduleSave('meta');
+  }
+
+  function scheduleSave(kind) {
+    pendingSaveKinds.add(kind);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      const kinds = Array.from(pendingSaveKinds);
+      pendingSaveKinds.clear();
+      kinds.forEach(function (k) { persist(k); });
+    }, 500);
+  }
+
+  async function persist(kind) {
+    try {
+      if (kind === 'pnl') {
+        await storageSet('pnl-values', JSON.stringify(STATE.pnl.rows));
+      } else if (kind === 'frentes') {
+        await storageSet('frentes-values', JSON.stringify(STATE.frentes));
+      } else if (kind === 'meta') {
+        await storageSet('dashboard-meta', JSON.stringify(STATE.meta));
+      }
+      updateSaveIndicator(true);
+    } catch (e) {
+      updateSaveIndicator(false);
+    }
+  }
+
+  function updateSaveIndicator(ok) {
+    const el = document.getElementById('save-indicator');
+    if (!el) return;
+    if (storageAvailable === false) {
+      el.textContent = 'Edição local nesta sessão (arquivo aberto fora do Claude — as alterações não são salvas ao recarregar).';
+      el.className = 'ls-save-indicator ls-save-indicator--local';
+      return;
+    }
+    el.textContent = ok ? 'Alterações salvas.' : 'Não foi possível salvar agora — a edição continua válida nesta sessão.';
+    el.className = 'ls-save-indicator' + (ok ? '' : ' ls-save-indicator--warn');
+  }
+
+  async function loadState() {
+    const hasStorage = !!(window.storage && typeof window.storage.get === 'function');
+    storageAvailable = hasStorage;
+    if (!hasStorage) { updateSaveIndicator(true); return; }
+
+    try {
+      const [pnlRaw, frentesRaw, metaRaw] = await Promise.all([
+        storageGet('pnl-values'),
+        storageGet('frentes-values'),
+        storageGet('dashboard-meta'),
+      ]);
+      if (pnlRaw) STATE.pnl.rows = JSON.parse(pnlRaw);
+      if (frentesRaw) STATE.frentes = JSON.parse(frentesRaw);
+      if (metaRaw) STATE.meta = JSON.parse(metaRaw);
+    } catch (e) {
+      // dados salvos inválidos/corrompidos — segue com o ilustrativo
+    }
+    updateSaveIndicator(true);
+  }
+
+  // ---------------------------------------------------------
+  // Handlers de edição (delegação de eventos)
+  // ---------------------------------------------------------
+  function onOkrNumInput(e) {
+    const input = e.target;
+    const fIdx = parseInt(input.getAttribute('data-frente'), 10);
+    const oIdx = parseInt(input.getAttribute('data-okr'), 10);
+    const field = input.getAttribute('data-field');
+    const okr = STATE.frentes[fIdx].okrs[oIdx];
+    if (okr.unit === 'milestone') {
+      okr[field] = input.value;
+    } else {
+      const val = parseLocaleNumber(input.value);
+      if (!Number.isNaN(val)) okr[field] = val;
+    }
+    updateOkrRowDeltas(fIdx, oIdx);
+    scheduleSave('frentes');
+    touchLastUpdated();
+  }
+
+  function onPnlNumInput(e) {
+    const input = e.target;
+    const idx = parseInt(input.getAttribute('data-pnl'), 10);
+    const field = input.getAttribute('data-field');
+    const row = STATE.pnl.rows[idx];
+    const val = parseLocaleNumber(input.value);
+    if (Number.isNaN(val)) return;
+    if (field === 'meses') {
+      const mIdx = parseInt(input.getAttribute('data-month-idx'), 10);
+      row.meses[mIdx] = val;
+    } else {
+      row[field] = val;
+    }
+    updatePnlRowDelta(idx);
+    scheduleSave('pnl');
+    touchLastUpdated();
+  }
+
+  function onDelFieldChange(e) {
+    const el = e.target;
+    const fIdx = parseInt(el.getAttribute('data-frente'), 10);
+    const dIdx = parseInt(el.getAttribute('data-del'), 10);
+    const field = el.getAttribute('data-field');
+    const item = STATE.frentes[fIdx].entregaveis[dIdx];
+    item[field] = el.value;
+    if (field === 'status' && el.tagName === 'SELECT') {
+      el.className = 'ls-status-select ls-status-select--' + el.value;
+    }
+    scheduleSave('frentes');
+    touchLastUpdated();
+  }
+
+  function attachDelegatedHandlers() {
+    document.addEventListener('input', function (e) {
+      if (e.target.matches('.ls-edit-input[data-okr]')) onOkrNumInput(e);
+      else if (e.target.matches('.ls-edit-input[data-pnl]')) onPnlNumInput(e);
+      else if (e.target.matches('.ls-textarea[data-del]')) onDelFieldChange(e);
+    });
+    document.addEventListener('change', function (e) {
+      if (e.target.matches('.ls-status-select[data-del]')) onDelFieldChange(e);
+      else if (e.target.id === 'analysis-month-select') renderPNL();
+    });
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.ls-row-toggle')) onPnlToggleClick(e);
+    });
+  }
+
+  // ---------------------------------------------------------
+  // Reset
+  // ---------------------------------------------------------
+  function resetIllustrative() {
+    if (!window.confirm('Limpar todos os campos preenchidos e voltar ao modelo em branco? As edições feitas nesta sessão serão perdidas.')) return;
+    STATE.pnl = JSON.parse(JSON.stringify(PNL));
+    STATE.frentes = JSON.parse(JSON.stringify(FRENTES));
+    STATE.meta.atualizadoEm = '';
+    renderPNL();
+    renderAllFrentes();
+    renderLastUpdated();
+    scheduleSave('pnl');
+    scheduleSave('frentes');
+    scheduleSave('meta');
+  }
+
+  // ---------------------------------------------------------
+  // Init
+  // ---------------------------------------------------------
+  async function init() {
+    await loadState();
+    renderNav();
+    renderShell();
+    renderPNL();
+    renderAllFrentes();
+    renderLastUpdated();
+    initTabs();
+    attachDelegatedHandlers();
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) resetBtn.addEventListener('click', resetIllustrative);
+    const stamp = document.getElementById('generated-stamp');
+    if (stamp) stamp.textContent = 'Painel criado em 13/08/2026.';
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
