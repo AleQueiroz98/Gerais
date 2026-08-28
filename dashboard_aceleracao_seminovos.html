@@ -578,6 +578,7 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
       lsSet(key, value);
       window.LSFile.dirty = true;
       emit('file:dirty');
+      agendarAutoSave();
       return { ok: true };
     },
   };
@@ -623,26 +624,65 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
   }
 
   // ---- IndexedDB: lembra o arquivo entre sessões ------------------
+  // Guarda o atalho para o arquivo entre sessões. É um conforto, não um
+  // requisito: qualquer falha aqui resolve como null em vez de propagar,
+  // e um limite de tempo garante que a promessa sempre termine — uma
+  // versão anterior podia ficar pendente para sempre e travava o Salvar
+  // inteiro, deixando o painel parado em "Não salvo".
   function idb(mode, fn) {
     return new Promise(function (resolve) {
+      var pronto = false;
+      function fim(v) { if (!pronto) { pronto = true; resolve(v); } }
+      setTimeout(function () { fim(null); }, 3000);
+
       var req;
-      try { req = indexedDB.open(IDB_NAME, 1); } catch (e) { return resolve(null); }
+      try { req = indexedDB.open(IDB_NAME, 1); } catch (e) { return fim(null); }
       req.onupgradeneeded = function () {
-        if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE);
+        try {
+          if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE);
+        } catch (e) { /* segue sem o atalho */ }
       };
-      req.onerror = function () { resolve(null); };
+      req.onerror = function () { fim(null); };
+      req.onblocked = function () { fim(null); };
       req.onsuccess = function () {
-        var db = req.result, tx, store;
+        var db = req.result, tx, store, r;
         try { tx = db.transaction(IDB_STORE, mode); store = tx.objectStore(IDB_STORE); }
-        catch (e) { return resolve(null); }
-        var r = fn(store);
-        tx.oncomplete = function () { resolve(r && r.result !== undefined ? r.result : null); };
-        tx.onerror = function () { resolve(null); };
+        catch (e) { return fim(null); }
+        try { r = fn(store); } catch (e) { return fim(null); }
+        tx.oncomplete = function () { fim(r && r.result !== undefined ? r.result : null); };
+        tx.onerror = function () { fim(null); };
+        tx.onabort = function () { fim(null); };
       };
     });
   }
 
   // ---- gravação ---------------------------------------------------
+  // Grava sozinho enquanto a pessoa edita. Só existe quando há um arquivo
+  // conectado — no modo download, salvar a cada tecla encheria a pasta de
+  // Downloads, então ali continua valendo o botão.
+  var autoTimer = null;
+
+  function agendarAutoSave() {
+    if (!fileHandle || window.LSFile.needsPermission) return;
+    clearTimeout(autoTimer);
+    autoTimer = setTimeout(function () { autoSave(); }, 1200);
+  }
+
+  async function autoSave() {
+    if (!fileHandle) return;
+    emit('file:saving');
+    try {
+      await writeTo(fileHandle);
+      window.LSFile.dirty = false;
+      window.LSFile.viaDownload = false;
+      emit('file:saved');
+    } catch (e) {
+      // Não cai para download aqui: baixar um arquivo sem a pessoa ter
+      // pedido seria pior que avisar que a gravação automática falhou.
+      emit('file:error', { message: e.message || String(e) });
+    }
+  }
+
   async function writeTo(handle) {
     var perm = await handle.queryPermission({ mode: 'readwrite' });
     if (perm !== 'granted') {
@@ -671,6 +711,7 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
     // está de fato disponível; qualquer falha dela cai para o download,
     // porque sair daqui sem salvar é o pior desfecho possível.
     if (supportsFS) {
+      var gravou = false;
       try {
         if (!fileHandle || forcarEscolha) {
           fileHandle = await window.showSaveFilePicker({
@@ -678,21 +719,29 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
             types: [{ description: 'Painel (página web)', accept: { 'text/html': ['.html'] } }],
           });
           fileName = fileHandle.name;
-          await idb('readwrite', function (s) { return s.put(fileHandle, 'file'); });
         }
         await writeTo(fileHandle);
+        // Só depois de gravar, e sem bloquear: se não der para lembrar o
+        // atalho, a pessoa apenas reescolhe o arquivo na próxima vez.
+        idb('readwrite', function (s) { return s.put(fileHandle, 'file'); });
+        gravou = true;
         window.LSFile.dirty = false;
         window.LSFile.viaDownload = false;
-        emit('file:saved');
-        return true;
+        window.LSFile.needsPermission = false;
       } catch (e) {
         // Cancelou a janela de salvar: não é erro, não faz nada.
         if (e && e.name === 'AbortError') { emit('file:idle'); return false; }
-        // Falhou por qualquer outro motivo (permissão, origem, disco):
-        // desiste da API e baixa o arquivo.
-        fileHandle = null;
-        supportsFS = false;
+        if (!gravou) {
+          // Falhou antes de escrever (permissão, origem, disco): desiste
+          // da API e baixa o arquivo.
+          fileHandle = null;
+          supportsFS = false;
+        }
       }
+      // O arquivo já foi gravado — sair daqui sem baixar nada. Emitir o
+      // evento fora do try impede que um erro no redesenho da interface
+      // seja confundido com falha de gravação e dispare um download extra.
+      if (gravou) { emit('file:saved'); return true; }
     }
 
     // Caminho 2 — download pelo navegador. Sempre funciona.
@@ -1502,14 +1551,17 @@ const FRENTE_MARCA = {
       return;
     }
     if (lastSaveState === 'dirty' || F.dirty) {
-      el.textContent = 'Alterações ainda não gravadas — clique em "Salvar" para atualizar o arquivo.';
-      el.className = 'ls-save-indicator ls-save-indicator--warn';
+      const auto = F.connected && !F.needsPermission;
+      el.textContent = auto
+        ? 'Gravando as alterações em ' + (F.name || 'seu arquivo') + '…'
+        : 'Alterações ainda não gravadas — clique em "Salvar" para atualizar o arquivo.';
+      el.className = auto ? 'ls-save-indicator' : 'ls-save-indicator ls-save-indicator--warn';
       return;
     }
     if (lastSaveState === 'saved') {
       el.textContent = F.viaDownload
         ? 'Arquivo baixado. Substitua o antigo por esta versão para o time ver os dados.'
-        : 'Arquivo atualizado' + (F.name ? ' (' + F.name + ')' : '') + '. Quem abrir este arquivo verá estes dados.';
+        : 'Gravando automaticamente em ' + (F.name || 'seu arquivo') + ' — não precisa clicar em Salvar.';
       el.className = 'ls-save-indicator';
       return;
     }
@@ -1633,25 +1685,35 @@ const FRENTE_MARCA = {
   function renderFileStatus() {
     const dot = document.getElementById('sync-dot');
     const label = document.getElementById('file-status');
+    const saveBtn = document.getElementById('save-file-btn');
     const F = window.LSFile || {};
+    const auto = F.connected && !F.needsPermission;
 
     if (dot) {
       if (F.dirty) {
         dot.className = 'ls-sync-dot ls-sync-dot--syncing';
-        dot.title = 'Há alterações não salvas — clique em Salvar';
+        dot.title = auto ? 'Gravando…' : 'Há alterações não salvas — clique em Salvar';
       } else if (F.connected) {
         dot.className = 'ls-sync-dot ls-sync-dot--online';
-        dot.title = 'Salvo em ' + (F.name || 'arquivo');
+        dot.title = 'Gravando automaticamente em ' + (F.name || 'arquivo');
       } else {
         dot.className = 'ls-sync-dot';
-        dot.title = 'Clique em Salvar para gravar os dados no arquivo';
+        dot.title = 'Clique em Salvar para escolher o arquivo';
       }
     }
 
     if (label) {
-      if (F.dirty) label.textContent = 'Não salvo';
-      else if (F.connected) label.textContent = F.name || 'Salvo';
+      if (auto) label.textContent = F.dirty ? 'Gravando…' : (F.name || 'Salvo');
+      else if (F.dirty) label.textContent = 'Não salvo';
       else label.textContent = 'Sem alterações';
+    }
+
+    // Com arquivo conectado a gravação é automática; o botão vira reforço.
+    if (saveBtn) {
+      const txt = saveBtn.querySelector('span');
+      saveBtn.title = auto
+        ? 'Já está gravando sozinho — clique só se quiser forçar agora'
+        : 'Escolher o arquivo onde gravar os dados';
     }
   }
 
