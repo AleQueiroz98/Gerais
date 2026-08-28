@@ -1,0 +1,93 @@
+{
+  "_doc": "Correcoes e realces aplicados sobre frentes.json, a partir do memorando estrategico Lead to Sales (v2, 17/ago). 'bold' e 'obj_bold' listam os trechos com selective bold.",
+  "frentes": {
+    "1": {
+      "obj_bold": ["planejamento integrado e colaborativo entre marketing e vendas",
+                   "necessidade de vendas de curto prazo",
+                   "planos de geração de leads", "planos comerciais de conversão",
+                   "ambições compartilhadas"]
+    },
+    "2": {
+      "obj_bold": ["experiência dos clientes em prospecção",
+                   "entendimento de suas necessidades",
+                   "priorização dos leads com maior potencial de conversão",
+                   "alocação às estruturas de vendas"]
+    },
+    "3": {
+      "nota": "Ciclo completo em ~8 meses, com possibilidade de antecipação para ~3 meses, condicionada a suporte externo em tecnologia.",
+      "obj_bold": ["entender a necessidade do cliente", "loja mais aderente",
+                   "maximizar, inicialmente, a conversão em comparecimento",
+                   "produtividade do vendedor humano"]
+    },
+    "4": {
+      "obj_bold": ["experiência dos clientes atendidos pela Central",
+                   "loja mais aderente", "conversão em comparecimento"]
+    },
+    "5": {
+      "obj_bold": ["experiência dos clientes", "aumentar a conversão em venda",
+                   "melhores práticas de atendimento", "treinamento",
+                   "gestão de performance", "visibilidade completa do funil"]
+    },
+    "6": {
+      "obj_bold": ["eficácia e a eficiência da geração de leads", "reduzindo o CAC",
+                   "qualidade dos leads a um menor custo"]
+    }
+  },
+  "milestones": {
+    "1.1.1":       {"desc": "Planejamento de vendas de curto prazo melhorado e em execução, com definição da necessidade de vendas por loja, tipo de veículo e mês",
+                    "bold": ["Planejamento de vendas de curto prazo melhorado e em execução"]},
+    "1.2.1":       {"bold": ["Planejamento de geração de leads melhorado e em execução"]},
+    "1.3.1":       {"bold": ["Planejamento de conversão de leads em vendas evoluído"]},
+    "1.4.1 / 1.5.1": {"prazo": "S2 out/26 (TBC)",
+                    "bold": ["Telemetria de geração e conversão de leads aprimorada"]},
+    "1.6.1":       {"prazo": "S1 set/26 (TBC)",
+                    "bold": ["Fóruns, governança e rotina recorrente de planejamento mensal integrado implantados"]},
+
+    "2.1.1":       {"bold": ["Ativos de captação melhorados"]},
+    "2.2.1":       {"prazo": "S4 set/26",
+                    "bold": ["Informações capturadas no site", "integradas e disponíveis"]},
+    "2.3.1":       {"bold": ["Lead score evoluído"]},
+    "2.4.1":       {"bold": ["Novo modelo de alocação em lojas desenhado"]},
+    "2.4.2":       {"bold": ["nova lógica de roteamento"]},
+    "2.4.3":       {"prazo": "S2 nov/26",
+                    "bold": ["Novo modelo de alocação de leads em lojas escalado"]},
+    "2.4.4":       {"bold": ["Piloto de alocação total dos leads na Liza"]},
+    "2.4.5":       {"bold": ["Modelo de clusterização revisado"]},
+
+    "3.1.1 / 3.2.1 / 3.3.1": {"bold": ["Melhorias dos pontos críticos da jornada"]},
+    "3.4.1":       {"bold": ["Entendimento das situações de troca de veículo (trade-in)"]},
+    "3.5.1":       {"prazo": "set/26 – nov/26",
+                    "bold": ["Limites de interação e regras de encerramento ou transbordo"]},
+    "3.6.1":       {"bold": ["Integração entre Liza e atendimento humano"]},
+    "3.7.1":       {"bold": ["Expansão da Liza"]},
+    "3.8.1":       {"bold": ["Gestão de performance da Liza aprimorada"]},
+    "3.9.1":       {"bold": ["Ferramenta de IA consultiva implementada"]},
+
+    "4.1.1":       {"bold": ["Melhores práticas de atendimento na Central mapeadas"]},
+    "4.2.1":       {"prazo": "S3 set/26",
+                    "bold": ["Modelo de treinamento e nova rotina de gestão de performance"]},
+    "4.3.1":       {"desc": "Teste com contratação de atendentes mais qualificados (classe 13, nível de EVs, vs. classe 10, nível de CVs) realizado",
+                    "bold": ["Teste com contratação de atendentes mais qualificados"]},
+    "4.4.1":       {"bold": ["Rotina de gestão de performance implementada"]},
+    "4.5.1":       {"bold": ["Piloto de atendimento da Central em lojas do varejo lançado"]},
+    "4.5.2":       {"bold": ["Piloto de atendimento da Central em lojas do varejo expandido"]},
+
+    "5.1.1":       {"bold": ["Solução de atendimento via WhatsApp Business integrado ao Slack expandida", "todas as lojas do varejo"]},
+    "5.2.1":       {"bold": ["Inteligência de gestão da performance dos CVs implementada"]},
+    "5.3.1":       {"bold": ["Ritos e rotina de gestão das equipes de loja revisados e implantados"]},
+
+    "6.1.1":       {"bold": ["Modelo de atribuição aprimorado"]},
+    "6.1.2":       {"bold": ["BI gerencial e rotina mensal de apuração implementados"]},
+    "6.2.1":       {"bold": ["Processo de revisão do plano de investimento em mídia implantado"]},
+    "6.3.1":       {"bold": ["Diagnóstico das campanhas Google", "plano de melhoria das táticas implementado"]},
+    "6.4.1":       {"bold": ["Diagnóstico das campanhas Meta", "plano de melhoria das táticas implementado"]},
+    "6.5.1":       {"bold": ["Diagnóstico e revisão das demais campanhas"]},
+    "6.6.1":       {"bold": ["Novas campanhas para segmentos prioritários"]},
+    "6.7.1":       {"bold": ["Modelo de produção e melhoria contínua de conteúdo revisado"]},
+    "6.8.1":       {"desc": "Ativos prioritários de conversão (landing pages, conteúdos, páginas de cadastro e enriquecimento) revisados e aprimorados",
+                    "bold": ["Ativos prioritários de conversão", "revisados e aprimorados"]},
+    "6.9.1":       {"bold": ["Modelo de experimentação implantado"]},
+    "6.10.1":      {"desc": "Oportunidades de geração de leads via parcerias e ativações comerciais mapeadas, priorizadas e testadas; escalonamento dos modelos de melhor performance condicionado à comprovação de volume, conversão e custo por venda",
+                    "bold": ["Oportunidades de geração de leads via parcerias e ativações comerciais mapeadas, priorizadas e testadas"]}
+  }
+}
