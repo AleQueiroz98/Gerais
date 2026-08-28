@@ -348,6 +348,7 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
 /* ============================================================
    TELA DE SENHA
    ============================================================ */
+.ls-unlocked #auth-overlay { display: none; }
 .ls-auth-overlay {
   position: fixed; inset: 0; z-index: 9999;
   background: var(--ls-gray-x-light);
@@ -489,8 +490,8 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
     <div class="ls-collab-bar">
       <span class="ls-sync-dot" id="sync-dot" title="Nenhum arquivo conectado"></span>
       <span class="ls-presence-count" id="file-status">Sem arquivo</span>
-      <button type="button" id="open-file-btn" class="ls-reset-btn" title="Abrir um arquivo de dados já preenchido">Abrir</button>
-      <button type="button" id="save-file-btn" class="ls-copy-link-btn" title="Escolher onde salvar os dados">
+      <button type="button" id="saveas-file-btn" class="ls-reset-btn" title="Salvar em outro arquivo ou em outra pasta">Salvar como…</button>
+      <button type="button" id="save-file-btn" class="ls-copy-link-btn" title="Gravar os dados neste mesmo arquivo">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11.5V13a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-1.5"/><path d="M8 2v8"/><path d="M4.5 6.5 8 10l3.5-3.5"/></svg>
         Salvar
       </button>
@@ -557,12 +558,11 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
   </div>
   <div class="ls-section" style="margin-bottom:8px;">
     <p style="font-size:12px; color:var(--ls-text-helper); max-width:760px;">
-      Este painel guarda o que você preenche num <strong>arquivo de dados (.json)</strong> que você mesmo escolhe.
-      Clique em <strong>Salvar</strong> e aponte para uma pasta do OneDrive ou do SharePoint da Localiza: a partir daí
-      cada alteração é gravada nesse arquivo automaticamente, e o próprio OneDrive sincroniza para o time. Quem for
-      abrir o painel depois clica em <strong>Abrir</strong> e seleciona o mesmo arquivo. Não há conexão com nenhum
-      servidor externo — tudo acontece dentro do ambiente da Localiza. IDs de milestones seguem a numeração das
-      alavancas do memorando "Lead to Sale" (Aceleração Seminovos).</p>
+      Este painel guarda o que você preenche <strong>dentro deste próprio arquivo</strong>. Preencha os campos e
+      clique em <strong>Salvar</strong>: o arquivo é reescrito já com os dados. Quem abrir esse arquivo depois — por
+      e-mail, Teams ou de uma pasta do SharePoint — vê tudo preenchido e pode continuar de onde você parou, salvando
+      de novo ao terminar. Não há conexão com nenhum servidor: tudo acontece na máquina de quem está usando. IDs de
+      milestones seguem a numeração das alavancas do memorando "Lead to Sale" (Aceleração Seminovos).</p>
   </div>
   <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
     <span id="save-indicator" class="ls-save-indicator"></span>
@@ -581,7 +581,9 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
 
   function unlock() {
     try { sessionStorage.setItem(SK, '1'); } catch(e) {}
-    overlay.style.display = 'none';
+    // Classe (e não style inline) para que a versão salva do arquivo
+    // possa removê-la e voltar a exigir a senha de quem abrir.
+    document.documentElement.classList.add('ls-unlocked');
   }
 
   function attempt() {
@@ -605,20 +607,39 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
 })();
 </script>
 
+<!-- Os dados preenchidos ficam gravados aqui dentro, neste próprio arquivo. -->
+<script type="application/json" id="ls-dados">null</script>
+
 <script>
 /* ============================================================
-   PERSISTÊNCIA EM ARQUIVO — sem servidor, sem internet.
+   ARQUIVO ÚNICO — o painel guarda os dados dentro de si mesmo.
    ------------------------------------------------------------
-   Grava os dados preenchidos num arquivo .json escolhido pela
-   pessoa. Se esse arquivo estiver numa pasta do OneDrive /
-   SharePoint sincronizada, o próprio OneDrive replica para o
-   time — não há chamada de rede nenhuma neste código.
-
-   Rascunho automático em localStorage protege contra fechar a
-   aba sem salvar.
+   Ao clicar em "Salvar", o painel reescreve o próprio arquivo
+   .html com tudo o que foi preenchido. Quem abrir esse arquivo
+   vê os dados já lá. Não existe arquivo de dados separado e não
+   há conexão com nenhum servidor.
    ============================================================ */
 (function () {
   'use strict';
+
+  // Cópia intacta do arquivo. Precisa ser capturada depois de o HTML
+  // inteiro ter sido lido (senão o script do painel, que vem abaixo,
+  // ficaria de fora e o arquivo salvo sairia truncado) e antes de o
+  // painel desenhar as tabelas (senão salvar acumularia o conteúdo
+  // gerado a cada vez). O ponto que satisfaz os dois é DOMContentLoaded:
+  // este módulo aparece antes do script do painel, então o listener
+  // registrado aqui roda primeiro — antes de qualquer renderização.
+  var PRISTINE = null;
+
+  function capturarSnapshot() {
+    if (PRISTINE === null) PRISTINE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', capturarSnapshot);
+  } else {
+    capturarSnapshot();
+  }
 
   var LS_PREFIX = 'ls-painel:';
   var IDB_NAME = 'ls-painel-fs';
@@ -626,21 +647,24 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
 
   var fileHandle = null;
   var fileName = null;
-  var writeTimer = null;
 
-  var supportsFS = (typeof window.showOpenFilePicker === 'function' &&
-                    typeof window.showSaveFilePicker === 'function');
+  var supportsFS = (typeof window.showSaveFilePicker === 'function');
 
   window.LSFile = {
     supported: supportsFS,
     get connected() { return !!fileHandle; },
     get name() { return fileName; },
+    dirty: false,
   };
 
-  // ---- rascunho local (localStorage) ------------------------------
   function lsGet(k) { try { return localStorage.getItem(LS_PREFIX + k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(LS_PREFIX + k, v); } catch (e) {} }
 
+  function emit(name, detail) {
+    window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+  }
+
+  // ---- storage usado pelo app ------------------------------------
   window.storage = {
     get: async function (key) {
       var raw = lsGet(key);
@@ -648,39 +672,13 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
     },
     set: async function (key, value) {
       lsSet(key, value);
-      scheduleFileWrite();
+      window.LSFile.dirty = true;
+      emit('file:dirty');
       return { ok: true };
     },
   };
 
-  // ---- guarda o "handle" do arquivo entre sessões -----------------
-  function idb(mode, fn) {
-    return new Promise(function (resolve) {
-      var req;
-      try { req = indexedDB.open(IDB_NAME, 1); } catch (e) { return resolve(null); }
-      req.onupgradeneeded = function () {
-        if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE);
-      };
-      req.onerror = function () { resolve(null); };
-      req.onsuccess = function () {
-        var db = req.result;
-        var tx, store;
-        try {
-          tx = db.transaction(IDB_STORE, mode);
-          store = tx.objectStore(IDB_STORE);
-        } catch (e) { return resolve(null); }
-        var r = fn(store);
-        tx.oncomplete = function () { resolve(r && r.result !== undefined ? r.result : null); };
-        tx.onerror = function () { resolve(null); };
-      };
-    });
-  }
-
-  function saveHandle(h) { return idb('readwrite', function (s) { return s.put(h, 'file'); }); }
-  function loadHandle() { return idb('readonly', function (s) { return s.get('file'); }); }
-  function clearHandle() { return idb('readwrite', function (s) { return s.delete('file'); }); }
-
-  // ---- montar / aplicar o pacote de dados -------------------------
+  // ---- pacote de dados -------------------------------------------
   function buildPayload() {
     return {
       formato: 'painel-seminovos-v1',
@@ -691,162 +689,159 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
     };
   }
 
-  function applyPayload(obj) {
-    if (!obj || obj.formato !== 'painel-seminovos-v1') return [];
-    var changed = [];
-    if (obj.pnl) { lsSet('pnl-values', obj.pnl); changed.push('pnl-values'); }
-    if (obj.frentes) { lsSet('frentes-values', obj.frentes); changed.push('frentes-values'); }
-    if (obj.meta) { lsSet('dashboard-meta', obj.meta); changed.push('dashboard-meta'); }
-    return changed;
-  }
-
-  // ---- gravação ---------------------------------------------------
-  async function writeNow() {
-    if (!fileHandle) return;
+  // Dados que vieram gravados DENTRO deste arquivo
+  function embeddedPayload() {
+    var el = document.getElementById('ls-dados');
+    if (!el) return null;
     try {
-      var perm = await fileHandle.queryPermission({ mode: 'readwrite' });
-      if (perm !== 'granted') {
-        perm = await fileHandle.requestPermission({ mode: 'readwrite' });
-        if (perm !== 'granted') throw new Error('permissão negada');
-      }
-      var w = await fileHandle.createWritable();
-      await w.write(JSON.stringify(buildPayload(), null, 2));
-      await w.close();
-      emit('file:saved');
-    } catch (e) {
-      emit('file:error', { message: e.message || String(e) });
-    }
+      var o = JSON.parse(el.textContent);
+      return (o && o.formato === 'painel-seminovos-v1') ? o : null;
+    } catch (e) { return null; }
   }
 
-  function scheduleFileWrite() {
-    if (!fileHandle) return;
-    clearTimeout(writeTimer);
-    emit('file:saving');
-    writeTimer = setTimeout(writeNow, 900);
+  function stamp(o) {
+    if (!o) return 0;
+    var t = Date.parse(o.salvoEm || '');
+    return isNaN(t) ? 0 : t;
   }
 
-  function emit(name, detail) {
-    window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+  // ---- monta a nova versão do arquivo ----------------------------
+  function buildHtml() {
+    capturarSnapshot();
+    var json = JSON.stringify(buildPayload());
+    // Escapa "<" para que nenhuma tag dentro dos dados encerre este bloco
+    json = json.replace(/</g, '\\u003c');
+    var out = PRISTINE.replace(
+      /(<script type="application\/json" id="ls-dados">)[\s\S]*?(<\/script>)/,
+      function (_m, abre, fecha) { return abre + json + fecha; }
+    );
+    // A pessoa que salva já passou pela senha, então o snapshot pode ter
+    // vindo destravado. Remove a marca para que o arquivo salvo volte a
+    // pedir a senha de quem o abrir.
+    out = out.replace(/(<html\b[^>]*\bclass=")([^"]*)(")/i, function (_m, a, cls, c) {
+      return a + cls.replace(/\bls-unlocked\b/g, '').replace(/\s+/g, ' ').trim() + c;
+    });
+    return out;
   }
 
-  // ---- ações públicas ---------------------------------------------
-  window.LSFile.openFile = async function () {
-    if (!supportsFS) return fallbackOpen();
-    try {
-      var picked = await window.showOpenFilePicker({
-        types: [{ description: 'Dados do painel', accept: { 'application/json': ['.json'] } }],
-        multiple: false,
-      });
-      fileHandle = picked[0];
-      fileName = fileHandle.name;
-      var f = await fileHandle.getFile();
-      var txt = await f.text();
-      var changed = applyPayload(JSON.parse(txt));
-      await saveHandle(fileHandle);
-      emit('file:connected');
-      if (changed.length) emit('collab:remote-change', { keys: changed });
-      return true;
-    } catch (e) {
-      if (e && e.name === 'AbortError') return false;
-      emit('file:error', { message: e.message || String(e) });
-      return false;
-    }
-  };
-
-  window.LSFile.saveAs = async function () {
-    if (!supportsFS) return fallbackDownload();
-    try {
-      fileHandle = await window.showSaveFilePicker({
-        suggestedName: 'painel-seminovos.json',
-        types: [{ description: 'Dados do painel', accept: { 'application/json': ['.json'] } }],
-      });
-      fileName = fileHandle.name;
-      await saveHandle(fileHandle);
-      await writeNow();
-      emit('file:connected');
-      return true;
-    } catch (e) {
-      if (e && e.name === 'AbortError') return false;
-      emit('file:error', { message: e.message || String(e) });
-      return false;
-    }
-  };
-
-  window.LSFile.disconnect = async function () {
-    fileHandle = null; fileName = null;
-    await clearHandle();
-    emit('file:connected');
-  };
-
-  // ---- alternativas para navegadores sem a API --------------------
-  function fallbackDownload() {
-    var blob = new Blob([JSON.stringify(buildPayload(), null, 2)], { type: 'application/json' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'painel-seminovos.json';
-    a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-    emit('file:saved');
-    return true;
-  }
-
-  function fallbackOpen() {
+  // ---- IndexedDB: lembra o arquivo entre sessões ------------------
+  function idb(mode, fn) {
     return new Promise(function (resolve) {
-      var inp = document.createElement('input');
-      inp.type = 'file'; inp.accept = '.json,application/json';
-      inp.onchange = function () {
-        var f = inp.files && inp.files[0];
-        if (!f) return resolve(false);
-        var fr = new FileReader();
-        fr.onload = function () {
-          try {
-            var changed = applyPayload(JSON.parse(fr.result));
-            if (changed.length) emit('collab:remote-change', { keys: changed });
-            resolve(true);
-          } catch (e) {
-            emit('file:error', { message: 'arquivo inválido' });
-            resolve(false);
-          }
-        };
-        fr.readAsText(f);
+      var req;
+      try { req = indexedDB.open(IDB_NAME, 1); } catch (e) { return resolve(null); }
+      req.onupgradeneeded = function () {
+        if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE);
       };
-      inp.click();
+      req.onerror = function () { resolve(null); };
+      req.onsuccess = function () {
+        var db = req.result, tx, store;
+        try { tx = db.transaction(IDB_STORE, mode); store = tx.objectStore(IDB_STORE); }
+        catch (e) { return resolve(null); }
+        var r = fn(store);
+        tx.oncomplete = function () { resolve(r && r.result !== undefined ? r.result : null); };
+        tx.onerror = function () { resolve(null); };
+      };
     });
   }
 
-  // ---- religa ao arquivo usado da última vez ----------------------
+  // ---- gravação ---------------------------------------------------
+  async function writeTo(handle) {
+    var perm = await handle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') {
+      perm = await handle.requestPermission({ mode: 'readwrite' });
+      if (perm !== 'granted') throw new Error('permissão negada');
+    }
+    var w = await handle.createWritable();
+    await w.write(new Blob([buildHtml()], { type: 'text/html' }));
+    await w.close();
+  }
+
+  function downloadHtml() {
+    var blob = new Blob([buildHtml()], { type: 'text/html' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'dashboard_aceleracao_seminovos.html';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+  }
+
+  // Salvar: regrava o mesmo arquivo se já houver um; senão pergunta onde
+  window.LSFile.save = async function (forcarEscolha) {
+    emit('file:saving');
+    try {
+      if (supportsFS) {
+        if (!fileHandle || forcarEscolha) {
+          fileHandle = await window.showSaveFilePicker({
+            suggestedName: fileName || 'dashboard_aceleracao_seminovos.html',
+            types: [{ description: 'Painel (página web)', accept: { 'text/html': ['.html'] } }],
+          });
+          fileName = fileHandle.name;
+          await idb('readwrite', function (s) { return s.put(fileHandle, 'file'); });
+        }
+        await writeTo(fileHandle);
+      } else {
+        downloadHtml();
+      }
+      window.LSFile.dirty = false;
+      emit('file:saved');
+      return true;
+    } catch (e) {
+      if (e && e.name === 'AbortError') { emit('file:idle'); return false; }
+      emit('file:error', { message: e.message || String(e) });
+      return false;
+    }
+  };
+
+  window.LSFile.saveAs = function () { return window.LSFile.save(true); };
+
+  // ---- carga inicial ---------------------------------------------
   window.collabReady = (async function () {
+    // 1) dados gravados dentro deste arquivo
+    var doArquivo = embeddedPayload();
+
+    // 2) rascunho deste navegador (protege contra fechar sem salvar)
+    var rascunho = null;
+    var metaRaw = lsGet('dashboard-meta');
+    if (metaRaw) {
+      try {
+        rascunho = {
+          formato: 'painel-seminovos-v1',
+          salvoEm: (JSON.parse(metaRaw) || {}).atualizadoEm,
+          pnl: lsGet('pnl-values'),
+          frentes: lsGet('frentes-values'),
+          meta: metaRaw,
+        };
+      } catch (e) { rascunho = null; }
+    }
+
+    // O mais recente vence
+    var vencedor = stamp(rascunho) > stamp(doArquivo) ? rascunho : doArquivo;
+    if (vencedor) {
+      if (vencedor.pnl) lsSet('pnl-values', vencedor.pnl);
+      if (vencedor.frentes) lsSet('frentes-values', vencedor.frentes);
+      if (vencedor.meta) lsSet('dashboard-meta', vencedor.meta);
+      // Se o rascunho é mais novo que o arquivo, há trabalho não salvo
+      if (doArquivo && rascunho && stamp(rascunho) > stamp(doArquivo)) {
+        window.LSFile.dirty = true;
+      }
+    }
+
+    // 3) reconecta ao arquivo usado da última vez
     if (!supportsFS) return;
     try {
-      var h = await loadHandle();
+      var h = await idb('readonly', function (s) { return s.get('file'); });
       if (!h) return;
+      fileHandle = h;
+      fileName = h.name;
       var perm = await h.queryPermission({ mode: 'readwrite' });
-      if (perm !== 'granted') {
-        // Sem clique do usuário não dá para pedir permissão; guarda o
-        // handle e deixa o botão "Reconectar" resolver.
-        fileHandle = h; fileName = h.name;
-        window.LSFile.needsPermission = true;
-        return;
-      }
-      fileHandle = h; fileName = h.name;
-      var f = await h.getFile();
-      applyPayload(JSON.parse(await f.text()));
-    } catch (e) { /* segue com o rascunho local */ }
+      if (perm !== 'granted') window.LSFile.needsPermission = true;
+    } catch (e) { /* segue sem arquivo conectado */ }
   })();
 
-  window.LSFile.reconnect = async function () {
-    if (!fileHandle) return false;
-    try {
-      var perm = await fileHandle.requestPermission({ mode: 'readwrite' });
-      if (perm !== 'granted') return false;
-      window.LSFile.needsPermission = false;
-      var f = await fileHandle.getFile();
-      var changed = applyPayload(JSON.parse(await f.text()));
-      emit('file:connected');
-      if (changed.length) emit('collab:remote-change', { keys: changed });
-      return true;
-    } catch (e) { return false; }
-  };
+  // Avisa antes de fechar com alterações não salvas
+  window.addEventListener('beforeunload', function (e) {
+    if (window.LSFile.dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
 })();
 </script>
 
@@ -1578,25 +1573,32 @@ const FRENTE_MARCA = {
     if (typeof state === 'boolean') state = state ? 'saved' : 'error';
     if (state) lastSaveState = state;
     if (!el) return;
-
-    if (!window.LSFile || !window.LSFile.connected) {
-      el.textContent = 'Rascunho guardado neste navegador. Clique em "Salvar" para gravar num arquivo e compartilhar com o time.';
-      el.className = 'ls-save-indicator ls-save-indicator--local';
-      return;
-    }
+    const F = window.LSFile || {};
 
     if (lastSaveState === 'error') {
-      el.textContent = 'Não foi possível gravar no arquivo — o rascunho continua guardado neste navegador.';
+      el.textContent = 'Não foi possível gravar o arquivo — suas alterações continuam na tela e no rascunho deste navegador.';
       el.className = 'ls-save-indicator ls-save-indicator--warn';
       return;
     }
     if (lastSaveState === 'saving') {
-      el.textContent = 'Salvando em ' + (window.LSFile.name || 'arquivo') + '…';
+      el.textContent = 'Gravando…';
       el.className = 'ls-save-indicator';
       return;
     }
-    el.textContent = 'Salvo em ' + (window.LSFile.name || 'arquivo') + '.';
-    el.className = 'ls-save-indicator';
+    if (lastSaveState === 'dirty' || F.dirty) {
+      el.textContent = 'Alterações ainda não gravadas — clique em "Salvar" para atualizar o arquivo.';
+      el.className = 'ls-save-indicator ls-save-indicator--warn';
+      return;
+    }
+    if (lastSaveState === 'saved') {
+      el.textContent = F.supported
+        ? 'Arquivo atualizado' + (F.name ? ' (' + F.name + ')' : '') + '. Quem abrir este arquivo verá estes dados.'
+        : 'Arquivo baixado. Substitua o antigo pela versão nova para o time ver os dados.';
+      el.className = 'ls-save-indicator';
+      return;
+    }
+    el.textContent = 'Preencha os campos e clique em "Salvar" para gravar os dados dentro deste arquivo.';
+    el.className = 'ls-save-indicator ls-save-indicator--local';
   }
 
   async function loadState() {
@@ -1718,30 +1720,27 @@ const FRENTE_MARCA = {
     const F = window.LSFile || {};
 
     if (dot) {
-      if (F.needsPermission) {
+      if (F.dirty) {
         dot.className = 'ls-sync-dot ls-sync-dot--syncing';
-        dot.title = 'Clique em "Reconectar" para voltar a gravar em ' + (F.name || 'seu arquivo');
+        dot.title = 'Há alterações não salvas — clique em Salvar';
       } else if (F.connected) {
         dot.className = 'ls-sync-dot ls-sync-dot--online';
-        dot.title = 'Gravando automaticamente em ' + (F.name || 'arquivo');
+        dot.title = 'Salvo em ' + (F.name || 'arquivo');
       } else {
         dot.className = 'ls-sync-dot';
-        dot.title = 'Nenhum arquivo conectado — as edições ficam só neste navegador';
+        dot.title = 'Clique em Salvar para gravar os dados no arquivo';
       }
     }
 
     if (label) {
-      if (F.needsPermission) label.textContent = 'Reconectar';
-      else if (F.connected) label.textContent = F.name || 'Arquivo';
-      else label.textContent = 'Sem arquivo';
+      if (F.dirty) label.textContent = 'Não salvo';
+      else if (F.connected) label.textContent = F.name || 'Salvo';
+      else label.textContent = 'Sem alterações';
     }
-
-    const openBtn = document.getElementById('open-file-btn');
-    if (openBtn) openBtn.textContent = F.needsPermission ? 'Reconectar' : 'Abrir';
   }
 
   function initCollabHandlers() {
-    // Dados vindos de um arquivo aberto → recarrega o estado e redesenha
+    // Dados carregados de dentro do arquivo → redesenha o painel
     window.addEventListener('collab:remote-change', async function (e) {
       const keys = e.detail ? e.detail.keys : [];
       try {
@@ -1760,31 +1759,22 @@ const FRENTE_MARCA = {
           const v = raw ? JSON.parse(raw) : null;
           if (v && typeof v === 'object') { STATE.meta = Object.assign({}, STATE.meta, v); renderLastUpdated(); }
         }
-      } catch (err) { /* arquivo inválido — mantém o que já estava */ }
+      } catch (err) { /* dados inválidos — mantém o que já estava */ }
     });
 
-    window.addEventListener('file:connected', function () { renderFileStatus(); updateSaveIndicator(); });
+    window.addEventListener('file:dirty',  function () { renderFileStatus(); updateSaveIndicator('dirty'); });
     window.addEventListener('file:saving', function () { updateSaveIndicator('saving'); });
-    window.addEventListener('file:saved', function () { updateSaveIndicator('saved'); });
-    window.addEventListener('file:error', function () { updateSaveIndicator('error'); });
-
-    const openBtn = document.getElementById('open-file-btn');
-    if (openBtn) {
-      openBtn.addEventListener('click', async function () {
-        if (window.LSFile.needsPermission) await window.LSFile.reconnect();
-        else await window.LSFile.openFile();
-        renderFileStatus();
-        updateSaveIndicator();
-      });
-    }
+    window.addEventListener('file:saved',  function () { renderFileStatus(); updateSaveIndicator('saved'); });
+    window.addEventListener('file:idle',   function () { renderFileStatus(); updateSaveIndicator(); });
+    window.addEventListener('file:error',  function () { renderFileStatus(); updateSaveIndicator('error'); });
 
     const saveBtn = document.getElementById('save-file-btn');
     if (saveBtn) {
-      saveBtn.addEventListener('click', async function () {
-        await window.LSFile.saveAs();
-        renderFileStatus();
-        updateSaveIndicator();
-      });
+      saveBtn.addEventListener('click', function () { window.LSFile.save(); });
+    }
+    const saveAsBtn = document.getElementById('saveas-file-btn');
+    if (saveAsBtn) {
+      saveAsBtn.addEventListener('click', function () { window.LSFile.saveAs(); });
     }
   }
 
