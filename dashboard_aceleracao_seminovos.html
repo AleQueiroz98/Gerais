@@ -548,11 +548,11 @@ th.ls-col-current { font-weight: 800; color: var(--ls-black); }
   var fileHandle = null;
   var fileName = null;
 
-  // A File System Access API não funciona em páginas abertas direto do
-  // disco (file://) — o navegador expõe a função mas ela lança erro. Aí
-  // o caminho válido é o download normal.
-  var origemLocal = (location.protocol === 'file:');
-  var supportsFS = (typeof window.showSaveFilePicker === 'function') && !origemLocal;
+  // Gravar direto no arquivo funciona tanto numa página servida por URL
+  // quanto num arquivo aberto do disco — file:// é contexto seguro e o
+  // seletor abre normalmente. Se falhar em qualquer um dos casos, o
+  // download entra como alternativa.
+  var supportsFS = (typeof window.showSaveFilePicker === 'function');
 
   window.LSFile = {
     supported: supportsFS,
