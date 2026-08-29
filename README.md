@@ -11,12 +11,17 @@ layout do painel.
 | Caminho | Conteúdo |
 |---|---|
 | `source/dashboard_aceleracao_seminovos.html` | Painel HTML de origem |
+| `source/260828__Acompanhamento_das_frentes_v1.pptx` | Deck já no template Bain (base da v2) |
 | `source/memo_lead_to_sales_v2.pdf` | Memorando estratégico (fonte dos entregáveis) |
 | `scripts/extract.js` | Extrai o array `FRENTES` do HTML para `frentes.json` |
 | `scripts/frentes.json` | Dados das 6 frentes (objetivo, líderes, time, milestones) |
 | `scripts/overrides.json` | Correções do memo + trechos de *selective bold* |
-| `scripts/build.py` | Monta o `.pptx` (16:9) com a identidade visual do painel |
-| `output/frentes_milestones.pptx` | Deck gerado |
+| `scripts/deckstyle.py` | Tokens visuais, métricas de texto e helpers de tabela |
+| `scripts/build.py` | Monta o `.pptx` (16:9) do zero, com a identidade visual do painel |
+| `scripts/content_update.py` | Conteúdo do acompanhamento mensal (frentes 2, 4 e 5) |
+| `scripts/update_deck.py` | Atualiza o deck já no template Bain, preservando o branding |
+| `output/frentes_milestones.pptx` | Deck gerado do zero |
+| `output/260829__Acompanhamento_das_frentes_v2.pptx` | **Entregável atual** — deck Bain atualizado |
 
 ## Como regerar
 
@@ -24,8 +29,13 @@ layout do painel.
 pip install python-pptx Pillow
 cd scripts
 node extract.js          # atualiza frentes.json a partir do HTML
-python3 build.py         # gera frentes_milestones.pptx
+python3 build.py         # gera o deck do zero
+python3 update_deck.py   # atualiza o deck ja no template Bain
 ```
+
+`update_deck.py` edita o arquivo em `source/` no lugar de recriá-lo, então
+capa, página de objetivos, cronograma do PI Planning, cabeçalhos, rodapés e
+todo o branding Bain ficam intactos.
 
 Para editar conteúdo sem mexer no código, altere `overrides.json`: cada
 milestone aceita `desc`, `prazo` e `bold` (lista de trechos a destacar); cada
@@ -65,3 +75,29 @@ frente aceita `obj_bold` e `nota`.
 | 4.3.1 | Detalhe das classes (13 = nível de EVs, 10 = nível de CVs) |
 | 6.8.1 | Inclui *páginas de enriquecimento* |
 | 6.10.1 | Inclui a condição de escalonamento por volume, conversão e custo por venda |
+
+
+## Acompanhamento de agosto/26 (v2)
+
+**Frente 2 dividida em duas páginas**, seguindo as duas subfrentes do próprio
+cronograma do PI Planning:
+
+- *Qualificação de leads* — a coleta de informações mínimas virou três
+  milestones separados por canal, todos com a Thais Pimenta: site (2.1.1),
+  Facebook e WhatsApp (2.1.2) e classificados (2.1.3).
+- *Alocação de leads* — as duas trilhas do cronograma: modelo simplificado
+  v1.0 (2.4.1 a 2.4.3, com as 100 lojas em 11/09) e modelo robusto
+  (2.4.4 a 2.4.6, dos ~5 pilotos até a escala do modelo vencedor), mais o
+  piloto na Liza (2.4.7) e a clusterização (2.4.8).
+
+**Frentes 4 e 5** mantiveram os milestones; mudaram status, progresso
+recente, próximos passos e pontos a escalar. Dois status subiram de *Não
+iniciado* para *Em progresso* (4.2.1 e 5.2.1) e o piloto da Central em lojas
+do varejo (4.5.1) voltou de *Concluído* para *Em progresso*, com prazo
+S2 set/26 — o piloto só começa em 08/09.
+
+**Correções de formatação**: o menu de frentes estava quebrando em duas
+linhas e cobrindo o título "Milestones" (a fonte tinha subido para 10,5pt);
+foi refeito em 9pt, numa linha só, ocupando a largura útil. Todo o texto do
+deck passou a ser marcado como `pt-BR`, para o PowerPoint tratar a
+acentuação como português na edição.
