@@ -101,3 +101,48 @@ linhas e cobrindo o título "Milestones" (a fonte tinha subido para 10,5pt);
 foi refeito em 9pt, numa linha só, ocupando a largura útil. Todo o texto do
 deck passou a ser marcado como `pt-BR`, para o PowerPoint tratar a
 acentuação como português na edição.
+
+---
+
+# Treinamento — Simulador de Financiamento (PDV Seminovos)
+
+Material de treinamento em HTML (17 slides, 16:9) para os **consultores de vendas
+da Localiza Seminovos**, com o objetivo de fazê-los adotar o novo botão
+**"Simule com os bancos"** antes de enviar a ficha ao banco.
+
+O storyline segue a lógica *situação → complicação → resolução*, com linguagem
+simples e foco no ganho do consultor (tempo, atendimentos e comissão), não no
+ganho da empresa:
+
+| Bloco | Slides | Mensagem |
+|---|---|---|
+| Capa e roteiro | 1–2 | "Pare de mandar ficha no escuro" |
+| O problema | 3–4 | O ciclo de ficha negada e o que ele custa do bolso do consultor |
+| O que mudou | 5–9 | O botão novo e os 3 passos, com os prints reais das telas |
+| Como usar para vender | 10–12 | Vender a partir do crédito aprovado; antes × depois; ganhos |
+| O que falar | 13–14 | 3 scripts de fala e 5 objeções com resposta pronta |
+| Como começar | 15–17 | 3 regras de ouro, checklist, indicadores e fechamento |
+
+Os slides 4 e 16 têm **espaços em branco (`__`) propositais** para as métricas da
+operação (fichas por venda, tempo por tentativa, taxa de aprovação etc.), a serem
+preenchidos com a base da loja/região antes da aplicação.
+
+## Estrutura
+
+| Caminho | Conteúdo |
+|---|---|
+| `source/nova_jornada_pdv_simulacao.pdf` | Documentação original da nova jornada (fonte das telas) |
+| `scripts/treinamento_template.html` | Template do deck, com marcadores `{{TELA_*}}` |
+| `scripts/build_treinamento.py` | Extrai as telas do PDF e embute em base64 |
+| `output/treinamento_simulador_pdv.html` | **Entregável** — arquivo único, funciona offline |
+
+## Como regerar
+
+```bash
+pip install pymupdf
+python3 scripts/build_treinamento.py
+```
+
+O HTML gerado é autocontido (imagens em base64, sem fontes ou scripts externos),
+então pode ser enviado por e-mail e aberto em qualquer navegador de loja, sem
+internet. Navegação por setas ← →, clique nas laterais ou `Ctrl+P` para gerar PDF.

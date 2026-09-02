@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simule com os bancos — Treinamento para Consultores de Vendas | Localiza Seminovos</title>
+<style>
+:root{
+  --verde:#00602F;
+  --verde-esc:#00351B;
+  --verde-vivo:#6CC24A;
+  --verde-claro:#E8F4EA;
+  --laranja:#F58220;
+  --laranja-claro:#FDF0E3;
+  --vermelho:#C0392B;
+  --vermelho-claro:#FBEBE9;
+  --azul:#1B6FA8;
+  --azul-claro:#EAF3FA;
+  --tinta:#16211B;
+  --tinta-2:#4A5A52;
+  --tinta-3:#8A968F;
+  --linha:#DCE3DE;
+  --fundo:#FFFFFF;
+  --cinza:#F5F7F5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+  background:#333B36;color:var(--tinta);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+
+/* ---------- palco ---------- */
+#palco{position:relative;width:1280px;height:720px;transform-origin:center center}
+.slide{
+  position:absolute;inset:0;background:var(--fundo);
+  padding:52px 64px 64px;display:none;flex-direction:column;
+}
+.slide.ativo{display:flex}
+.slide::after{
+  content:attr(data-n);position:absolute;right:28px;bottom:18px;
+  font-size:13px;color:var(--tinta-3);letter-spacing:.04em;
+}
+
+/* ---------- cabecalho ---------- */
+.eyebrow{
+  font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--laranja);margin-bottom:10px;
+}
+h1.titulo{
+  font-size:34px;line-height:1.18;font-weight:700;color:var(--verde);
+  letter-spacing:-.01em;max-width:1080px;
+}
+h1.titulo em{font-style:normal;color:var(--laranja)}
+.sub{font-size:17px;color:var(--tinta-2);margin-top:10px;max-width:980px;line-height:1.45}
+.regua{height:3px;width:100%;background:var(--linha);margin:18px 0 24px;position:relative}
+.regua::before{content:"";position:absolute;left:0;top:0;height:3px;width:96px;background:var(--verde-vivo)}
+.corpo{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+
+/* ---------- takeaway ---------- */
+.takeaway{
+  margin-top:22px;background:var(--verde-claro);border-left:5px solid var(--verde);
+  padding:14px 20px;font-size:17px;line-height:1.4;color:var(--tinta);
+}
+.takeaway b{color:var(--verde)}
+.takeaway.laranja{background:var(--laranja-claro);border-left-color:var(--laranja)}
+.takeaway.laranja b{color:#B45A05}
+
+/* ---------- capa ---------- */
+.capa{background:linear-gradient(135deg,#00602F 0%,#004A25 55%,#00351B 100%);color:#fff;
+  padding:0;justify-content:center;align-items:flex-start}
+.capa-inner{padding:0 84px;width:100%}
+.capa .marca{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--verde-vivo);font-weight:700}
+.capa h1{font-size:62px;line-height:1.06;font-weight:700;margin:20px 0 0;letter-spacing:-.02em}
+.capa h1 span{color:var(--verde-vivo)}
+.capa .lead{font-size:22px;color:#CFE3D6;margin-top:22px;max-width:760px;line-height:1.45}
+.capa .rodape{
+  position:absolute;left:84px;right:84px;bottom:52px;display:flex;justify-content:space-between;
+  align-items:flex-end;font-size:14px;color:#9CBBA8;border-top:1px solid rgba(255,255,255,.18);padding-top:16px;
+}
+.capa .selo{background:var(--laranja);color:#fff;font-weight:700;font-size:14px;
+  padding:8px 16px;display:inline-block;margin-top:34px;letter-spacing:.02em}
+
+/* ---------- agenda ---------- */
+.agenda{display:flex;flex-direction:column;gap:12px}
+.agenda-item{display:flex;align-items:center;gap:20px;padding:14px 20px;background:var(--cinza);
+  border-left:4px solid var(--linha)}
+.agenda-item .num{font-size:26px;font-weight:700;color:var(--tinta-3);width:46px;flex:none}
+.agenda-item .txt strong{display:block;font-size:19px;color:var(--verde)}
+.agenda-item .txt span{font-size:15px;color:var(--tinta-2)}
+.agenda-item.destaque{background:var(--verde-claro);border-left-color:var(--verde-vivo)}
+.agenda-item.destaque .num{color:var(--verde-vivo)}
+
+/* ---------- ciclo ---------- */
+.ciclo{display:flex;align-items:stretch;gap:0;margin:6px 0}
+.ciclo-passo{flex:1;background:var(--cinza);padding:18px 16px;position:relative;text-align:center}
+.ciclo-passo + .ciclo-passo{margin-left:16px}
+.ciclo-passo::after{content:"";position:absolute;right:-16px;top:50%;transform:translateY(-50%);
+  border-left:9px solid var(--linha);border-top:8px solid transparent;border-bottom:8px solid transparent;z-index:2}
+.ciclo-passo:last-child::after{display:none}
+.ciclo-passo .ic{font-size:26px;line-height:1}
+.ciclo-passo b{display:block;font-size:16px;margin-top:8px;color:var(--tinta)}
+.ciclo-passo span{display:block;font-size:13.5px;color:var(--tinta-2);margin-top:4px;line-height:1.35}
+.ciclo-passo.ruim{background:var(--vermelho-claro)}
+.ciclo-passo.ruim b{color:var(--vermelho)}
+.volta{margin-top:14px;background:var(--vermelho);color:#fff;padding:12px 20px;font-size:17px;
+  font-weight:600;text-align:center;letter-spacing:.01em}
+
+/* ---------- cards ---------- */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.cards.c4{grid-template-columns:repeat(4,1fr)}
+.cards.c2{grid-template-columns:repeat(2,1fr)}
+.card{border:1px solid var(--linha);border-top:4px solid var(--verde-vivo);padding:20px;background:#fff}
+.card .ic{font-size:28px;line-height:1}
+.card h3{font-size:19px;color:var(--verde);margin:10px 0 8px;line-height:1.25}
+.card p{font-size:15px;color:var(--tinta-2);line-height:1.5}
+.card.dor{border-top-color:var(--vermelho);background:var(--vermelho-claro)}
+.card.dor h3{color:var(--vermelho)}
+.card.laranja{border-top-color:var(--laranja)}
+.card.laranja h3{color:#B45A05}
+
+/* ---------- telas do sistema ---------- */
+.tela-linha{display:grid;grid-template-columns:1.35fr 1fr;gap:36px;align-items:center}
+.tela-linha.inverso{grid-template-columns:1fr 1.35fr}
+.moldura{border:1px solid var(--linha);box-shadow:0 6px 22px rgba(0,0,0,.10);background:#fff;
+  padding:6px;max-height:430px;display:flex;align-items:center;justify-content:center}
+.moldura img{width:100%;height:auto;max-height:418px;object-fit:contain;display:block}
+.passos-txt h3{font-size:22px;color:var(--verde);margin-bottom:12px;line-height:1.25}
+.lista{list-style:none;display:flex;flex-direction:column;gap:12px}
+.lista li{position:relative;padding-left:24px;font-size:16px;line-height:1.45;color:var(--tinta-2)}
+.lista li b{color:var(--tinta)}
+.lista li::before{content:"";position:absolute;left:2px;top:7px;width:9px;height:9px;
+  background:var(--verde-vivo);border-radius:50%}
+.lista.check li::before{content:"✓";background:none;color:var(--verde-vivo);font-weight:700;
+  top:0;left:0;width:auto;height:auto;font-size:16px;border-radius:0}
+
+.pill{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:5px 12px;margin-bottom:12px}
+.pill.verde{background:var(--verde-claro);color:var(--verde)}
+.pill.amarelo{background:var(--laranja-claro);color:#B45A05}
+
+/* ---------- bancos ---------- */
+.bancos{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.banco{border:1px solid var(--linha);padding:8px 16px;font-size:15px;font-weight:600;color:var(--tinta-2);background:#fff}
+
+/* ---------- tabela antes x depois ---------- */
+table.comp{width:100%;border-collapse:collapse;font-size:15.5px}
+table.comp th,table.comp td{padding:13px 16px;text-align:left;vertical-align:top;border-bottom:1px solid var(--linha)}
+table.comp thead th{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--verde)}
+table.comp thead th:nth-child(2){background:#8A968F}
+table.comp thead th:nth-child(3){background:var(--verde)}
+table.comp td:first-child{font-weight:700;color:var(--tinta);width:24%}
+table.comp td:nth-child(2){color:var(--tinta-2);background:var(--cinza)}
+table.comp td:nth-child(3){color:var(--tinta);background:var(--verde-claro);font-weight:600}
+
+/* ---------- scripts de fala ---------- */
+.fala{border:1px solid var(--linha);padding:20px;background:#fff;display:flex;flex-direction:column;gap:12px}
+.fala .quando{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--laranja)}
+.fala .frase{font-size:17px;line-height:1.5;color:var(--tinta);border-left:4px solid var(--verde-vivo);
+  padding-left:14px;font-style:italic}
+.fala .porque{font-size:14px;color:var(--tinta-2);line-height:1.45}
+
+/* ---------- objecoes ---------- */
+.obj{display:flex;flex-direction:column;gap:10px}
+.obj-linha{display:grid;grid-template-columns:1fr 1.25fr;gap:0;border:1px solid var(--linha);
+  align-items:center}
+.obj-linha .q{padding:14px 18px;background:var(--cinza);font-size:16px;color:var(--tinta);font-weight:600;
+  align-self:stretch;display:flex;align-items:center;gap:10px;line-height:1.4}
+.obj-linha .a{padding:14px 18px;font-size:15.5px;color:var(--tinta-2);line-height:1.45;background:#fff}
+.obj-linha .a b{color:var(--tinta)}
+.obj-linha .q::before{content:"“";font-size:30px;color:var(--tinta-3);line-height:.6;flex:none;
+  align-self:flex-start;margin-top:8px}
+
+/* ---------- regras ---------- */
+.regras{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.regra{background:var(--verde);color:#fff;padding:24px 22px;display:flex;flex-direction:column;gap:10px}
+.regra .n{font-size:38px;font-weight:700;color:var(--verde-vivo);line-height:1}
+.regra b{font-size:19px;line-height:1.25}
+.regra span{font-size:14.5px;color:#CFE3D6;line-height:1.45}
+
+/* ---------- kpis ---------- */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.kpi{border:1px solid var(--linha);border-top:4px solid var(--laranja);padding:18px 16px;text-align:center}
+.kpi .v{font-size:30px;font-weight:700;color:var(--tinta-3);letter-spacing:-.02em}
+.kpi .l{font-size:13.5px;color:var(--tinta-2);margin-top:8px;line-height:1.35}
+.nota{font-size:13px;color:var(--tinta-3);margin-top:14px;font-style:italic}
+
+/* ---------- caso ---------- */
+.caso{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--linha)}
+.caso .col{padding:22px}
+.caso .col + .col{border-left:1px solid var(--linha)}
+.caso .col h4{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta-3);margin-bottom:12px}
+.caso .col p{font-size:16px;line-height:1.5;color:var(--tinta-2)}
+.caso .col p b{color:var(--tinta)}
+.caso .col.final{background:var(--verde-claro)}
+.caso .col.final h4{color:var(--verde)}
+.numerao{font-size:40px;font-weight:700;color:var(--verde);letter-spacing:-.02em;line-height:1;margin-bottom:10px}
+.numerao.cinza{color:var(--tinta-3)}
+.numerao.laranja{color:var(--laranja)}
+
+/* ---------- checklist final ---------- */
+.check-final{display:flex;flex-direction:column;gap:10px}
+.check-final .item{display:flex;align-items:center;gap:14px;border:1px solid var(--linha);padding:14px 18px}
+.check-final .item .box{width:22px;height:22px;border:2px solid var(--verde-vivo);flex:none}
+.check-final .item span{font-size:17px;color:var(--tinta)}
+.check-final .item b{color:var(--verde)}
+
+/* ---------- fechamento ---------- */
+.fim{background:linear-gradient(135deg,#00602F 0%,#004A25 100%);color:#fff;justify-content:center;align-items:center;text-align:center}
+.fim h1{font-size:52px;line-height:1.12;font-weight:700;max-width:900px}
+.fim h1 span{color:var(--verde-vivo)}
+.fim p{font-size:20px;color:#CFE3D6;margin-top:22px;max-width:720px;line-height:1.5}
+
+/* ---------- navegacao ---------- */
+#barra{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.14);z-index:50}
+#barra i{display:block;height:100%;background:var(--verde-vivo);transition:width .25s ease}
+#nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:10px;
+  align-items:center;z-index:60;background:rgba(0,0,0,.42);padding:8px 14px;border-radius:30px;
+  opacity:0;transition:opacity .25s}
+body:hover #nav{opacity:1}
+#nav button{background:none;border:none;color:#fff;font-size:17px;cursor:pointer;padding:2px 8px;line-height:1}
+#nav span{color:#fff;font-size:13px;min-width:52px;text-align:center;letter-spacing:.04em}
+
+@media print{
+  body{display:block;background:#fff;overflow:visible}
+  #palco{width:100%;height:auto;transform:none!important}
+  .slide{position:relative;display:flex!important;width:1280px;height:720px;page-break-after:always;
+    break-after:page;box-shadow:none}
+  #nav,#barra{display:none}
+  @page{size:1280px 720px;margin:0}
+}
+</style>
+</head>
+<body>
+<div id="palco">
+
+<!-- 1 . CAPA -->
+<section class="slide capa ativo" data-n="">
+  <div class="capa-inner">
+    <div class="marca">Localiza Seminovos &nbsp;•&nbsp; Treinamento de Consultores de Vendas</div>
+    <h1>Pare de mandar ficha<br>no escuro.<br><span>Pergunte ao banco antes.</span></h1>
+    <p class="lead">O novo botão <b>“Simule com os bancos”</b> mostra, em 1 minuto, se o cliente
+    tem chance de aprovação — e quanto de crédito ele tem — <b>antes</b> de você mandar a ficha.</p>
+    <div class="selo">Nova Jornada PDV — Simulador de Financiamento</div>
+  </div>
+  <div class="rodape">
+    <span>Material de treinamento — uso interno</span>
+    <span>Duração: 20 minutos &nbsp;|&nbsp; Setas ← → para navegar</span>
+  </div>
+</section>
+
+<!-- 2 . AGENDA -->
+<section class="slide" data-n="2">
+  <div class="eyebrow">Roteiro de hoje</div>
+  <h1 class="titulo">Em 20 minutos você vai sair daqui sabendo usar o simulador — e sabendo <em>por que ele vende mais</em></h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="agenda">
+      <div class="agenda-item"><div class="num">1</div><div class="txt"><strong>O problema que você vive todo dia</strong><span>A novela do “será que passa?” e quanto ela custa do seu bolso</span></div></div>
+      <div class="agenda-item destaque"><div class="num">2</div><div class="txt"><strong>O que mudou na tela</strong><span>Os 3 passos do novo simulador, print por print</span></div></div>
+      <div class="agenda-item"><div class="num">3</div><div class="txt"><strong>Como usar o resultado para vender</strong><span>Sinal verde, sinal amarelo e o que fazer em cada um</span></div></div>
+      <div class="agenda-item"><div class="num">4</div><div class="txt"><strong>O que falar para o cliente</strong><span>Frases prontas e respostas para as perguntas mais comuns</span></div></div>
+      <div class="agenda-item"><div class="num">5</div><div class="txt"><strong>Como começar amanhã</strong><span>3 regras de ouro e o checklist de 30 segundos</span></div></div>
+    </div>
+  </div>
+  <div class="takeaway">Uma única mensagem para levar: <b>simular antes é mais rápido do que tentar de novo depois.</b></div>
+</section>
+
+<!-- 3 . SITUACAO -->
+<section class="slide" data-n="3">
+  <div class="eyebrow">1. O problema — como é hoje</div>
+  <h1 class="titulo">Hoje você só descobre se o cliente passa <em>depois</em> de mandar a ficha — e aí já foi tempo do cliente e o seu</h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="ciclo">
+      <div class="ciclo-passo"><div class="ic">🚗</div><b>1. Cliente escolhe</b><span>Ele gosta de um carro e senta com você</span></div>
+      <div class="ciclo-passo"><div class="ic">🖥️</div><b>2. Você simula</b><span>A tela mostra mais ou menos o valor da parcela</span></div>
+      <div class="ciclo-passo"><div class="ic">📨</div><b>3. Manda a ficha</b><span>E só resta esperar a resposta do banco</span></div>
+      <div class="ciclo-passo ruim"><div class="ic">⛔</div><b>4. Negado</b><span>Sem dizer o porquê e sem dizer o que mudar</span></div>
+      <div class="ciclo-passo ruim"><div class="ic">🔁</div><b>5. Tenta de novo</b><span>Muda a entrada no chute e manda outra ficha</span></div>
+    </div>
+    <div class="volta">↺ &nbsp;E volta para o passo 2. De novo. E de novo. Até o cliente cansar e ir embora.</div>
+    <div class="cards" style="margin-top:22px">
+      <div class="card dor"><div class="ic">❓</div><h3>Você não sabe</h3><p>A tela de hoje mostra a parcela, mas não diz se o banco vai aprovar. Você aperta “Simular” no escuro.</p></div>
+      <div class="card dor"><div class="ic">😕</div><h3>O cliente não sabe</h3><p>Ele ouve “negado” sem entender o motivo. Perde a confiança na loja e vai olhar na concorrência.</p></div>
+      <div class="card dor"><div class="ic">⏳</div><h3>Quem paga é o seu tempo</h3><p>Cada rodada de ficha come minutos do seu atendimento — e enquanto isso outro cliente espera.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 . COMPLICACAO -->
+<section class="slide" data-n="4">
+  <div class="eyebrow">1. O problema — quanto custa</div>
+  <h1 class="titulo">Cada ficha negada não é só um “não”: é <em>o seu tempo, o seu atendimento e a sua comissão</em> indo embora</h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="caso">
+      <div class="col">
+        <h4>Tentativas por cliente</h4>
+        <div class="numerao cinza">__ fichas</div>
+        <p>Quantas vezes você manda ficha do mesmo cliente até saber se ele passa? <b>Cada uma delas custa espera.</b></p>
+      </div>
+      <div class="col">
+        <h4>Tempo por tentativa</h4>
+        <div class="numerao cinza">__ min</div>
+        <p>Preencher, mandar, esperar, explicar para o cliente e começar tudo de novo. <b>É tempo que não vira venda.</b></p>
+      </div>
+      <div class="col">
+        <h4>Clientes que desistem</h4>
+        <div class="numerao cinza">__ %</div>
+        <p>Cliente que ouve “negado” duas vezes normalmente não volta. <b>Ele não some do sistema, ele some da loja.</b></p>
+      </div>
+    </div>
+    <div class="cards" style="margin-top:24px">
+      <div class="card laranja"><div class="ic">🕐</div><h3>Menos atendimentos no dia</h3><p>Se cada cliente ocupa 3 rodadas de ficha, você atende menos gente. Menos gente atendida é menos carro vendido.</p></div>
+      <div class="card laranja"><div class="ic">🤝</div><h3>Desgaste com o cliente</h3><p>Você promete “vou tentar aqui pra você” e não sai. A conversa esfria e o argumento de venda morre.</p></div>
+      <div class="card laranja"><div class="ic">💸</div><h3>Venda que era possível e não saiu</h3><p>Muita ficha negada só precisava de um pouco mais de entrada. Sem informação, ninguém propôs isso ao cliente.</p></div>
+    </div>
+  </div>
+  <div class="takeaway laranja">O problema nunca foi o cliente ser ruim. O problema é <b>descobrir tarde demais</b> o que dava para ajustar.</div>
+</section>
+
+<!-- 5 . A VIRADA -->
+<section class="slide" data-n="5">
+  <div class="eyebrow">2. O que mudou</div>
+  <h1 class="titulo">Agora dá para perguntar aos bancos <em>antes</em> — e a resposta vem na hora, com o cliente ainda sentado na sua frente</h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="tela-linha">
+      <div class="passos-txt">
+        <h3>Um botão novo na tela que você já usa</h3>
+        <ul class="lista">
+          <li><b>Não é sistema novo.</b> É o mesmo Simulador de Financiamento, com o botão <b>“Simule com os bancos”</b>.</li>
+          <li><b>Consulta 5 bancos de uma vez</b>, com uma pré-análise de verdade, e não um chute.</li>
+          <li><b>Leva cerca de 1 minuto</b> e usa os mesmos dados que você já pediria para montar a ficha.</li>
+          <li><b>Não é ficha.</b> É uma consulta prévia para você saber o terreno antes de andar nele.</li>
+        </ul>
+        <div class="bancos">
+          <span class="banco">Itaú</span><span class="banco">Santander</span><span class="banco">BV</span>
+          <span class="banco">Banco PAN</span><span class="banco">Bradesco</span>
+        </div>
+      </div>
+      <div>
+        <div class="cards" style="grid-template-columns:1fr;gap:14px">
+          <div class="card"><h3>1. Tem chance ou não tem?</h3><p>O sistema responde <b>alta</b> ou <b>baixa probabilidade</b> de aprovação para aquele CPF.</p></div>
+          <div class="card"><h3>2. Quanto de crédito ele tem?</h3><p>Quando a chance é alta, aparece o <b>valor de crédito disponível</b> para o cliente.</p></div>
+          <div class="card"><h3>3. O que dá para mudar?</h3><p>Quando a chance é baixa, o sistema <b>sugere o ajuste</b> — normalmente a entrada.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="takeaway">De “mandar ficha e torcer” para <b>“consultar, ajustar e só então mandar a ficha certa”</b>.</div>
+</section>
+
+<!-- 6 . PASSO 1 -->
+<section class="slide" data-n="6">
+  <div class="eyebrow">2. Passo a passo — Passo 1 de 3</div>
+  <h1 class="titulo">Passo 1: na mesma tela de sempre, clique em <em>“Simule com os bancos”</em></h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="tela-linha">
+      <div class="moldura"><img src="{{TELA_BOTAO}}" alt="Tela de inclusão com o botão Simule com os bancos"></div>
+      <div class="passos-txt">
+        <h3>Onde fica o botão</h3>
+        <ul class="lista">
+          <li>É o <b>botão verde no alto da tela</b>, ao lado de “Comparar veículos”.</li>
+          <li>Faça isso <b>antes</b> de brincar com a entrada e o prazo. Primeiro descobre a chance, depois monta a proposta.</li>
+          <li>A régua colorida da entrada continua ali: <b>vermelho é entrada baixa, verde é maior chance de aprovação</b>.</li>
+          <li>O botão laranja “Simular” continua fazendo o de sempre — <b>o que muda o jogo é o botão verde</b>.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="takeaway">Regra prática: <b>o botão verde vem antes do botão laranja.</b></div>
+</section>
+
+<!-- 7 . PASSO 2 -->
+<section class="slide" data-n="7">
+  <div class="eyebrow">2. Passo a passo — Passo 2 de 3</div>
+  <h1 class="titulo">Passo 2: preencha os dados básicos do cliente — <em>são os mesmos que você já pediria para a ficha</em></h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="tela-linha">
+      <div>
+        <div class="moldura" style="max-height:210px"><img src="{{TELA_DADOS}}" alt="Formulário de dados cadastrais" style="max-height:200px"></div>
+        <div class="moldura" style="max-height:200px;margin-top:14px"><img src="{{TELA_BANCOS}}" alt="Consulta enviada aos bancos parceiros" style="max-height:190px"></div>
+      </div>
+      <div class="passos-txt">
+        <h3>O que pedir ao cliente</h3>
+        <ul class="lista check">
+          <li><b>Placa e CPF</b> já vêm preenchidos da tela anterior.</li>
+          <li>Você digita <b>data de nascimento, celular, e-mail, se tem CNH e o sexo</b>.</li>
+          <li>Confira o CPF com calma: <b>CPF errado joga fora a consulta inteira</b>.</li>
+          <li>Clique e aguarde: o sistema envia para <b>Itaú, Santander, BV, PAN e Bradesco ao mesmo tempo</b>.</li>
+        </ul>
+        <p style="font-size:15px;color:var(--tinta-2);margin-top:16px;line-height:1.5">
+          <b>Fale isso para o cliente enquanto preenche:</b> “São os mesmos dados da ficha. A diferença é que agora
+          a resposta vem na hora, e não daqui a pouco.”</p>
+      </div>
+    </div>
+  </div>
+  <div class="takeaway">Nada de dado novo, nada de papel a mais. <b>É o mesmo esforço, só que na ordem certa.</b></div>
+</section>
+
+<!-- 8 . PASSO 3 - BAIXA -->
+<section class="slide" data-n="8">
+  <div class="eyebrow">2. Passo a passo — Passo 3 de 3 (resultado A)</div>
+  <h1 class="titulo">Sinal amarelo: “baixa probabilidade” <em>não quer dizer “não”. Quer dizer “assim não”.</em></h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="tela-linha inverso">
+      <div class="passos-txt">
+        <span class="pill amarelo">Baixa probabilidade</span>
+        <h3>Você acabou de ganhar 3 alavancas</h3>
+        <ul class="lista">
+          <li><b>Aumentar a entrada.</b> É o ajuste que mais muda o resultado — a régua verde da tela mostra a faixa boa.</li>
+          <li><b>Trocar o CPF.</b> Cônjuge, familiar, sócio ou a empresa do cliente podem ter um perfil melhor.</li>
+          <li><b>Mudar o carro.</b> Um veículo de valor menor pede menos crédito e cabe no que o banco aceita.</li>
+        </ul>
+        <p style="font-size:15px;color:var(--tinta-2);margin-top:14px;line-height:1.5">
+        Ajustou? <b>Simule de novo ali mesmo, com o cliente do lado</b>, até chegar ao sinal verde.</p>
+      </div>
+      <div class="moldura"><img src="{{TELA_BAIXA}}" alt="Resultado com baixa probabilidade de aprovação"></div>
+    </div>
+  </div>
+  <div class="takeaway laranja">Antes você dizia “foi negado”. Agora você diz: <b>“desse jeito não passa — mas com R$ X de entrada passa”</b>.</div>
+</section>
+
+<!-- 9 . PASSO 3 - ALTA -->
+<section class="slide" data-n="9">
+  <div class="eyebrow">2. Passo a passo — Passo 3 de 3 (resultado B)</div>
+  <h1 class="titulo">Sinal verde: além do “provável”, o sistema entrega <em>o valor de crédito do cliente</em></h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="tela-linha">
+      <div class="moldura"><img src="{{TELA_ALTA}}" alt="Resultado com alta probabilidade e crédito aprovado"></div>
+      <div class="passos-txt">
+        <span class="pill verde">Alta probabilidade</span>
+        <h3>Três informações que valem ouro</h3>
+        <ul class="lista check">
+          <li><b>Chance alta de aprovação</b> para aquele CPF — pode seguir com segurança.</li>
+          <li><b>O valor de crédito disponível</b> (no exemplo, R$ 65.000). Esse é o tamanho do bolso do cliente.</li>
+          <li><b>A melhor faixa de entrada e as opções de parcela</b> — 12x a 60x, com a entrada mínima de cada uma.</li>
+        </ul>
+        <p style="font-size:15px;color:var(--tinta-2);margin-top:14px;line-height:1.5">
+          Ao clicar na parcela, você <b>confirma o valor exato que o banco retornou</b> e leva isso direto para a proposta.</p>
+      </div>
+    </div>
+  </div>
+  <div class="takeaway">O sistema não diz só “pode”. Ele diz <b>“pode até aqui”</b> — e é com esse número que você negocia.</div>
+</section>
+
+<!-- 10 . VENDER PELO CREDITO -->
+<section class="slide" data-n="10">
+  <div class="eyebrow">3. Como usar para vender</div>
+  <h1 class="titulo">A maior mudança não é na tela: é você <em>vender a partir do crédito do cliente</em>, e não do carro que ele apontou</h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="caso">
+      <div class="col">
+        <h4>Como era</h4>
+        <p><b>Cliente:</b> “Quero esse aí de R$ 79.990.”<br><br>
+        <b>Você:</b> “Vou mandar a ficha e a gente vê.”<br><br>
+        Ficha 1: negado. Ficha 2: negado.
+        <b>Uma hora de atendimento e nenhuma venda.</b></p>
+      </div>
+      <div class="col">
+        <h4>Como fica</h4>
+        <p>Você simula em 1 minuto e vê:<br>
+        <b>crédito disponível de R$ 65.000</b>, com entrada mínima de R$ 10.000 no plano de 12x.<br><br>
+        Agora você sabe exatamente <b>o tamanho da conversa</b> antes de abrir a boca.</p>
+      </div>
+      <div class="col final">
+        <h4>O que você faz com isso</h4>
+        <p><b>Caminho 1:</b> mantém o carro e sobe a entrada até a faixa verde.<br><br>
+        <b>Caminho 2:</b> leva o cliente a um carro que cabe nos R$ 65.000 — e fecha hoje.<br><br>
+        <b>Nos dois, a venda acontece no mesmo atendimento.</b></p>
+      </div>
+    </div>
+    <div class="cards" style="margin-top:22px">
+      <div class="card"><div class="ic">🎯</div><h3>Mostre o carro certo</h3><p>Com o crédito na mão, você para de mostrar veículo que o banco nunca ia financiar.</p></div>
+      <div class="card"><div class="ic">🗣️</div><h3>Negocie com número</h3><p>“O banco liberou R$ 65 mil” é muito mais forte do que “acho que dá”.</p></div>
+      <div class="card"><div class="ic">⚡</div><h3>Feche na hora</h3><p>O cliente decide enquanto está quente, sem “depois eu te ligo”.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 . ANTES X DEPOIS -->
+<section class="slide" data-n="11">
+  <div class="eyebrow">3. Como usar para vender</div>
+  <h1 class="titulo">O mesmo atendimento, com <em>outra ordem</em> — e outra conversa</h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <table class="comp">
+      <thead><tr><th>No atendimento</th><th>Como era antes</th><th>Como fica com o simulador</th></tr></thead>
+      <tbody>
+        <tr><td>Primeira informação</td><td>Um valor aproximado de parcela</td><td>Chance de aprovação e valor de crédito do cliente</td></tr>
+        <tr><td>Quando você descobre</td><td>Depois de mandar a ficha e esperar</td><td>Em cerca de 1 minuto, com o cliente na sua frente</td></tr>
+        <tr><td>Se der problema</td><td>“Negado”, sem saber o motivo</td><td>“Baixa probabilidade” + a sugestão do que ajustar</td></tr>
+        <tr><td>Ajuste de entrada</td><td>No chute, uma ficha por tentativa</td><td>Na hora, quantas vezes precisar, sem mandar ficha</td></tr>
+        <tr><td>Escolha do carro</td><td>O cliente aponta e você torce</td><td>Você mostra o que cabe no crédito aprovado</td></tr>
+        <tr><td>Ficha enviada</td><td>Várias, no escuro</td><td>Uma, já com as condições certas</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="takeaway">A ficha deixa de ser o <b>teste</b> e passa a ser a <b>confirmação</b> de algo que você já sabe.</div>
+</section>
+
+<!-- 12 . O QUE VOCE GANHA -->
+<section class="slide" data-n="12">
+  <div class="eyebrow">3. Como usar para vender</div>
+  <h1 class="titulo">O que isso muda <em>para você</em>, na prática, no fim do dia</h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="cards c4">
+      <div class="card"><div class="ic">⏱️</div><h3>Menos tempo por cliente</h3><p>Uma consulta de 1 minuto no lugar de várias rodadas de ficha e espera.</p></div>
+      <div class="card"><div class="ic">👥</div><h3>Mais gente atendida</h3><p>Tempo que sobra é tempo para o próximo cliente da loja — e para o próximo carro.</p></div>
+      <div class="card"><div class="ic">✅</div><h3>Menos “não” na sua cara</h3><p>Você só manda ficha quando a chance já é boa. Menos recusa, menos desgaste.</p></div>
+      <div class="card"><div class="ic">💰</div><h3>Mais venda fechada</h3><p>Cliente que sai da loja sabendo o crédito dele fecha mais — e fecha na hora.</p></div>
+    </div>
+    <div class="cards c2" style="margin-top:22px">
+      <div class="card laranja"><div class="ic">🛡️</div><h3>E a sua palavra vale mais</h3><p>Você para de prometer o que não depende de você. Passa a falar com base no que o banco já respondeu — na frente do cliente.</p></div>
+      <div class="card laranja"><div class="ic">📈</div><h3>E o seu dia fica previsível</h3><p>Você sabe logo no começo do atendimento se aquele cliente é venda de hoje, venda de ajuste ou conversa para outro dia.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 . SCRIPTS -->
+<section class="slide" data-n="13">
+  <div class="eyebrow">4. O que falar para o cliente</div>
+  <h1 class="titulo">Três frases prontas: uma para <em>começar</em>, uma para o <em>sinal amarelo</em>, uma para o <em>sinal verde</em></h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="cards">
+      <div class="fala">
+        <div class="quando">Na abertura</div>
+        <div class="frase">“Antes de mandar sua ficha, deixa eu consultar aqui com os bancos. Leva 1 minuto e a gente já vê o que dá pra fazer, sem você perder viagem.”</div>
+        <div class="porque"><b>Por que funciona:</b> o cliente entende que você está poupando o tempo dele, não pedindo mais burocracia.</div>
+      </div>
+      <div class="fala">
+        <div class="quando">Sinal amarelo</div>
+        <div class="frase">“Do jeito que está, os bancos não aprovam. Mas se a gente subir a entrada para R$ ____, a chance melhora bastante. Consegue chegar nesse valor?”</div>
+        <div class="porque"><b>Por que funciona:</b> troca o “negado” por uma proposta concreta. O cliente sai com um caminho, não com um não.</div>
+      </div>
+      <div class="fala">
+        <div class="quando">Sinal verde</div>
+        <div class="frase">“Os bancos já indicaram crédito de R$ ____ para o seu CPF. Com esse valor, dá pra fechar esse carro hoje — quer ver as parcelas?”</div>
+        <div class="porque"><b>Por que funciona:</b> é um número do banco, não seu. Dá segurança para o cliente decidir na hora.</div>
+      </div>
+    </div>
+  </div>
+  <div class="takeaway">Nunca diga “vai ser difícil pra você”. Diga <b>“assim não passa, mas assim passa”</b> — e mostre a tela.</div>
+</section>
+
+<!-- 14 . OBJECOES -->
+<section class="slide" data-n="14">
+  <div class="eyebrow">4. O que falar para o cliente</div>
+  <h1 class="titulo">As perguntas que você vai ouvir — <em>e a resposta curta para cada uma</em></h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="obj">
+      <div class="obj-linha"><div class="q">Isso não dá mais trabalho pra mim?”</div>
+        <div class="a">1 minuto de consulta agora evita 2 ou 3 fichas negadas depois. <b>O trabalho não aumenta, ele sai de cima de você.</b></div></div>
+      <div class="obj-linha"><div class="q">O cliente não vai querer passar os dados.”</div>
+        <div class="a">São <b>os mesmos dados da ficha</b>. A diferença é que agora ele recebe uma resposta na hora, em vez de esperar.</div></div>
+      <div class="obj-linha"><div class="q">E se o banco mudar de ideia depois?”</div>
+        <div class="a">É uma <b>pré-análise</b>: serve para você negociar com base em dado, não em achismo. Ao clicar na parcela, você confirma o valor exato que o banco retornou.</div></div>
+      <div class="obj-linha"><div class="q">Eu já sei de olho quem passa e quem não passa.”</div>
+        <div class="a">Talvez a chance sim. Mas <b>o valor de crédito do cliente você não tem como saber de cabeça</b> — e é ele que define qual carro você mostra.</div></div>
+      <div class="obj-linha"><div class="q">Deu baixa probabilidade. Acabou?”</div>
+        <div class="a">Não. <b>Ajuste a entrada, teste outro CPF ou outro carro e simule de novo</b>, ali mesmo, quantas vezes precisar. Não custa ficha.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 . REGRAS DE OURO -->
+<section class="slide" data-n="15">
+  <div class="eyebrow">5. Como começar amanhã</div>
+  <h1 class="titulo">Três regras de ouro para <em>todo</em> atendimento com financiamento</h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="regras">
+      <div class="regra"><div class="n">1</div><b>Nunca mande ficha sem simular antes</b>
+        <span>O botão verde vem sempre antes do botão laranja. Sem exceção.</span></div>
+      <div class="regra"><div class="n">2</div><b>Nunca diga “não vai passar”</b>
+        <span>Diga “assim não passa — vamos ajustar”. E mostre na tela o que muda.</span></div>
+      <div class="regra"><div class="n">3</div><b>Nunca deixe o cliente sair sem o número dele</b>
+        <span>Se saiu sabendo o crédito que tem, ele volta. Se saiu com um “negado”, ele não volta.</span></div>
+    </div>
+    <div class="check-final" style="margin-top:26px">
+      <div class="item"><div class="box"></div><span><b>30 segundos antes de cada ficha:</b> conferi o CPF e a data de nascimento?</span></div>
+      <div class="item"><div class="box"></div><span><b>Simulei com os bancos</b> e li o resultado junto com o cliente?</span></div>
+      <div class="item"><div class="box"></div><span>Se deu amarelo, <b>testei pelo menos um ajuste de entrada</b> antes de desistir?</span></div>
+      <div class="item"><div class="box"></div><span>Se deu verde, <b>falei o valor do crédito em voz alta</b> e mostrei as parcelas?</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 . KPIs -->
+<section class="slide" data-n="16">
+  <div class="eyebrow">5. Como começar amanhã</div>
+  <h1 class="titulo">O que a loja vai acompanhar — para todo mundo ver que <em>simular antes dá resultado</em></h1>
+  <div class="regua"></div>
+  <div class="corpo">
+    <div class="kpis">
+      <div class="kpi"><div class="v">__%</div><div class="l">Fichas enviadas <b>com simulação prévia</b></div></div>
+      <div class="kpi"><div class="v">__</div><div class="l">Fichas por venda<br>(quanto menor, melhor)</div></div>
+      <div class="kpi"><div class="v">__%</div><div class="l">Taxa de aprovação das fichas enviadas</div></div>
+      <div class="kpi"><div class="v">__ min</div><div class="l">Tempo médio do atendimento com financiamento</div></div>
+      <div class="kpi"><div class="v">__</div><div class="l">Vendas fechadas por consultor no mês</div></div>
+    </div>
+    <p class="nota">Preencher com a base da loja/região antes da aplicação do treinamento. A leitura é sempre a mesma:
+    quanto mais atendimentos começam pelo simulador, menos ficha se manda para chegar na mesma venda.</p>
+    <div class="cards c2" style="margin-top:24px">
+      <div class="card"><div class="ic">📅</div><h3>Primeira semana</h3><p>Meta simples: <b>toda ficha de financiamento passa pelo simulador antes</b>. O gerente acompanha na reunião diária.</p></div>
+      <div class="card"><div class="ic">🏆</div><h3>Primeiro mês</h3><p>Compare o seu próprio número: <b>fichas por venda antes e depois</b>. É a prova mais rápida de que funciona.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 . FECHAMENTO -->
+<section class="slide fim" data-n="">
+  <h1>Simule antes.<br><span>Mande uma ficha só.</span><br>Venda no mesmo dia.</h1>
+  <p>O botão “Simule com os bancos” está na sua tela a partir de agora.
+  Use no próximo cliente que sentar com você — e veja a diferença já no primeiro atendimento.</p>
+</section>
+
+</div>
+
+<div id="barra"><i></i></div>
+<div id="nav">
+  <button id="ant" title="Anterior">‹</button>
+  <span id="cont">1 / 17</span>
+  <button id="prox" title="Próximo">›</button>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var palco = document.getElementById('palco');
+  var barra = document.querySelector('#barra i');
+  var cont = document.getElementById('cont');
+  var atual = 0;
+
+  function mostrar(i){
+    atual = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach(function(s, k){ s.classList.toggle('ativo', k === atual); });
+    barra.style.width = ((atual + 1) / slides.length * 100) + '%';
+    cont.textContent = (atual + 1) + ' / ' + slides.length;
+    if (location.hash !== '#' + (atual + 1)) history.replaceState(null, '', '#' + (atual + 1));
+  }
+  function ajustar(){
+    var e = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    palco.style.transform = 'scale(' + e + ')';
+  }
+
+  document.addEventListener('keydown', function(ev){
+    if (ev.key === 'ArrowRight' || ev.key === 'PageDown' || ev.key === ' ') { mostrar(atual + 1); ev.preventDefault(); }
+    if (ev.key === 'ArrowLeft' || ev.key === 'PageUp') { mostrar(atual - 1); ev.preventDefault(); }
+    if (ev.key === 'Home') mostrar(0);
+    if (ev.key === 'End') mostrar(slides.length - 1);
+  });
+  document.getElementById('prox').addEventListener('click', function(){ mostrar(atual + 1); });
+  document.getElementById('ant').addEventListener('click', function(){ mostrar(atual - 1); });
+  palco.addEventListener('click', function(ev){
+    if (ev.target.closest('#nav')) return;
+    mostrar(atual + (ev.clientX < window.innerWidth / 2 ? -1 : 1));
+  });
+  window.addEventListener('resize', ajustar);
+
+  ajustar();
+  var inicial = parseInt((location.hash || '#1').slice(1), 10);
+  mostrar(isNaN(inicial) ? 0 : inicial - 1);
+})();
+</script>
+</body>
+</html>
