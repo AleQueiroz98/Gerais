@@ -167,6 +167,7 @@ Convenção de status:
 O marcador nunca aparece sozinho: cada linha traz o rótulo escrito ao lado do
 ícone e uma barra de acento na primeira coluna. A folha de estilo de impressão
 gera A4 paisagem (`Ctrl/Cmd+P` → salvar como PDF) para colar em slide.
+
 ---
 
 # Status das quatro frentes (página de PMO)
