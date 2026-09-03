@@ -167,3 +167,59 @@ Convenção de status:
 O marcador nunca aparece sozinho: cada linha traz o rótulo escrito ao lado do
 ícone e uma barra de acento na primeira coluna. A folha de estilo de impressão
 gera A4 paisagem (`Ctrl/Cmd+P` → salvar como PDF) para colar em slide.
+---
+
+# Status das quatro frentes (página de PMO)
+
+Uma página de acompanhamento com as quatro frentes de crédito e, para cada
+marco, **o que precisava ser feito**, o **prazo**, o **status** (semáforo),
+**progresso recente**, **próximos passos** e **pontos a escalar**. Mesma
+linguagem visual do deck `Acompanhamento das frentes`: barra verde por frente,
+tabela nativa do PowerPoint e corpo que reduz de 9,5pt até 7,5pt para caber em
+uma página.
+
+## Semáforo
+
+| Símbolo | Chave | Significado |
+|---|---|---|
+| ✓ verde | `ok` | Concluído |
+| ••• verde | `plano` | Em andamento, dentro do plano |
+| ••• amarelo | `risco` | Em andamento, com riscos |
+| ••• vermelho | `atraso` | Em andamento, fora do plano |
+
+O check e os pontos são caracteres comuns (`✓` e `•`), não Wingdings, para
+renderizar igual em qualquer máquina. A faixa de cada frente traz a contagem
+por status à direita, e o título da página é montado a partir dessas contagens,
+então os números nunca ficam defasados do conteúdo.
+
+## Estrutura
+
+| Caminho | Conteúdo |
+|---|---|
+| `scripts/pmo_content.py` | **Conteúdo da página** — frentes, marcos, prazos, status e comentários |
+| `scripts/pmo_status.py` | Monta a página (16:9), calcula alturas e desenha o semáforo |
+| `output/260903__Status_quatro_frentes.pptx` | **Entregável** — página única |
+
+## Como regerar
+
+```bash
+pip install python-pptx Pillow
+cd scripts
+python3 pmo_status.py
+```
+
+Para atualizar o acompanhamento basta editar `pmo_content.py`: cada marco é uma
+tupla `(o que precisava ser feito, prazo, status, progresso recente, próximos
+passos, pontos a escalar)`, e `NA`/`TBD` aparecem em cinza claro como
+placeholder. Trechos a destacar em negrito ficam no dicionário `BOLD`.
+
+## Notas de layout
+
+- **Uma tabela nativa só**, editável célula a célula; a faixa de cada frente usa
+  células mescladas (título à esquerda, contagem à direita).
+- As alturas das linhas são calculadas a partir do texto real (métricas
+  Arial/Liberation Sans) com uma folga sobre a altura de linha, porque o
+  PowerPoint trata a altura da linha como mínimo e infla a tabela se a
+  estimativa for curta.
+- Células sem texto têm o parágrafo vazio fixado em 1pt e margens zeradas: um
+  parágrafo vazio herda 18pt e forçaria ~0,4" de altura mínima na linha.
