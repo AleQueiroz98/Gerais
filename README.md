@@ -22,7 +22,7 @@ layout do painel.
 | `scripts/update_deck.py` | Atualiza o deck já no template Bain, preservando o branding |
 | `output/frentes_milestones.pptx` | Deck gerado do zero |
 | `output/260829__Acompanhamento_das_frentes_v2.pptx` | **Entregável atual** — deck Bain atualizado |
-| `output/pmo_status_frentes.html` | Painel de status das 4 frentes (simulador de pré-análise, distribuição de fichas, ecossistema de financiadoras, ciclo de crédito) |
+| `output/pmo_status_frentes.html` | Página única (16:9) com o status das 4 frentes de F&I |
 
 ## Como regerar
 
@@ -148,25 +148,31 @@ O HTML gerado é autocontido (imagens em base64, sem fontes ou scripts externos)
 então pode ser enviado por e-mail e aberto em qualquer navegador de loja, sem
 internet. Navegação por setas ← →, clique nas laterais ou `Ctrl+P` para gerar PDF.
 
-## Painel de status das 4 frentes
+## Página de status das 4 frentes de F&I
 
-`output/pmo_status_frentes.html` é uma página autocontida (um único arquivo,
-sem dependências externas) com uma tabela por frente e as colunas *O que
-precisava ser feito*, *Prazo*, *Status*, *Progresso recente*, *Próximos passos*
-e *Pontos a escalar*.
+`output/pmo_status_frentes.html` é uma página autocontida (arquivo único, sem
+dependências externas) desenhada como **um slide 16:9**: um artboard de
+1600×900 que se ajusta à janela por `transform: scale()` e imprime em
+exatamente uma folha A4 paisagem.
 
-Convenção de status:
+Uma linha por entregável, agrupadas por frente, com as colunas *O que
+precisava ser feito* (com o prazo), *Status*, *Progresso recente*, *Próximos
+passos* e *Pontos a escalar*.
+
+Convenção de status — a célula recebe fundo tingido, ícone e rótulo escrito,
+como no deck de acompanhamento:
 
 | Marcador | Significado |
 |---|---|
 | Check verde | Concluído |
 | Três pontos verdes | Em andamento — dentro do plano |
 | Três pontos vermelhos | Em andamento — fora do plano |
-| Três pontos amarelos | Bloqueado — dependência externa, prazo a definir |
+| Três pontos amarelos | Bloqueado em terceiros — prazo a definir |
 
-O marcador nunca aparece sozinho: cada linha traz o rótulo escrito ao lado do
-ícone e uma barra de acento na primeira coluna. A folha de estilo de impressão
-gera A4 paisagem (`Ctrl/Cmd+P` → salvar como PDF) para colar em slide.
+As quatro frentes usam o mesmo *color code* do plano de escalada de F&I
+(azul, vinho, ocre e cinza), aplicado na barra e no número à esquerda de cada
+grupo. O ocre foi escurecido um passo para o numeral branco atingir contraste
+3:1.
 
 ---
 

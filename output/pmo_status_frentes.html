@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Acompanhamento das frentes — Painel de status</title>
+<title>Acompanhamento das 4 frentes de F&amp;I</title>
 <style>
 :root {
   /* === Spacing — base-2 scale === */
@@ -60,33 +60,29 @@
   /* === Card shadow (signature) === */
   --ds-shadow-card: 0 14px 42px 0 rgba(8, 15, 52, 0.06);
 
-  /* === Layout offsets ===
-     Overridden locally when the artifact includes a top navigation bar
-     (e.g. set --ds-nav-height: 64px on :root). Used by the progress-bar
-     recipe to sit directly below the nav. */
+  /* === Layout offsets === */
   --ds-nav-height: 0;
 
-  /* === Data-viz palette ===
-     For palette decisions, see references/charts.md. */
+  /* === Data-viz palette === */
 
   /* Company red — monochrome ramp (4 shades, light → dark) */
-  --ds-red-100: #FF6666;     /* Ramp-only — never standalone. See Color exception rules. */
-  --ds-red-200: #CC0000;   /* Company red — the HIGHLIGHT shade */
+  --ds-red-100: #FF6666;     /* Ramp-only — never standalone. */
+  --ds-red-200: #CC0000;     /* Company red — the HIGHLIGHT shade */
   --ds-red-300: #990000;
   --ds-red-400: #660000;
 
   /* Beacon Violet — used in multi-series + diverging */
-  --ds-violet-100: #D5D6FF;   /* lightest lilac — common context/neutral series fill */
+  --ds-violet-100: #D5D6FF;
   --ds-violet-200: #988FEC;
-  --ds-violet-300: #5E4ADC;   /* Beacon brand violet */
+  --ds-violet-300: #5E4ADC;
 
   /* Expert Purple — anchors the dark end of diverging scales */
   --ds-purple-100: #B4A2CB;
   --ds-purple-200: #926F98;
-  --ds-purple-300: #4F0731;   /* Expert purple */
+  --ds-purple-300: #4F0731;
 
   /* "Something to highlight" grey ramp (5 steps, light → dark) */
-  --ds-chart-gray-100: #D2D2D1;   /* lightest — default context fill on highlight charts */
+  --ds-chart-gray-100: #D2D2D1;
   --ds-chart-gray-200: #A5A5A4;
   --ds-chart-gray-300: #777776;
   --ds-chart-gray-400: #343432;
@@ -97,23 +93,21 @@
   --ds-other-200: #DCD1C9;
   --ds-other-300: #C6B3A8;
 
-  /* Diverging scale (Negative → Neutral → Positive), 7 steps.
-     Spectrum visualizations only — never as general series colors.
-     See Color exception rules. */
-  --ds-diverging-1: #4F0731;   /* Negative 1 — most negative (Expert purple) */
+  /* Diverging scale (Negative → Neutral → Positive), 7 steps. */
+  --ds-diverging-1: #4F0731;
   --ds-diverging-2: #7C4C76;
   --ds-diverging-3: #A891BA;
-  --ds-diverging-4: #D5D6FF;   /* Neutral (lilac) */
+  --ds-diverging-4: #D5D6FF;
   --ds-diverging-5: #DDABD3;
   --ds-diverging-6: #DD476D;
-  --ds-diverging-7: #FF0024;   /* Positive 1 — most positive */
+  --ds-diverging-7: #FF0024;
 
-  /* === Exception color (opt-in only — see references/charts.md) === */
+  /* === Exception color === */
   --ds-nps-red:        #CC0000;
   --ds-nps-gray:       #979797;
   --ds-nps-yellow:     #FFCC00;
 
-  /* === Surface modes === (see references/advanced-color.md for Expert Purple) */
+  /* === Surface modes === */
 
   /* Light mode (default) */
   --ds-surface:           var(--ds-color-white);
@@ -123,15 +117,17 @@
   --ds-surface-eyebrow:   var(--ds-color-company-red);
 }
 
-/* Expert Purple surface mode — opt in by setting data-surface="purple" on <body>. */
-[data-surface="purple"] {
-  --ds-surface:         #4F0731;
-  --ds-surface-text:    var(--ds-color-white);
-  --ds-surface-heading: var(--ds-color-white);
-  --ds-surface-divider: rgba(255, 255, 255, 0.15);
-  --ds-surface-eyebrow: var(--ds-color-white);
-  color: var(--ds-surface-text);
-  background: var(--ds-surface);
+/* ---------------------------------------------------------------------------
+   Frente identity colours — carried over from the source escalation plan so
+   the four fronts read the same here as they do in the timeline page.
+   The ochre is deepened one step from the source swatch so that the white
+   numeral inside the badge clears the 3:1 contrast requirement.
+   --------------------------------------------------------------------------- */
+:root {
+  --frente-1: #40708F;   /* Simulador de pré-análise */
+  --frente-2: #8C3A6B;   /* Modelo de distribuição de fichas */
+  --frente-3: #9C8226;   /* Ecossistema de F&I para lojistas */
+  --frente-4: #595959;   /* Gestão integrada do ciclo de crédito */
 }
 
 /* Apply base typography and surface tokens to the page. */
@@ -143,621 +139,553 @@ html, body {
   font-size: 18px;
   line-height: 28px;
 }
-
 *, *::before, *::after { box-sizing: border-box; }
 
-/* ============ Layout ============ */
-.page {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: var(--ds-space-08) var(--ds-space-08) var(--ds-space-09);
-}
-
-/* ============ Header ============ */
-.masthead {
-  border-bottom: 1px solid var(--ds-stroke);
-  padding-bottom: var(--ds-space-05);
-  margin-bottom: var(--ds-space-06);
-}
-.eyebrow {
-  font-size: 13px;
-  line-height: 18px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ds-color-company-red);
-  background: var(--ds-color-white);
-  margin: 0 0 var(--ds-space-03);
-}
-h1 {
-  font-size: 48px;
-  line-height: 56px;
-  font-weight: 700;
-  color: var(--ds-text-black);
-  margin: 0 0 var(--ds-space-03);
-}
-.lede {
-  font-size: 21px;
-  line-height: 28px;
-  color: var(--ds-text-regular);
-  margin: 0;
-  max-width: 900px;
-}
-.masthead-meta {
+/* ============ Stage + slide artboard (16:9, single page) ============ */
+.stage {
+  background: var(--ds-gray-x-light);
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--ds-space-05);
-  margin-top: var(--ds-space-04);
-  font-size: 15px;
-  line-height: 22px;
-  color: var(--ds-text-helper);
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--ds-space-04) 0;
+  overflow: hidden;
 }
-.masthead-meta strong { color: var(--ds-text-dark); font-weight: 700; }
-
-/* ============ KPI row — connected cells ============ */
-.ds-kpi-row {
-  display: flex;
-  border: 1px solid var(--ds-stroke);
+.slide {
+  width: 1600px;
+  height: 900px;
+  flex: 0 0 auto;
   background: var(--ds-color-white);
-  margin-bottom: var(--ds-space-05);
-}
-.ds-kpi-tile {
-  flex: 1;
-  padding: var(--ds-space-04);
-  border-right: 1px solid var(--ds-stroke);
+  box-shadow: var(--ds-shadow-card);
+  transform-origin: top center;
+  padding: var(--ds-space-05) var(--ds-space-07) var(--ds-space-04);
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-02);
-}
-.ds-kpi-tile:last-child { border-right: none; }
-.ds-kpi-label {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-03);
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--ds-text-regular);
-}
-.ds-kpi-value {
-  font-size: 32px;
-  line-height: 40px;
-  font-weight: 700;
-  color: var(--ds-text-black);
-}
-.ds-kpi-tile--hero .ds-kpi-value { color: var(--ds-error); }
-.ds-kpi-note {
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--ds-text-helper);
 }
 
-/* ============ Legend ============ */
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ds-space-05);
-  align-items: center;
-  padding: var(--ds-space-04);
-  background: var(--ds-gray-x-light);
-  border: 1px solid var(--ds-stroke);
-  margin-bottom: var(--ds-space-07);
+/* ============ Title block ============ */
+.title {
+  font-size: 25px;
+  line-height: 32px;
+  font-weight: 400;
+  color: var(--ds-text-black);
+  margin: 0 0 var(--ds-space-03);
 }
-.legend-title {
+.title strong { font-weight: 700; }
+.title-rule {
+  height: 2px;
+  background: var(--ds-color-company-red);
+  margin: 0 0 var(--ds-space-03);
+}
+
+/* Tag band — dark chip left, legend centre, status right */
+.band {
+  display: flex;
+  align-items: stretch;
+  gap: var(--ds-space-05);
+  margin-bottom: var(--ds-space-04);
+}
+.chip {
+  background: var(--ds-chart-gray-400);
+  color: var(--ds-text-on-color);
   font-size: 13px;
   line-height: 18px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ds-text-helper);
+  letter-spacing: 0.22em;
+  padding: var(--ds-space-02) var(--ds-space-04) var(--ds-space-02) var(--ds-space-03);
+  display: flex;
+  align-items: center;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  padding-right: var(--ds-space-05);
+  flex: 0 0 auto;
+}
+.legend {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-05);
+  flex: 1 1 auto;
 }
 .legend-item {
   display: flex;
   align-items: center;
   gap: var(--ds-space-03);
-  font-size: 15px;
-  line-height: 22px;
+  font-size: 13px;
+  line-height: 18px;
   color: var(--ds-text-dark);
+}
+.legend-count {
+  font-weight: 700;
+  color: var(--ds-text-black);
+  font-variant-numeric: tabular-nums;
+}
+.legend-count--hero { color: var(--ds-error); }
+.prelim {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--ds-text-black);
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
 }
 
 /* ============ Status marks ============ */
 .mark { flex: 0 0 auto; display: block; }
-.mark--check .mark-ring { fill: none; stroke: var(--ds-success); stroke-width: 1.5; }
-.mark--check .mark-tick { fill: none; stroke: var(--ds-success); stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+.mark--check .mark-ring { fill: none; stroke: var(--ds-success); stroke-width: 1.6; }
+.mark--check .mark-tick { fill: none; stroke: var(--ds-success); stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
 .mark--ok    .mark-dot { fill: var(--ds-success); }
 .mark--late  .mark-dot { fill: var(--ds-error); }
 .mark--block .mark-dot { fill: var(--ds-warning); }
 
-.status {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--ds-space-03);
+/* ============ Table ============ */
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+  line-height: 17px;
+  flex: 1 1 auto;
 }
-.status-text {
-  font-size: 15px;
-  line-height: 20px;
+.grid th {
+  text-align: left;
+  vertical-align: bottom;
+  font-size: 13px;
+  line-height: 17px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ds-text-black);
+  padding: 0 var(--ds-space-04) var(--ds-space-02);
+  border-bottom: 1.5px solid var(--ds-text-black);
 }
-.status-label { display: block; font-weight: 700; color: var(--ds-text-black); }
-.status-sub   { display: block; font-size: 13px; line-height: 18px; color: var(--ds-text-helper); }
+.grid th.th-status { text-align: center; }
+.grid td {
+  vertical-align: top;
+  padding: var(--ds-space-02) var(--ds-space-04) var(--ds-space-03);
+  border-bottom: 1px solid var(--ds-stroke);
+  color: var(--ds-text-dark);
+}
+.grid tr.group-start > td { border-top: 1px solid var(--ds-gray-dark); }
+.grid tr:last-child > td { border-bottom: 1px solid var(--ds-gray-dark); }
 
-/* ============ Workstream block ============ */
-.ws {
-  border: 1px solid var(--ds-stroke);
-  background: var(--ds-color-white);
-  margin-bottom: var(--ds-space-06);
+col.c-band { width: 228px; }
+col.c-what { width: 302px; }
+col.c-stat { width: 152px; }
+col.c-prog { width: 290px; }
+col.c-next { width: 290px; }
+col.c-esc  { width: 258px; }
+
+/* ============ Frente band cell ============ */
+.band-cell {
+  padding: var(--ds-space-04) var(--ds-space-03) var(--ds-space-04) var(--ds-space-05);
+  position: relative;
+  background: var(--ds-gray-x-light);
 }
-.ws-head {
+.band-cell::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 6px;
+  background: var(--frente);
+}
+.band-top {
   display: flex;
   align-items: center;
-  gap: var(--ds-space-04);
-  padding: var(--ds-space-04) var(--ds-space-05);
-  border-bottom: 1px solid var(--ds-color-black);
+  gap: var(--ds-space-03);
+  margin-bottom: var(--ds-space-03);
 }
-.ws-index {
+.badge {
   flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--frente);
+  color: var(--ds-text-on-color);
+  font-size: 15px;
+  line-height: 26px;
+  font-weight: 700;
+  text-align: center;
+}
+.frente-name {
+  font-size: 17px;
+  line-height: 21px;
+  font-weight: 700;
+  color: var(--ds-text-black);
+  margin: 0;
+}
+.band-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ds-space-01) var(--ds-space-03);
+  font-size: 13px;
+  line-height: 17px;
+}
+.band-meta dt {
+  font-weight: 700;
+  color: var(--ds-text-helper);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 13px;
+  margin: 0;
+}
+.band-meta dd { margin: 0; color: var(--ds-text-dark); }
+.band-value { font-weight: 700; color: var(--ds-text-black); }
+
+/* ============ Entregável cell ============ */
+.what {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  color: var(--ds-text-black);
+  margin: 0 0 var(--ds-space-02);
+}
+.what .qual { font-weight: 400; color: var(--ds-text-regular); }
+.due {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 17px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ds-text-dark);
+  background: var(--ds-color-white);
+  border: 1px solid var(--ds-stroke);
+  padding: 1px var(--ds-space-03);
+  white-space: nowrap;
+}
+.due--tbd { color: var(--ds-text-helper); }
+.due-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-03);
+}
+.due-note {
+  font-size: 13px;
+  line-height: 17px;
+  color: var(--ds-error);
+}
+
+/* ============ Status cell ============ */
+.st-cell { padding: var(--ds-space-03); text-align: center; }
+.st-line {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--ds-color-company-red);
-  color: var(--ds-text-on-color);
-  font-size: 18px;
-  line-height: 26px;
-  font-weight: 700;
-}
-.ws-title {
-  font-size: 21px;
-  line-height: 28px;
-  font-weight: 700;
-  color: var(--ds-text-black);
-  margin: 0;
-  flex: 1 1 auto;
-}
-.ws-tally {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-04);
-  flex: 0 0 auto;
-}
-.tally {
-  display: flex;
-  align-items: center;
   gap: var(--ds-space-02);
+}
+.st-cell--done  { background: var(--ds-success-light); }
+.st-cell--ok    { background: var(--ds-success-light); }
+.st-cell--late  { background: var(--ds-error-light); }
+.st-cell--block { background: var(--ds-warning-light); }
+.st-label {
   font-size: 13px;
-  line-height: 18px;
-  font-weight: 700;
-  color: var(--ds-text-dark);
-}
-
-/* ============ Table ============ */
-.ds-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--ds-font-sans);
-  font-size: 15px;
-  line-height: 22px;
-  table-layout: fixed;
-}
-.ds-table th {
-  text-align: left;
-  vertical-align: bottom;
-  font-weight: 700;
-  font-size: 13px;
-  line-height: 18px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: var(--ds-space-03) var(--ds-space-04);
-  border-bottom: 1px solid var(--ds-color-black);
-  color: var(--ds-text-black);
-  background: var(--ds-gray-x-light);
-}
-.ds-table td {
-  padding: var(--ds-space-04);
-  border-bottom: 1px solid var(--ds-stroke);
-  color: var(--ds-text-dark);
-  vertical-align: top;
-}
-.ds-table tbody tr:last-child td { border-bottom: none; }
-.ds-table tbody tr:hover td { background: var(--ds-background-hover); }
-
-.col-what   { width: 24%; }
-.col-when   { width: 8%;  }
-.col-status { width: 15%; }
-.col-prog   { width: 17.6%; }
-.col-next   { width: 17.6%; }
-.col-esc    { width: 17.8%; }
-
-.what {
+  line-height: 17px;
   font-weight: 700;
   color: var(--ds-text-black);
-  margin: 0;
 }
-.when {
-  font-variant-numeric: tabular-nums;
+.st-sub {
+  display: block;
+  font-size: 13px;
+  line-height: 17px;
   color: var(--ds-text-dark);
-  white-space: nowrap;
 }
-.when--tbd { color: var(--ds-text-helper); }
+
+/* ============ Content cells ============ */
+.cell-list { margin: 0; padding: 0; list-style: none; }
+.cell-list li {
+  position: relative;
+  padding-left: var(--ds-space-04);
+  margin-bottom: var(--ds-space-02);
+}
+.cell-list li:last-child { margin-bottom: 0; }
+.cell-list li::before {
+  content: "";
+  position: absolute;
+  left: 3px; top: 7px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--ds-gray-dark);
+}
 .na { color: var(--ds-gray-dark); }
 
-/* Row accent — reinforces status without relying on colour alone */
-tr[data-status="late"]  td:first-child { box-shadow: inset 3px 0 0 0 var(--ds-error); }
-tr[data-status="block"] td:first-child { box-shadow: inset 3px 0 0 0 var(--ds-warning); }
-tr[data-status="ok"]    td:first-child { box-shadow: inset 3px 0 0 0 var(--ds-success); }
-tr[data-status="done"]  td:first-child { box-shadow: inset 3px 0 0 0 var(--ds-success); }
-
-/* ============ Footnote ============ */
-.footnote {
-  border-top: 1px solid var(--ds-stroke);
-  padding-top: var(--ds-space-04);
+/* ============ Footer ============ */
+.foot {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ds-space-05);
+  margin-top: var(--ds-space-04);
   font-size: 13px;
-  line-height: 18px;
+  line-height: 17px;
   color: var(--ds-text-helper);
 }
-.footnote p { margin: 0 0 var(--ds-space-02); }
+.foot-src { flex: 1 1 auto; }
+.foot-class { flex: 0 0 auto; }
+.foot-page { flex: 0 0 auto; font-weight: 700; color: var(--ds-text-dark); }
 
-/* ============ Responsive ============ */
-@media (max-width: 1100px) {
-  .page { padding: var(--ds-space-05); }
-  h1 { font-size: 36px; line-height: 43px; }
-  .ds-kpi-row { flex-wrap: wrap; }
-  .ds-kpi-tile { flex: 1 1 45%; border-bottom: 1px solid var(--ds-stroke); }
-  .ds-table, .ds-table tbody, .ds-table tr, .ds-table td { display: block; width: 100%; }
-  .ds-table thead { display: none; }
-  .ds-table tr { border-bottom: 1px solid var(--ds-color-black); padding: var(--ds-space-04) 0; }
-  .ds-table td { border-bottom: none; padding: var(--ds-space-02) var(--ds-space-04); }
-  .ds-table td::before {
-    content: attr(data-label);
-    display: block;
-    font-size: 13px;
-    line-height: 18px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--ds-text-helper);
-  }
-  .ds-table td:first-child::before { content: none; }
-}
-
-/* ============ Print — landscape, one front per page ============ */
+/* ============ Print — exactly one A4 landscape page ============ */
 @media print {
-  @page { size: A4 landscape; margin: 8mm; }
-  html, body { font-size: 11px; line-height: 16px; }
-  .page { padding: 0; max-width: none; }
-  h1 { font-size: 22px; line-height: 26px; }
-  .lede { font-size: 12px; line-height: 16px; }
-  .ds-table { font-size: 9px; line-height: 12px; }
-  .ds-table th { font-size: 8px; line-height: 11px; }
-  .ds-table td { padding: 6px 8px; }
-  .ws { break-inside: avoid; page-break-inside: avoid; margin-bottom: 10px; }
-  .ws-title { font-size: 13px; line-height: 17px; }
-  .status-text { font-size: 9px; line-height: 12px; }
-  .status-sub { font-size: 8px; line-height: 11px; }
-  .ds-table tbody tr:hover td { background: transparent; }
+  @page { size: A4 landscape; margin: 6mm; }
+  html, body { background: var(--ds-color-white); }
+  .stage { padding: 0; background: var(--ds-color-white); height: auto; overflow: visible; }
+  .slide {
+    box-shadow: none;
+    /* zoom (not transform) so the shrunken slide also shrinks its layout box
+       and the page stays a single sheet */
+    transform: none !important;
+    zoom: 0.66;
+  }
 }
 </style>
 </head>
 <body>
-<main class="page">
+<div class="stage">
+<section class="slide" aria-label="Acompanhamento das quatro frentes de F&amp;I">
 
-  <header class="masthead">
-    <p class="eyebrow">PMO &middot; Acompanhamento das frentes</p>
-    <h1>Status das quatro frentes</h1>
-    <p class="lede">O que precisava ser feito, onde estamos e o que trava &mdash; uma linha por entreg&aacute;vel, com progresso recente, pr&oacute;ximos passos e pontos a escalar.</p>
-    <div class="masthead-meta">
-      <span><strong>Data de refer&ecirc;ncia:</strong> 03/set/26</span>
-      <span><strong>Frentes:</strong> 4</span>
-      <span><strong>Entreg&aacute;veis acompanhados:</strong> 10</span>
-    </div>
-  </header>
+  <h1 class="title"><strong>Acompanhamento das 4 frentes de F&amp;I:</strong> 3 de 10 entreg&aacute;veis conclu&iacute;dos, 2 fora do plano e 3 travados em terceiros</h1>
+  <div class="title-rule"></div>
 
-  <section class="ds-kpi-row" aria-label="Resumo dos entreg&aacute;veis por status">
-    <div class="ds-kpi-tile">
-      <span class="ds-kpi-label">
-        <svg class="mark mark--check" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg>
-        Conclu&iacute;dos
+  <div class="band">
+    <span class="chip">ACOMPANHAMENTO</span>
+    <div class="legend" aria-label="Legenda de status e contagem de entreg&aacute;veis">
+      <span class="legend-item">
+        <svg class="mark mark--check" width="17" height="17" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg>
+        Conclu&iacute;do <span class="legend-count">3</span>
       </span>
-      <span class="ds-kpi-value">3</span>
-      <span class="ds-kpi-note">Entregues no prazo de 01&ndash;02/set</span>
-    </div>
-    <div class="ds-kpi-tile">
-      <span class="ds-kpi-label">
-        <svg class="mark mark--ok" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-        Em andamento, no plano
+      <span class="legend-item">
+        <svg class="mark mark--ok" width="17" height="17" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
+        Em andamento, dentro do plano <span class="legend-count">2</span>
       </span>
-      <span class="ds-kpi-value">2</span>
-      <span class="ds-kpi-note">Sem risco de prazo identificado</span>
-    </div>
-    <div class="ds-kpi-tile ds-kpi-tile--hero">
-      <span class="ds-kpi-label">
-        <svg class="mark mark--late" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-        Em andamento, fora do plano
+      <span class="legend-item">
+        <svg class="mark mark--late" width="17" height="17" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
+        Em andamento, fora do plano <span class="legend-count legend-count--hero">2</span>
       </span>
-      <span class="ds-kpi-value">2</span>
-      <span class="ds-kpi-note">Aten&ccedil;&atilde;o priorit&aacute;ria desta semana</span>
-    </div>
-    <div class="ds-kpi-tile">
-      <span class="ds-kpi-label">
-        <svg class="mark mark--block" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-        Depend&ecirc;ncia externa
-      </span>
-      <span class="ds-kpi-value">3</span>
-      <span class="ds-kpi-note">Prazo a definir (TBD)</span>
-    </div>
-  </section>
-
-  <section class="legend" aria-label="Legenda de status">
-    <span class="legend-title">Legenda</span>
-    <span class="legend-item">
-      <svg class="mark mark--check" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg>
-      Conclu&iacute;do
-    </span>
-    <span class="legend-item">
-      <svg class="mark mark--ok" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-      Em andamento &mdash; dentro do plano
-    </span>
-    <span class="legend-item">
-      <svg class="mark mark--late" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-      Em andamento &mdash; fora do plano
-    </span>
-    <span class="legend-item">
-      <svg class="mark mark--block" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-      Bloqueado &mdash; depend&ecirc;ncia externa / prazo a definir
-    </span>
-  </section>
-
-  <!-- ============ FRENTE 1 ============ -->
-  <section class="ws">
-    <div class="ws-head">
-      <span class="ws-index" aria-hidden="true">1</span>
-      <h2 class="ws-title">Simulador de pr&eacute;-an&aacute;lise</h2>
-      <span class="ws-tally">
-        <span class="tally">
-          <svg class="mark mark--check" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg>2
-        </span>
-        <span class="tally">
-          <svg class="mark mark--late" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>1
-        </span>
+      <span class="legend-item">
+        <svg class="mark mark--block" width="17" height="17" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
+        Bloqueado em terceiros <span class="legend-count">3</span>
       </span>
     </div>
-    <table class="ds-table">
-      <thead>
-        <tr>
-          <th class="col-what" scope="col">O que precisava ser feito</th>
-          <th class="col-when" scope="col">Prazo</th>
-          <th class="col-status" scope="col">Status</th>
-          <th class="col-prog" scope="col">Progresso recente</th>
-          <th class="col-next" scope="col">Pr&oacute;ximos passos</th>
-          <th class="col-esc" scope="col">Pontos a escalar</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr data-status="done">
-          <td><p class="what">Desenhar plano de comunica&ccedil;&atilde;o</p></td>
-          <td data-label="Prazo"><span class="when">02/set/26</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--check" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg>
-              <span class="status-text"><span class="status-label">Conclu&iacute;do</span><span class="status-sub">Entregue no prazo</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente">Plano de comunica&ccedil;&atilde;o desenhado, com formato, data, participantes e dura&ccedil;&atilde;o definidos para cada conversa</td>
-          <td data-label="Pr&oacute;ximos passos"><span class="na">N/A</span></td>
-          <td data-label="Pontos a escalar"><span class="na">N/A</span></td>
-        </tr>
-        <tr data-status="late">
-          <td><p class="what">Ajustar tela do simulador, textos e cards de cr&eacute;dito parcial</p></td>
-          <td data-label="Prazo"><span class="when">02/set/26</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--late" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-              <span class="status-text"><span class="status-label">Em andamento</span><span class="status-sub">Fora do plano</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente">Desenvolvimentos preliminares conclu&iacute;dos</td>
-          <td data-label="Pr&oacute;ximos passos">Implementar os ajustes observados durante a visita em loja</td>
-          <td data-label="Pontos a escalar">Avaliar dificuldade e prazos para implementar todas as melhorias mapeadas</td>
-        </tr>
-        <tr data-status="done">
-          <td><p class="what">Selecionar lojas do piloto</p></td>
-          <td data-label="Prazo"><span class="when">02/set/26</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--check" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg>
-              <span class="status-text"><span class="status-label">Conclu&iacute;do</span><span class="status-sub">Entregue no prazo</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente">Lojas selecionadas nas regionais Nordeste, MG, CO, ES e RJ &mdash; 75 lojas escolhidas para o piloto</td>
-          <td data-label="Pr&oacute;ximos passos"><span class="na">N/A</span></td>
-          <td data-label="Pontos a escalar"><span class="na">N/A</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+    <span class="prelim">/ PRELIMINAR</span>
+  </div>
 
-  <!-- ============ FRENTE 2 ============ -->
-  <section class="ws">
-    <div class="ws-head">
-      <span class="ws-index" aria-hidden="true">2</span>
-      <h2 class="ws-title">Modelo de distribui&ccedil;&atilde;o de fichas</h2>
-      <span class="ws-tally">
-        <span class="tally">
-          <svg class="mark mark--check" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg>1
-        </span>
-        <span class="tally">
-          <svg class="mark mark--ok" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>1
-        </span>
-      </span>
-    </div>
-    <table class="ds-table">
-      <thead>
-        <tr>
-          <th class="col-what" scope="col">O que precisava ser feito</th>
-          <th class="col-when" scope="col">Prazo</th>
-          <th class="col-status" scope="col">Status</th>
-          <th class="col-prog" scope="col">Progresso recente</th>
-          <th class="col-next" scope="col">Pr&oacute;ximos passos</th>
-          <th class="col-esc" scope="col">Pontos a escalar</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr data-status="done">
-          <td><p class="what">Iniciar modelo escal&aacute;vel em duas lojas</p></td>
-          <td data-label="Prazo"><span class="when">01/set/26</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--check" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg>
-              <span class="status-text"><span class="status-label">Conclu&iacute;do</span><span class="status-sub">Entregue no prazo</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente">Modelo implementado na VCGRU e na VCSCJS</td>
-          <td data-label="Pr&oacute;ximos passos">Expandir gradualmente para as demais lojas que j&aacute; fazem parte do piloto</td>
-          <td data-label="Pontos a escalar"><span class="na">N/A</span></td>
-        </tr>
-        <tr data-status="ok">
-          <td><p class="what">Implementar sistema de rean&aacute;lise nos modelos</p></td>
-          <td data-label="Prazo"><span class="when">25/set/26</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--ok" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-              <span class="status-text"><span class="status-label">Em andamento</span><span class="status-sub">Dentro do plano</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente"><span class="na">N/A</span></td>
-          <td data-label="Pr&oacute;ximos passos"><span class="na">N/A</span></td>
-          <td data-label="Pontos a escalar"><span class="na">N/A</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+  <table class="grid">
+    <colgroup>
+      <col class="c-band"><col class="c-what"><col class="c-stat">
+      <col class="c-prog"><col class="c-next"><col class="c-esc">
+    </colgroup>
+    <thead>
+      <tr>
+        <th scope="col">Frente</th>
+        <th scope="col">O que precisava ser feito</th>
+        <th scope="col" class="th-status">Status</th>
+        <th scope="col">Progresso recente</th>
+        <th scope="col">Pr&oacute;ximos passos</th>
+        <th scope="col">Pontos a escalar</th>
+      </tr>
+    </thead>
+    <tbody>
 
-  <!-- ============ FRENTE 3 ============ -->
-  <section class="ws">
-    <div class="ws-head">
-      <span class="ws-index" aria-hidden="true">3</span>
-      <h2 class="ws-title">Ecossistema de financiadoras para lojistas</h2>
-      <span class="ws-tally">
-        <span class="tally">
-          <svg class="mark mark--block" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>3
-        </span>
-      </span>
-    </div>
-    <table class="ds-table">
-      <thead>
-        <tr>
-          <th class="col-what" scope="col">O que precisava ser feito</th>
-          <th class="col-when" scope="col">Prazo</th>
-          <th class="col-status" scope="col">Status</th>
-          <th class="col-prog" scope="col">Progresso recente</th>
-          <th class="col-next" scope="col">Pr&oacute;ximos passos</th>
-          <th class="col-esc" scope="col">Pontos a escalar</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr data-status="block">
-          <td><p class="what">Integrar o PAN no FAS</p></td>
-          <td data-label="Prazo"><span class="when when--tbd">TBD</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--block" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-              <span class="status-text"><span class="status-label">Bloqueado</span><span class="status-sub">Prazo a definir</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente"><span class="na">N/A</span></td>
-          <td data-label="Pr&oacute;ximos passos"><span class="na">N/A</span></td>
-          <td data-label="Pontos a escalar">Definir quem far&aacute; o desenvolvimento &mdash; internamente ou do lado do PAN</td>
-        </tr>
-        <tr data-status="block">
-          <td><p class="what">Finalizar os desenvolvimentos de tecnologia necess&aacute;rios do VOX</p></td>
-          <td data-label="Prazo"><span class="when when--tbd">TBD</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--block" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-              <span class="status-text"><span class="status-label">Bloqueado</span><span class="status-sub">Prazo a definir</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente"><span class="na">N/A</span></td>
-          <td data-label="Pr&oacute;ximos passos">Garantir que os nossos desenvolvimentos de tecnologia sejam priorizados junto ao VOX</td>
-          <td data-label="Pontos a escalar"><span class="na">N/A</span></td>
-        </tr>
-        <tr data-status="block">
-          <td><p class="what">Resolver os problemas de inconsist&ecirc;ncia nas ofertas do Bradesco</p></td>
-          <td data-label="Prazo"><span class="when when--tbd">TBD</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--block" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-              <span class="status-text"><span class="status-label">Bloqueado</span><span class="status-sub">Prazo a definir</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente"><span class="na">N/A</span></td>
-          <td data-label="Pr&oacute;ximos passos">Garantir que os problemas de instabilidade sejam resolvidos</td>
-          <td data-label="Pontos a escalar"><span class="na">N/A</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+      <!-- ===================== FRENTE 1 ===================== -->
+      <tr class="group-start">
+        <td class="band-cell" rowspan="3" style="--frente: var(--frente-1);">
+          <div class="band-top">
+            <span class="badge" aria-hidden="true">1</span>
+            <h2 class="frente-name">Simulador de pr&eacute;-an&aacute;lise</h2>
+          </div>
+          <dl class="band-meta">
+            <dt>Resp.</dt><dd>S&ocirc;nia e Ricardo</dd>
+            <dt>Valor</dt><dd class="band-value">R$ 29&ndash;74 M</dd>
+          </dl>
+        </td>
+        <td>
+          <p class="what">Desenhar plano de comunica&ccedil;&atilde;o</p>
+          <span class="due">02/set</span>
+        </td>
+        <td class="st-cell st-cell--done">
+          <span class="st-line"><svg class="mark mark--check" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg><span class="st-label">Conclu&iacute;do</span></span>
+          <span class="st-sub">no prazo</span>
+        </td>
+        <td><ul class="cell-list"><li>Formato, data, participantes e dura&ccedil;&atilde;o definidos para cada conversa</li></ul></td>
+        <td><ul class="cell-list"><li>Implementar o plano de comunica&ccedil;&atilde;o a partir de 08/set</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+      </tr>
+      <tr>
+        <td>
+          <p class="what">Ajustar tela do simulador <span class="qual">(textos e card de cr&eacute;dito parcial)</span></p>
+          <span class="due-row"><span class="due">02/set</span><span class="due-note">prazo em redefini&ccedil;&atilde;o</span></span>
+        </td>
+        <td class="st-cell st-cell--late">
+          <span class="st-line"><svg class="mark mark--late" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg><span class="st-label">Em andamento</span></span>
+          <span class="st-sub">fora do plano</span>
+        </td>
+        <td><ul class="cell-list"><li>Desenvolvimentos preliminares conclu&iacute;dos</li></ul></td>
+        <td><ul class="cell-list"><li>Implementar os ajustes observados durante a visita em loja</li></ul></td>
+        <td><ul class="cell-list"><li>Avaliar dificuldade e prazos para implementar todas as melhorias mapeadas</li></ul></td>
+      </tr>
+      <tr>
+        <td>
+          <p class="what">Selecionar lojas do piloto</p>
+          <span class="due">02/set</span>
+        </td>
+        <td class="st-cell st-cell--done">
+          <span class="st-line"><svg class="mark mark--check" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg><span class="st-label">Conclu&iacute;do</span></span>
+          <span class="st-sub">no prazo</span>
+        </td>
+        <td><ul class="cell-list"><li>Lojas selecionadas nas regionais Nordeste, MG, CO, ES e RJ</li><li>75 lojas escolhidas para o piloto</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+      </tr>
 
-  <!-- ============ FRENTE 4 ============ -->
-  <section class="ws">
-    <div class="ws-head">
-      <span class="ws-index" aria-hidden="true">4</span>
-      <h2 class="ws-title">Gest&atilde;o integrada do ciclo de cr&eacute;dito</h2>
-      <span class="ws-tally">
-        <span class="tally">
-          <svg class="mark mark--ok" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>1
-        </span>
-        <span class="tally">
-          <svg class="mark mark--late" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>1
-        </span>
-      </span>
-    </div>
-    <table class="ds-table">
-      <thead>
-        <tr>
-          <th class="col-what" scope="col">O que precisava ser feito</th>
-          <th class="col-when" scope="col">Prazo</th>
-          <th class="col-status" scope="col">Status</th>
-          <th class="col-prog" scope="col">Progresso recente</th>
-          <th class="col-next" scope="col">Pr&oacute;ximos passos</th>
-          <th class="col-esc" scope="col">Pontos a escalar</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr data-status="ok">
-          <td><p class="what">Obter dados de Bradesco e VOX (levantamento de dados)</p></td>
-          <td data-label="Prazo"><span class="when when--tbd">TBD</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--ok" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-              <span class="status-text"><span class="status-label">Em andamento</span><span class="status-sub">Dentro do plano</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente"><span class="na">N/A</span></td>
-          <td data-label="Pr&oacute;ximos passos"><span class="na">N/A</span></td>
-          <td data-label="Pontos a escalar"><span class="na">N/A</span></td>
-        </tr>
-        <tr data-status="late">
-          <td><p class="what">Criar score de cr&eacute;dito pr&oacute;prio</p></td>
-          <td data-label="Prazo"><span class="when when--tbd">TBD</span></td>
-          <td data-label="Status">
-            <span class="status">
-              <svg class="mark mark--late" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg>
-              <span class="status-text"><span class="status-label">Em andamento</span><span class="status-sub">Fora do plano</span></span>
-            </span>
-          </td>
-          <td data-label="Progresso recente">Acessos concedidos e bases entendidas</td>
-          <td data-label="Pr&oacute;ximos passos">Estrutura&ccedil;&atilde;o e consolida&ccedil;&atilde;o das bases, treinamento do modelo e backtest com dados hist&oacute;ricos para avaliar a dispers&atilde;o e a acur&aacute;cia do modelo</td>
-          <td data-label="Pontos a escalar"><span class="na">N/A</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+      <!-- ===================== FRENTE 2 ===================== -->
+      <tr class="group-start">
+        <td class="band-cell" rowspan="2" style="--frente: var(--frente-2);">
+          <div class="band-top">
+            <span class="badge" aria-hidden="true">2</span>
+            <h2 class="frente-name">Modelo de distribui&ccedil;&atilde;o de fichas</h2>
+          </div>
+          <dl class="band-meta">
+            <dt>Resp.</dt><dd>Sandra Reis</dd>
+            <dt>Valor</dt><dd class="band-value">R$ 24&ndash;52 M</dd>
+          </dl>
+        </td>
+        <td>
+          <p class="what">Iniciar modelo escal&aacute;vel em 2 lojas <span class="qual">(VCGRU e VCSJS)</span></p>
+          <span class="due">01/set</span>
+        </td>
+        <td class="st-cell st-cell--done">
+          <span class="st-line"><svg class="mark mark--check" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-ring" cx="8" cy="8" r="7"/><path class="mark-tick" d="M4.5 8.3 L6.9 10.7 L11.5 5.6"/></svg><span class="st-label">Conclu&iacute;do</span></span>
+          <span class="st-sub">no prazo</span>
+        </td>
+        <td><ul class="cell-list"><li>Modelo implementado na VCGRU e na VCSJS</li></ul></td>
+        <td><ul class="cell-list"><li>Expandir gradualmente para as demais lojas que j&aacute; fazem parte do piloto</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+      </tr>
+      <tr>
+        <td>
+          <p class="what">Implantar sistema de rean&aacute;lise nos modelos</p>
+          <span class="due">25/set</span>
+        </td>
+        <td class="st-cell st-cell--ok">
+          <span class="st-line"><svg class="mark mark--ok" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg><span class="st-label">Em andamento</span></span>
+          <span class="st-sub">dentro do plano</span>
+        </td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+      </tr>
 
-  <footer class="footnote">
-    <p><strong>Legenda de status:</strong> conclu&iacute;do (check verde) &middot; em andamento dentro do plano (tr&ecirc;s pontos verdes) &middot; em andamento fora do plano (tr&ecirc;s pontos vermelhos) &middot; bloqueado por depend&ecirc;ncia externa, com prazo a definir (tr&ecirc;s pontos amarelos).</p>
-    <p>N/A indica que ainda n&atilde;o h&aacute; informa&ccedil;&atilde;o reportada para o campo. TBD indica prazo ainda n&atilde;o acordado.</p>
-  </footer>
+      <!-- ===================== FRENTE 3 ===================== -->
+      <tr class="group-start">
+        <td class="band-cell" rowspan="3" style="--frente: var(--frente-3);">
+          <div class="band-top">
+            <span class="badge" aria-hidden="true">3</span>
+            <h2 class="frente-name">Ecossistema de F&amp;I para lojistas</h2>
+          </div>
+          <dl class="band-meta">
+            <dt>Resp.</dt><dd>Thiago Lopes</dd>
+            <dt>Valor</dt><dd class="band-value">TBC</dd>
+          </dl>
+        </td>
+        <td>
+          <p class="what">Integrar o PAN no FAS</p>
+          <span class="due due--tbd">TBD</span>
+        </td>
+        <td class="st-cell st-cell--block">
+          <span class="st-line"><svg class="mark mark--block" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg><span class="st-label">Bloqueado</span></span>
+          <span class="st-sub">prazo a definir</span>
+        </td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+        <td><ul class="cell-list"><li>Definir quem far&aacute; o desenvolvimento &mdash; internamente ou do lado do PAN</li></ul></td>
+      </tr>
+      <tr>
+        <td>
+          <p class="what">Finalizar os desenvolvimentos de tecnologia necess&aacute;rios do VW</p>
+          <span class="due due--tbd">TBD</span>
+        </td>
+        <td class="st-cell st-cell--block">
+          <span class="st-line"><svg class="mark mark--block" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg><span class="st-label">Bloqueado</span></span>
+          <span class="st-sub">prazo a definir</span>
+        </td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+        <td><ul class="cell-list"><li>Garantir que os nossos desenvolvimentos sejam priorizados junto ao VW</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+      </tr>
+      <tr>
+        <td>
+          <p class="what">Resolver as inconsist&ecirc;ncias nas ofertas do Bradesco</p>
+          <span class="due due--tbd">TBD</span>
+        </td>
+        <td class="st-cell st-cell--block">
+          <span class="st-line"><svg class="mark mark--block" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg><span class="st-label">Bloqueado</span></span>
+          <span class="st-sub">prazo a definir</span>
+        </td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+        <td><ul class="cell-list"><li>Garantir que os problemas de instabilidade sejam resolvidos</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+      </tr>
 
-</main>
+      <!-- ===================== FRENTE 4 ===================== -->
+      <tr class="group-start">
+        <td class="band-cell" rowspan="2" style="--frente: var(--frente-4);">
+          <div class="band-top">
+            <span class="badge" aria-hidden="true">4</span>
+            <h2 class="frente-name">Gest&atilde;o integrada do ciclo de cr&eacute;dito</h2>
+          </div>
+          <dl class="band-meta">
+            <dt>Resp.</dt><dd>B&aacute;rbara Gabrielle e Lucas &Aacute;vila</dd>
+            <dt>Valor</dt><dd class="band-value">TBC</dd>
+          </dl>
+        </td>
+        <td>
+          <p class="what">Levantar os dados de Bradesco e VW</p>
+          <span class="due">02/set</span>
+        </td>
+        <td class="st-cell st-cell--ok">
+          <span class="st-line"><svg class="mark mark--ok" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg><span class="st-label">Em andamento</span></span>
+          <span class="st-sub">dentro do plano</span>
+        </td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+      </tr>
+      <tr>
+        <td>
+          <p class="what">Criar score de cr&eacute;dito Localiza</p>
+          <span class="due due--tbd">TBD</span>
+        </td>
+        <td class="st-cell st-cell--late">
+          <span class="st-line"><svg class="mark mark--late" width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle class="mark-dot" cx="3" cy="8" r="1.9"/><circle class="mark-dot" cx="8" cy="8" r="1.9"/><circle class="mark-dot" cx="13" cy="8" r="1.9"/></svg><span class="st-label">Em andamento</span></span>
+          <span class="st-sub">fora do plano</span>
+        </td>
+        <td><ul class="cell-list"><li>Acessos concedidos e bases entendidas</li></ul></td>
+        <td><ul class="cell-list"><li>Estruturar as bases, treinar o modelo e fazer backtest com dados hist&oacute;ricos para avaliar dispers&atilde;o e acur&aacute;cia</li></ul></td>
+        <td><ul class="cell-list"><li class="na">N/A</li></ul></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <div class="foot">
+    <span class="foot-src">Fonte: memorando Lead to Sales &mdash; Acelera&ccedil;&atilde;o Seminovos e plano de escalada de F&amp;I (preliminar) &middot; Ref.: 03/set/26 &middot; TBD = prazo n&atilde;o acordado; TBC = valor a confirmar</span>
+    <span class="foot-class">Classifica&ccedil;&atilde;o da Informa&ccedil;&atilde;o: INTERNA</span>
+    <span class="foot-page">1</span>
+  </div>
+
+</section>
+</div>
+
+<script>
+(function () {
+  var slide = document.querySelector('.slide');
+  var stage = document.querySelector('.stage');
+  function fit() {
+    var pad = 32;
+    var s = Math.min((window.innerWidth - pad) / 1600, (window.innerHeight - pad) / 900);
+    s = Math.min(s, 1);
+    slide.style.transform = 'scale(' + s + ')';
+    stage.style.height = (900 * s + pad) + 'px';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+})();
+</script>
 </body>
 </html>
