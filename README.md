@@ -22,6 +22,7 @@ layout do painel.
 | `scripts/update_deck.py` | Atualiza o deck já no template Bain, preservando o branding |
 | `output/frentes_milestones.pptx` | Deck gerado do zero |
 | `output/260829__Acompanhamento_das_frentes_v2.pptx` | **Entregável atual** — deck Bain atualizado |
+| `output/pmo_status_frentes.html` | Painel de status das 4 frentes (simulador de pré-análise, distribuição de fichas, ecossistema de financiadoras, ciclo de crédito) |
 
 ## Como regerar
 
@@ -146,3 +147,23 @@ python3 scripts/build_treinamento.py
 O HTML gerado é autocontido (imagens em base64, sem fontes ou scripts externos),
 então pode ser enviado por e-mail e aberto em qualquer navegador de loja, sem
 internet. Navegação por setas ← →, clique nas laterais ou `Ctrl+P` para gerar PDF.
+
+## Painel de status das 4 frentes
+
+`output/pmo_status_frentes.html` é uma página autocontida (um único arquivo,
+sem dependências externas) com uma tabela por frente e as colunas *O que
+precisava ser feito*, *Prazo*, *Status*, *Progresso recente*, *Próximos passos*
+e *Pontos a escalar*.
+
+Convenção de status:
+
+| Marcador | Significado |
+|---|---|
+| Check verde | Concluído |
+| Três pontos verdes | Em andamento — dentro do plano |
+| Três pontos vermelhos | Em andamento — fora do plano |
+| Três pontos amarelos | Bloqueado — dependência externa, prazo a definir |
+
+O marcador nunca aparece sozinho: cada linha traz o rótulo escrito ao lado do
+ícone e uma barra de acento na primeira coluna. A folha de estilo de impressão
+gera A4 paisagem (`Ctrl/Cmd+P` → salvar como PDF) para colar em slide.
