@@ -318,3 +318,70 @@ python3 pptx_preview.py ../output/260903__Status_frentes_3paginas.pptx /tmp/prev
 - O símbolo do semáforo fica no mesmo parágrafo do rótulo, com tamanho próprio
   de run, para o check e os três pontos ficarem na linha do texto.
 - Símbolos são caracteres comuns (`✓` e `•`), não Wingdings.
+
+---
+
+# Página — Piloto de alocação de leads em loja próxima
+
+Recriação da página de acompanhamento do piloto de alocação (pré vs. pós
+piloto, por grupo), com o layout original preservado e duas mudanças:
+
+1. **Wordings migrados** de *loja escolhida / loja alocada* para **loja próxima**:
+   as categorias passaram a ser `Alocado em loja próxima` e
+   `NÃO alocado em loja próxima`, os cabeçalhos viraram
+   *"% conversão – leads com loja próxima identificada"* e a linha de base dos
+   gráficos virou `% dos leads` (antes `% total`), acompanhando a base dos
+   painéis novos.
+2. **Gráficos substituídos** pelos painéis atuais (pré-piloto de 103 dias,
+   01/04 a 13/07; pós-piloto oficial de 25 dias, 13/07 a 06/08).
+
+## Estrutura
+
+| Caminho | Conteúdo |
+|---|---|
+| `scripts/build_piloto_alocacao.py` | Monta a página (16:9) do zero, com os dados no topo do arquivo |
+| `output/piloto_alocacao_loja_proxima.pptx` | **Entregável** — a página em PPT |
+
+```bash
+pip install python-pptx
+python3 scripts/build_piloto_alocacao.py
+```
+
+## Layout preservado
+
+- Cabeçalhos em chevron (pré em preto, pós em cinza), régua vermelha sob o
+  título e tag `/PRELIMINAR`.
+- Três painéis tracejados — *Lojas do piloto* (vermelho), *Grupo controle* e
+  *Restante do Brasil* (cinza) — com o rótulo do grupo rotacionado à esquerda.
+- Barras marimekko (largura proporcional ao `% dos leads`), linha tracejada
+  vermelha da média, delta em p.p. entre as barras e a variação pré → pós
+  entre os dois gráficos de cada linha.
+- Caixa de destaque vermelha na linha do piloto e nota/fonte no rodapé.
+
+## Dados (razão das somas: total de vendas / total de leads)
+
+| Grupo | Pré: leads / vendas / média | Pós: leads / vendas / média | Variação |
+|---|---|---|---|
+| Lojas do piloto | 7.596 / 44 / 0,58% | 1.626 / 4 / 0,25% | **-~58%** |
+| Grupo controle | 74.255 / 380 / 0,51% | 15.213 / 85 / 0,56% | **+~9%** |
+| Restante do Brasil | 411.317 / 1.884 / 0,46% | 84.727 / 478 / 0,56% | **+~23%** |
+
+## Ajustes de conteúdo
+
+- **Título e conclusão reescritos.** Os dados novos invertem a mensagem: a
+  conversão das lojas do piloto caiu, enquanto controle e restante do Brasil
+  subiram. O título antigo (*aumento de ~20% vs. ~10%*) foi substituído pela
+  leitura atual, com a ressalva da base pequena do pós piloto.
+- **Caixa de conclusão do rodapé removida** (a escala para +70 lojas em 01/09
+  não é mais o fecho da página).
+- **Destaque da linha do piloto** reescrito: a conversão dos leads alocados em
+  loja próxima caiu de 0,55% para 0,18% (3 vendas em 1.623 leads).
+- **Sinal do delta na linha *Restante do Brasil*** corrigido para `+0,05 p.p.`
+  (pré) e `+0,06 p.p.` (pós). Os painéis de origem imprimem esses dois valores
+  com sinal negativo, mas a barra *Alocado em loja próxima* está **acima** da
+  *NÃO alocado* nas duas janelas (0,46% vs. 0,41% e 0,57% vs. 0,51%) — as
+  magnitudes batem, só o sinal estava invertido. Nas linhas 1 e 2 o sinal dos
+  painéis já era coerente e foi mantido.
+- **Barra fora de escala.** No pós piloto das lojas do piloto, os 33,33% da
+  categoria *NÃO alocado* vêm de 1 venda em 3 leads; a barra é marcada com
+  seta vermelha em vez de estourar o eixo.
