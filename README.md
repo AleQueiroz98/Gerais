@@ -23,6 +23,7 @@ layout do painel.
 | `output/frentes_milestones.pptx` | Deck gerado do zero |
 | `output/260829__Acompanhamento_das_frentes_v2.pptx` | **Entregável atual** — deck Bain atualizado |
 | `output/pmo_status_frentes.html` | Página única (16:9) com o status das 4 frentes de F&I |
+| `output/260903__Status_frentes_3paginas.pptx` | **Entregável atual** — deck editável de 3 páginas com o status das 4 frentes |
 
 ## Como regerar
 
@@ -230,3 +231,52 @@ placeholder. Trechos a destacar em negrito ficam no dicionário `BOLD`.
   estimativa for curta.
 - Células sem texto têm o parágrafo vazio fixado em 1pt e margens zeradas: um
   parágrafo vazio herda 18pt e forçaria ~0,4" de altura mínima na linha.
+
+---
+
+# Deck de 3 páginas do status das frentes (`pmo_deck.py`)
+
+Junta as duas versões da página de status em um único `.pptx` editável, mais
+uma terceira que combina as duas. Tudo em tabelas nativas do PowerPoint, então
+dá para editar célula a célula, inserir e remover linhas.
+
+| Página | O que é |
+|---|---|
+| 1 | Versão da página HTML: identidade por frente na faixa da esquerda, com o *color code* do plano de escalada, responsável, valor gerado e status em pastilha com rótulo escrito |
+| 2 | A página do print, gerada por `pmo_status.py` sem alteração |
+| 3 | Combinação das duas: color code e identidade da frente da 1; título construído a partir das contagens e contagem por frente da 2; a coluna *Pontos a escalar* sai da tabela e vira a faixa **Decisões pedidas nesta reunião** no pé da página |
+
+## Estrutura
+
+| Caminho | Conteúdo |
+|---|---|
+| `scripts/pmo_deck_content.py` | **Conteúdo das páginas 1 e 3** — frentes, responsável, valor, marcos e decisões pedidas |
+| `scripts/pmo_deck.py` | Monta as três páginas e chama `pmo_status.build()` para a página 2 |
+| `scripts/pptx_preview.py` | Preview HTML de um `.pptx`, lido da geometria real do arquivo |
+
+## Como regerar
+
+```bash
+pip install python-pptx Pillow
+cd scripts
+python3 pmo_deck.py
+
+# conferir o layout sem abrir o PowerPoint
+python3 pptx_preview.py ../output/260903__Status_frentes_3paginas.pptx /tmp/preview.html
+```
+
+## Notas de layout
+
+- **A barra de cor da frente é a primeira coluna da tabela**, mesclada
+  verticalmente sobre as linhas do grupo — não é um shape solto. Assim continua
+  colada na linha quando o texto for editado no PowerPoint.
+- A altura de cada linha é calculada a partir do texto real (métricas
+  Arial/Liberation Sans) considerando a coluna mais alta, incluindo a pastilha
+  de status e a linha do prazo. O corpo reduz de 9,5pt até 7,5pt para caber em
+  uma página; se nem no corpo mínimo couber, o build falha com a medida em vez
+  de gerar uma página com sobreposição.
+- A faixa de identidade da frente encolhe junto com o corpo (`band_sizes`), e a
+  altura do grupo nunca fica menor que o conteúdo da faixa.
+- O símbolo do semáforo fica no mesmo parágrafo do rótulo, com tamanho próprio
+  de run, para o check e os três pontos ficarem na linha do texto.
+- Símbolos são caracteres comuns (`✓` e `•`), não Wingdings.

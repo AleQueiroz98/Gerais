@@ -230,9 +230,8 @@ def row_heights(avail):
     return body_pt, heights
 
 
-def main():
-    prs = Presentation()
-    prs.slide_width, prs.slide_height = Inches(SW), Inches(SH)
+def build(prs):
+    """acrescenta a pagina de status ao deck recebido"""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     rect(slide, 0, 0, SW, SH, fill=WHITE)
 
@@ -323,10 +322,18 @@ def main():
     textbox(slide, ML, SH - 0.34, CW, 0.20, C.RODAPE,
             size=PT_FOOT, color=TEXT_HELPER)
 
+    return {'titulo_linhas': tit_n, 'corpo_pt': body_pt, 'linhas': nrows,
+            'topo': top, 'base': top + sum(heights)}
+
+
+def main():
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Inches(SW), Inches(SH)
+    info = build(prs)
     prs.save(OUT)
     print('pagina gerada | titulo %d linha(s) | corpo %.1fpt | %d linhas | '
-          'tabela de %.2f" a %.2f"' % (tit_n, body_pt, nrows, top,
-                                       top + sum(heights)))
+          'tabela de %.2f" a %.2f"' % (info['titulo_linhas'], info['corpo_pt'],
+                                       info['linhas'], info['topo'], info['base']))
 
 
 if __name__ == '__main__':
