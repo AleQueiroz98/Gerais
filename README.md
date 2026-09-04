@@ -136,18 +136,56 @@ preenchidos com a base da loja/região antes da aplicação.
 | `source/nova_jornada_pdv_simulacao.pdf` | Documentação original da nova jornada (fonte das telas) |
 | `scripts/treinamento_template.html` | Template do deck, com marcadores `{{TELA_*}}` |
 | `scripts/build_treinamento.py` | Extrai as telas do PDF e embute em base64 |
+| `scripts/extract_treinamento_layout.js` | Mede no Chromium o layout real de cada página do HTML |
+| `scripts/build_treinamento_ppt.py` | Monta o `.pptx` a partir do layout medido |
 | `output/treinamento_simulador_pdv.html` | **Entregável** — arquivo único, funciona offline |
+| `output/treinamento_simulador_pdv.pptx` | **Entregável** — mesmas 17 páginas em PowerPoint editável |
 
 ## Como regerar
 
 ```bash
-pip install pymupdf
-python3 scripts/build_treinamento.py
+pip install pymupdf python-pptx Pillow
+python3 scripts/build_treinamento.py          # HTML autocontido
+
+cd scripts                                    # versao PowerPoint
+node extract_treinamento_layout.js ../output/treinamento_simulador_pdv.html \
+     layout.json telas/
+python3 build_treinamento_ppt.py layout.json telas/ \
+     ../output/treinamento_simulador_pdv.pptx
 ```
 
 O HTML gerado é autocontido (imagens em base64, sem fontes ou scripts externos),
 então pode ser enviado por e-mail e aberto em qualquer navegador de loja, sem
 internet. Navegação por setas ← →, clique nas laterais ou `Ctrl+P` para gerar PDF.
+
+## Versão PowerPoint
+
+As 17 páginas do HTML viraram 17 slides de 1280 × 720 px (16:9 exato, 1 px CSS =
+9525 EMU), **sem imagem de fundo**: cada bloco do HTML é uma forma nativa e cada
+texto é uma caixa de texto do PowerPoint, com as mesmas coordenadas, cores,
+corpos de fonte, entrelinhas e *letter-spacing* do original. A conversão é
+medida, não estimada:
+
+- `extract_treinamento_layout.js` abre o HTML no Chromium, torna as 17 páginas
+  visíveis, e grava a caixa, o estilo computado e os trechos de texto de cada
+  elemento — inclusive os pseudo-elementos (`::before` da régua verde e das
+  bolinhas da lista, `::after` da seta do ciclo e do número da página).
+- `build_treinamento_ppt.py` traduz esse *display list* para o PPT: fundos e
+  bordas assimétricas viram retângulos, a seta do ciclo vira forma livre, a
+  tabela "antes × depois" vira tabela nativa (editável célula a célula), as
+  telas do produto entram como imagem com `object-fit: contain`, e a capa e o
+  fechamento recebem o gradiente linear do CSS.
+- **Correção de linha de base**: o CSS distribui meia-entrelinha acima da
+  primeira linha, enquanto o PowerPoint mede a primeira linha de base como
+  `topo + entrelinha − descendente`. O script compensa a diferença a partir das
+  métricas da fonte (`CONTEUDO`), o que zera o desvio vertical dos blocos.
+- Cada forma leva o nome da classe do HTML (`card · fundo`, `titulo · texto`),
+  para achar o bloco no painel de seleção do PowerPoint.
+
+O deck usa **Segoe UI**, a mesma família declarada no HTML. Como o container de
+build não tem essa fonte, a medição roda em Liberation Sans e as métricas da
+Segoe UI entram por constante; comparando página a página com a mesma fonte nas
+duas pontas, a diferença estrutural contra o HTML fica em 0,4%.
 
 ## Página de status das 4 frentes de F&I
 
