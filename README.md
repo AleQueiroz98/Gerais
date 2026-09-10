@@ -38,6 +38,8 @@ python3 scripts/check_ambiente.py   # no Windows: py scripts\check_ambiente.py
 | `output/260829__Acompanhamento_das_frentes_v2.pptx` | **Entregável atual** — deck Bain atualizado |
 | `output/pmo_status_frentes.html` | Página única (16:9) com o status das 4 frentes de F&I |
 | `output/260903__Status_frentes_3paginas.pptx` | **Entregável atual** — deck editável de 3 páginas com o status das 4 frentes |
+| `scripts/build_recap_alavancas.py` | Monta o recap da agenda de valor (conversão por informação coletada) |
+| `output/recap_alavancas_conversao.pptx` | **Entregável atual** — recap redesenhado, builds das duas alavancas e página da alavanca 1 |
 
 ## Como regerar
 
@@ -399,3 +401,63 @@ python3 scripts/build_piloto_alocacao.py
 - **Barra fora de escala.** No pós piloto das lojas do piloto, os 33,33% da
   categoria *NÃO alocado* vêm de 1 venda em 3 leads; a barra é marcada com
   seta vermelha em vez de estourar o eixo.
+
+
+## Recap da agenda de valor — conversão por informação coletada
+
+`scripts/build_recap_alavancas.py` gera `output/recap_alavancas_conversao.pptx`
+(4 páginas 16:9). Reconstrói o recap de conversão por dado coletado do lead com
+a mensagem da **alavanca 1** (aumentar a proporção de leads com informação
+mínima) explícita no visual.
+
+```bash
+pip install python-pptx Pillow
+cd scripts
+python3 build_recap_alavancas.py ../output/recap_alavancas_conversao.pptx
+```
+
+| Página | Conteúdo |
+|---|---|
+| 1 | Recap completo: marimekko de 10 grupos + faixa de nível de informação |
+| 2 | Build da alavanca 1 (resto da página esmaecido) |
+| 3 | Build da alavanca 2 (resto da página esmaecido) |
+| 4 | Página dedicada à alavanca 1: escada de 3 degraus e pontos de captura |
+
+### O que mudou em relação à versão anterior
+
+- **Faixa de nível de informação do lead** sobre o gráfico, agregando as 10
+  barras em três degraus com a conversão média ponderada de cada um: carro
+  escolhido + CEP (0,71%), carro escolhido sem CEP (0,59%) e carro não
+  escolhido (0,41%). O leitor não precisa mais tirar a média de 10 barras de
+  cabeça.
+- **Sentido da seta corrigido.** Na versão anterior as setas da alavanca 1
+  saíam de *Lead deu CEP* em direção a *Não deu CEP*, o oposto do movimento
+  desejado. Agora uma seta única aponta para o grupo com mais informação e
+  carrega o volume em jogo: 482k leads/mês (80%).
+- **Média de cada grupo tracejada sobre as barras**, na cor da faixa
+  correspondente, para ligar a agregação à evidência.
+- **Rótulos legíveis.** Barra estreita ganha cartão branco e rótulo cortado
+  por tracejado sobe para cima da linha, em vez de tapá-la.
+- **Builds anotados**, não apenas esmaecidos: cada build acrescenta um callout
+  com os números da alavanca destacada.
+- **Página 4** liga a alavanca aos três pontos de captura do próprio
+  cronograma (milestones 2.1.1 site, 2.1.2 Facebook e WhatsApp, 2.1.3
+  classificados) e traz cenários de migração em p.p.
+
+### Leituras que a análise levantou
+
+- **CEP sozinho não move conversão.** Sem carro escolhido, com CEP dá 0,41% e
+  sem CEP dá 0,42%. O CEP paga quando o carro é conhecido (0,71% contra
+  0,59%). Por isso a escada tem três degraus, não quatro, e o carro é o dado
+  dominante.
+- **Volume e valor não fecham entre si.** As barras somam 603k leads/mês;
+  +0,1 p.p. sobre essa base daria ~600 carros/mês, não 300. O rodapé de
+  +0,1 a 0,3 p.p. → 300 a 950 carros implica uma base de ~310k/mês. O texto do
+  rodapé foi preservado como está e a página 4 não deriva número novo de
+  carros — fala só em p.p.
+- **Barras 8 e 9** aparecem ambas como *loja mais próxima* ✗ (39k e 40k
+  leads/mês). Se houver um critério que as separa, ele não estava no slide de
+  origem.
+- **Viés de seleção.** Os grupos também diferem em intenção de compra, então o
+  ganho exige coleta ativa da informação e não apenas segmentar os leads. Isso
+  está como nota de rodapé nas quatro páginas.
