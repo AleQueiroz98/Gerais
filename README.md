@@ -6,6 +6,20 @@ contra o memorando estratégico Lead to Sales (v2, 17/ago). Cada página traz
 apenas o **objetivo da frente** e a **tabela de milestones**, replicando o
 layout do painel.
 
+## Antes de comecar
+
+Os comandos deste README usam `python3` (padrao Mac/Linux). No notebook
+Windows, use `py` no lugar de `python3` e instale todas as dependencias de
+uma vez com `py -m pip install -r requirements.txt`.
+
+Nunca rodou Python nesta maquina? Siga o
+[`SETUP_WINDOWS.md`](SETUP_WINDOWS.md) — instalacao passo a passo, sem
+direitos de administrador. Para conferir se o ambiente esta pronto:
+
+```bash
+python3 scripts/check_ambiente.py   # no Windows: py scripts\check_ambiente.py
+```
+
 ## Estrutura
 
 | Caminho | Conteúdo |
