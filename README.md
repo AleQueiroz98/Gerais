@@ -461,3 +461,66 @@ python3 build_recap_alavancas.py ../output/recap_alavancas_conversao.pptx
 - **Viés de seleção.** Os grupos também diferem em intenção de compra, então o
   ganho exige coleta ativa da informação e não apenas segmentar os leads. Isso
   está como nota de rodapé nas quatro páginas.
+---
+
+# Funil lead → venda por canal (jan-ago/26)
+
+Página única (16:9) com o funil completo do lead à venda, mês a mês, para os
+três canais — **CV** (já sem Liza e sem Central), **Liza** e **Central** — mais
+a coluna de meta. Segue o rascunho de três painéis, com a linha de conversão
+final em heatmap contra a meta de 0,94%.
+
+## Estrutura
+
+| Caminho | Conteúdo |
+|---|---|
+| `scripts/build_funil_conversao.py` | Monta a página do zero; volumes brutos e leituras no topo do arquivo |
+| `output/funil_conversao_canais.pptx` | **Entregável** — a página em PPT |
+
+```bash
+pip install python-pptx Pillow
+python3 scripts/build_funil_conversao.py
+python3 scripts/pptx_preview.py output/funil_conversao_canais.pptx /tmp/prev.html
+```
+
+## Notas de layout
+
+- **Taxas recalculadas**, nunca transcritas: o arquivo guarda só os volumes
+  brutos (leads, fichas enviadas, aprovadas, faturadas e vendas) e todas as
+  porcentagens saem daí. Confere com os painéis de origem em todos os meses.
+- **Brackets do funil** à esquerda (LEADS, FICHAS, APROVAÇÃO, FATURAMENTO,
+  VENDA), com rótulo rotacionado; a etapa de venda é a única em vermelho.
+- **Heatmap na linha `% de vendas / leads`**, medido contra a meta de 0,94%:
+  verde quando o mês bate a meta, intensidade de vermelho proporcional à
+  distância abaixo dela, e moldura vermelha na linha inteira.
+- **Unidade escolhida por linha**, não por célula — se o maior valor da linha
+  passa de 10 mil, todos os meses daquela linha vão em `k`, para o olho não
+  comparar `9.060` com `15,6k`.
+- **Coluna Meta** em cinza à direita de cada painel, preenchida só onde há meta
+  definida (leads, vendas e % de vendas); as demais células ficam vazias.
+- Chip de variação da conversão no cabeçalho de cada canal (último mês com dado
+  vs. primeiro), em verde ou rubi.
+
+## Leitura dos dados
+
+| Canal | Conversão lead → venda | Variação | Leitura |
+|---|---|---|---|
+| CV | 0,75% (jan) → 0,67% (ago) | **-11%** | Leads -29% (454k → 321k); eficiência do funil estável |
+| Liza | 0,16% (abr) → 0,03% (ago) | **-79%** | Leads 7,2x desde abr/26, conversão despenca |
+| Central | 0,80% (jan) → 1,18% (ago) | **+48%** | Único acima da meta; aprovação de 51% para 81% |
+| **Consolidado** | 0,75% → 0,58% | **-23%** | ~38% abaixo da meta de 0,94% |
+
+## Ajustes de conteúdo
+
+- **Título reescrito.** O rascunho partia de "resultado tem melhorado x%"; os
+  dados mostram o contrário no consolidado (-23%) e em dois dos três canais. O
+  título traz a leitura real, com a Central como única exceção.
+- **Coluna de métricas corrigida.** O rascunho repetia `# fichas enviadas` e
+  trazia `% fichas efetivadas`; a lista virou um funil sem repetição, com a
+  base de cada taxa explícita no rótulo (`% aprovadas / enviadas`,
+  `% faturadas / aprovadas`, `% de vendas / leads`).
+- **Inversão da Liza sinalizada em nota.** Em ago/26 a Liza registra 248 fichas
+  faturadas e apenas 20 vendas — o oposto do CV (1.377 contra 2.144) —, o que
+  sugere lacuna de atribuição da venda ao canal, e não só queda de conversão.
+- **Meta de vendas derivada**, não transcrita: 0,94% sobre a meta mensal de
+  leads de cada canal (CV 400k → 3.760, Liza 50k → 470, Central 20k → 188).

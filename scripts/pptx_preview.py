@@ -102,6 +102,18 @@ def render_table(shape, parts):
                      % (xs[0], y, xs[-1] - xs[0]))
 
 
+def border_of(shape):
+    try:
+        line = shape.line
+        if line.fill.type is None:
+            return ''
+        w = line.width.pt if line.width else 0.75
+        return 'border:%.1fpx solid %s;' % (max(w * PX / 72.0, 1.0),
+                                            '#' + str(line.color.rgb))
+    except Exception:
+        return ''
+
+
 def render_shape(shape, parts):
     if shape.has_table:
         render_table(shape, parts)
@@ -114,13 +126,15 @@ def render_shape(shape, parts):
     body = ''
     if shape.has_text_frame:
         body = text_html(shape.text_frame)
+    rot = shape.rotation or 0
     style = ('position:absolute;left:%.1fpx;top:%.1fpx;width:%.1fpx;'
              'height:%.1fpx;box-sizing:border-box;display:flex;'
-             'flex-direction:column;%s;%s'
+             'flex-direction:column;%s;%s%s%s'
              % (px(shape.left), px(shape.top), px(shape.width),
                 px(shape.height), frame_style(shape.text_frame)
                 if shape.has_text_frame else 'justify-content:flex-start',
-                'background:%s;' % fill if fill else ''))
+                'background:%s;' % fill if fill else '', border_of(shape),
+                'transform:rotate(%.1fdeg);' % rot if rot else ''))
     parts.append('<div style="%s">%s</div>' % (style, body))
 
 
