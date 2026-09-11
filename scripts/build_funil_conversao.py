@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Deck 'Funil lead -> venda por canal' (CV, Liza e Central, jan-ago/26).
+"""Pagina 'Funil lead -> venda por canal' (CV, Liza e Central, jan-ago/26).
 
-Uma pagina de resumo e uma pagina por canal, todas com tabelas nativas do
-PowerPoint: cada numero fica na propria celula, entao da para selecionar o
-bloco e colar direto no Excel. As taxas sao recalculadas a partir dos volumes
-brutos -- nada e transcrito de valores ja arredondados -- e a linha de
-conversao final recebe heatmap contra a meta de 0,94%.
+Uma unica pagina 16:9 com os tres paineis lado a lado, como no rascunho, numa
+tabela nativa do PowerPoint: cada numero fica na propria celula, entao da para
+selecionar o bloco e colar direto no Excel. As taxas sao recalculadas a partir
+dos volumes brutos -- nada e transcrito de valores ja arredondados -- e a linha
+de conversao final recebe heatmap contra a meta de 0,94%.
 
 Os rotulos e a ordem das linhas seguem a planilha de origem, para o bloco colar
 alinhado com ela.
+
+As larguras das colunas saem do numero mais largo de cada painel a 8pt (o CV
+precisa de mais espaco por causa dos leads na casa dos 454 mil); o conjunto
+fecha exatamente os 12,73" uteis da pagina.
 """
 from pptx import Presentation
 from pptx.util import Inches, Pt
@@ -29,6 +33,8 @@ GREY4  = RGBColor(0xB4, 0xB4, 0xB4)
 GREY5  = RGBColor(0xDC, 0xDC, 0xDC)
 BAND   = RGBColor(0xF2, 0xF2, 0xF2)   # linhas de taxa sobre o total de leads
 METABG = RGBColor(0xEC, 0xEC, 0xEC)   # coluna de meta
+MINT   = RGBColor(0x7F, 0xD1, 0xAE)   # positivo sobre a barra escura
+ROSE   = RGBColor(0xFF, 0x8A, 0x8A)   # negativo sobre a barra escura
 WHITE  = RGBColor(0xFF, 0xFF, 0xFF)
 FONT   = "Arial"
 LANG   = "pt-BR"
@@ -38,17 +44,19 @@ SW, SH = 13.333, 7.5
 MARGIN_L, MARGIN_R = 0.30, 13.03
 TITLE_Y, TITLE_H = 0.17, 0.62
 RULE_Y = 0.90
-READ_Y, READ_H = 1.00, 0.30
-TBL_Y = 1.40
-NOTE_Y = 6.98
+TBL_Y = 1.00
+READ_Y, READ_H = 6.36, 0.52
+NOTE_Y = 6.92
 
 MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago"]
 META_CONV = 0.94                      # meta de conversao lead -> venda (%)
 
-# larguras da tabela de detalhe: rotulo + 8 meses + meta
-LBL_W, META_W = 2.40, 1.05
-MON_W = (MARGIN_R - MARGIN_L - LBL_W - META_W) / 8.0
-HEAD_H, ROW_H = 0.36, 0.455
+# a tabela e uma so: rotulo + 3 paineis de 9 colunas (8 meses + meta),
+# separados por uma coluna-espacador estreita
+PT_DADO = 8.0                         # menor fonte da pagina
+LBL_W, GAP_W = 1.52, 0.07
+COL_W = {"CV (sem Liza e sem Central)": 0.4515, "Liza": 0.3895, "Central": 0.3895}
+PANEL_H, MON_H, ROW_H = 0.38, 0.26, 0.42
 
 # ---------------------------------------------------------------- dados
 # volumes brutos por mes (jan a ago/26); None = canal ainda nao operava
@@ -63,10 +71,8 @@ CANAIS = [
         apr=[5711, 4703, 5161, 5203, 5161, 5256, 4648, 4619],
         fat=[1933, 1553, 1803, 1654, 1575, 1646, 1527, 1377],
         ven=[3416, 2674, 3183, 2816, 2742, 2669, 2480, 2144],
-        titulo=("CV perde escala e conversão ao mesmo tempo: leads −29% e conversão −11% "
-                "(0,75%→0,67%), com o funil interno praticamente estável"),
-        leitura=("Queda vem do topo, não do funil: fichas enviadas sobre leads sobe de 3,5% para 4,7%, "
-                 "mas aprovação cai de 36% para 30% e o volume de leads recua 29%"),
+        leitura=("Queda vem do topo, não do funil: os leads caem 29% (454k→321k) e as taxas "
+                 "internas de aprovação e faturamento seguem no patamar de janeiro"),
     ),
     dict(
         nome="Liza",
@@ -77,10 +83,8 @@ CANAIS = [
         apr=[N, N, N, 141, 236, 285, 466, 809],
         fat=[N, N, N, 50, 81, 85, 168, 248],
         ven=[N, N, N, 82, 157, 166, 297, 389],
-        titulo=("Liza escala 7,2x em cinco meses e a conversão cai de 1,01% para 0,67% (−34%), "
-                "saindo de acima da meta para abaixo dela"),
-        leitura=("Trade-off volume × qualidade: até jul/26 a Liza operou acima ou na meta de 0,94%; "
-                 "o salto de 31k para 58k leads em ago/26 derrubou a conversão a 0,67%"),
+        leitura=("Trade-off volume × qualidade: operou acima da meta até jul/26 e caiu a 0,67% "
+                 "ao saltar de 31k para 58k leads em ago/26"),
     ),
     dict(
         nome="Central",
@@ -91,10 +95,8 @@ CANAIS = [
         apr=[69, 66, 82, 71, 78, 91, 543, 320],
         fat=[29, 35, 43, 28, 29, 32, 88, 68],
         ven=[116, 101, 136, 98, 101, 83, 210, 107],
-        titulo=("Central é o único canal acima da meta: conversão sobe 48% (0,80%→1,18%) com "
-                "aprovação de fichas saltando de 51% para 81%"),
-        leitura=("Ganho é de qualidade, não de escala: leads caem 38% (14,5k→9,1k), mas o envio de "
-                 "fichas sobe de 0,9% para 4,4% dos leads e a aprovação quase dobra"),
+        leitura=("Ganho de qualidade, não de escala: com 38% menos leads, o envio de fichas "
+                 "sobe de 0,9% para 4,4% e a aprovação dobra"),
     ),
 ]
 
@@ -113,33 +115,15 @@ LINHAS = [
     ("% de vendas",                 "ven_leads", "pct2"),
 ]
 
-TITULO_RESUMO = ("Conversão lead→venda cai ~10% no consolidado (0,75%→0,68%) e segue 0,26 p.p. "
-                 "abaixo da meta de 0,94%: só a Central avança, Liza perde conversão ao escalar")
+TITULO = ("Conversão lead→venda cai ~10% no consolidado (0,75%→0,68%) e segue 0,26 p.p. abaixo "
+          "da meta de 0,94%: só a Central avança, Liza perde conversão ao escalar")
 
-NOTA_BASE = ("Nota: CV exclui Liza e Central. Taxas recalculadas sobre os volumes brutos; "
-             "% de fichas enviadas, % total de fichas faturadas e % de vendas são sobre o total de leads "
-             "do mês, % fichas aprovadas sobre as enviadas e % fichas faturadas sobre as aprovadas. "
-             "Meta de conversão de 0,94% aplicada sobre a meta mensal de leads de cada canal "
-             "(CV 400k, Liza 50k, Central 20k). % leads sem info de CEP não disponível para jan-mar/26; "
-             "Liza inicia em abr/26. Fonte: base de leads, base de fichas e base de vendas faturadas")
-
-LEITURAS = [
-    ("O problema é de topo de funil, não do funil interno",
-     "Os leads consolidados caíram 17% (469k→389k) e a conversão, 10%. As taxas internas de "
-     "aprovação e faturamento seguem no mesmo patamar de janeiro."),
-    ("Liza mostra trade-off claro entre volume e qualidade",
-     "Operou acima da meta até jul/26, com até 31k leads/mês. Ao saltar para 58k em ago/26, "
-     "a conversão caiu a 0,67% — vale checar a origem do volume incremental."),
-    ("Central ganha conversão sem precisar de escala",
-     "Com 38% menos leads, subiu a conversão a 1,18% elevando o envio de fichas "
-     "(0,9%→4,4% dos leads) e a aprovação (51%→81%). Único canal acima da meta."),
-]
-
-NOTA_RESUMO = ("Nota: CV exclui Liza e Central. Primeiro mês = jan/26, exceto Liza, que inicia em abr/26. "
-               "Conversão = vendas totais / leads do mês. Meta consolidada = soma das metas mensais de "
-               "leads dos três canais (470k) à conversão-meta de 0,94%. Detalhe mês a mês de cada canal "
-               "nas páginas seguintes. Fonte: base de leads e base de vendas faturadas")
-
+NOTA = ("Nota: CV exclui Liza e Central. Taxas recalculadas sobre os volumes brutos; "
+        "% de fichas enviadas, % total de fichas faturadas e % de vendas são sobre o total de leads "
+        "do mês, % fichas aprovadas sobre as enviadas e % fichas faturadas sobre as aprovadas. "
+        "Meta de conversão de 0,94% aplicada sobre a meta mensal de leads de cada canal "
+        "(CV 400k, Liza 50k, Central 20k). % leads sem info de CEP não disponível para jan-mar/26; "
+        "Liza inicia em abr/26. Fonte: base de leads, base de fichas e base de vendas faturadas")
 
 # ---------------------------------------------------------------- formatacao
 def fmt(v, kind):
@@ -247,199 +231,142 @@ def hline(slide, x1, y, x2, color=GREY4, w=0.75):
     return c
 
 
-def nova_pagina(prs, titulo, leitura=None, nota=NOTA_BASE):
-    slide = prs.slides.add_slide(prs.slide_layouts[6])
-    txt(slide, MARGIN_L, TITLE_Y, 10.85, TITLE_H, titulo, size=18, color=GREY1,
-        anchor=MSO_ANCHOR.TOP, line=1.06)
-    txt(slide, 11.25, TITLE_Y + 0.36, 1.78, 0.22, "/ P R E L I M I N A R", size=9,
-        color=GREY3, align=PP_ALIGN.RIGHT)
-    hline(slide, MARGIN_L, RULE_Y, MARGIN_R, RED, 2.25)
-    if leitura:
-        txt(slide, MARGIN_L, READ_Y, MARGIN_R - MARGIN_L, READ_H, leitura,
-            size=9.5, color=GREY2, anchor=MSO_ANCHOR.TOP, line=1.12)
-    txt(slide, MARGIN_L, NOTE_Y, MARGIN_R - MARGIN_L, 0.48, nota, size=9,
-        color=GREY3, anchor=MSO_ANCHOR.TOP, line=1.18)
-    return slide
+def hcell(tbl, r, c):
+    return tbl.cell(r, c)
 
 
-def nova_tabela(slide, x, y, larguras, alturas):
-    tbl = slide.shapes.add_table(len(alturas), len(larguras), Inches(x), Inches(y),
-                                 Inches(sum(larguras)), Inches(sum(alturas))).table
+# ---------------------------------------------------------------- montagem
+def colunas():
+    """larguras e indice da primeira coluna de dados de cada painel"""
+    largs, inicio = [LBL_W], []
+    for i, canal in enumerate(CANAIS):
+        if i:
+            largs.append(GAP_W)
+        inicio.append(len(largs))
+        largs += [COL_W[canal["nome"]]] * 9
+    return largs, inicio
+
+
+def monta_tabela(slide):
+    largs, inicio = colunas()
+    alturas = [PANEL_H, MON_H] + [ROW_H] * len(LINHAS)
+    tbl = slide.shapes.add_table(len(alturas), len(largs), Inches(MARGIN_L),
+                                 Inches(TBL_Y), Inches(sum(largs)),
+                                 Inches(sum(alturas))).table
     set_table_plain(tbl)
-    for i, w in enumerate(larguras):
+    for i, w in enumerate(largs):
         tbl.columns[i].width = Inches(w)
     set_row_heights(tbl, alturas)
     for r in range(len(alturas)):
-        for c in range(len(larguras)):
+        for c in range(len(largs)):
             cell_box(tbl.cell(r, c), fill=None)
-    return tbl
+    return tbl, inicio
 
 
-# ---------------------------------------------------------------- pagina de canal
-def pagina_canal(prs, canal):
-    slide = nova_pagina(prs, canal["titulo"], canal["leitura"])
+def cabecalho(tbl, inicio):
+    """linha 0: barra preta com o nome do canal e a variacao da conversao;
+    linha 1: meses e coluna de meta"""
+    cell_text(tbl.cell(0, 0), "Funil lead → venda", 10, GREY1, bold=True,
+              anchor=MSO_ANCHOR.BOTTOM, mx=0.04, mb=0.04)
+    cell_text(tbl.cell(1, 0), "2026", 8.5, GREY3, bold=True,
+              anchor=MSO_ANCHOR.MIDDLE, mx=0.04)
+    cell_border(tbl.cell(1, 0), 'B', GREY1, 1.25)
 
-    d = delta_conv(canal)
-    txt(slide, 10.60, READ_Y - 0.02, 2.43, 0.34,
-        [("Conversão lead→venda  ", {"size": 9, "color": GREY2}),
-         ("%+d%%" % round(d), {"size": 14, "bold": True,
-                               "color": FOREST if d > 0 else RUBY})],
-        align=PP_ALIGN.RIGHT)
+    for canal, c0 in zip(CANAIS, inicio):
+        d = delta_conv(canal)
+        alvo = tbl.cell(0, c0)
+        alvo.merge(tbl.cell(0, c0 + 8))
+        cell_box(alvo, fill=GREY1)
+        cell_text(alvo, [(canal["nome"] + "     ", False)], 10, WHITE, bold=True,
+                  anchor=MSO_ANCHOR.MIDDLE, mx=0.08)
+        p = alvo.text_frame.paragraphs[0]
+        for trecho, cor in ((" conversão ", GREY4), ("%+d%%" % round(d), None)):
+            r = p.add_run()
+            r.text = trecho
+            r.font.name, r.font.size = FONT, Pt(8 if cor else 10)
+            r.font.bold = cor is None
+            r.font.color.rgb = cor or (MINT if d > 0 else ROSE)
+            r.font._rPr.set('lang', LANG)
 
-    larg = [LBL_W] + [MON_W] * 8 + [META_W]
-    alt = [HEAD_H] + [ROW_H] * len(LINHAS)
-    tbl = nova_tabela(slide, MARGIN_L, TBL_Y, larg, alt)
+        for i, mes in enumerate(MESES):
+            cell_text(tbl.cell(1, c0 + i), mes, 8.5, GREY1, bold=True,
+                      align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, mx=0.01)
+        meta = tbl.cell(1, c0 + 8)
+        cell_box(meta, fill=METABG)
+        cell_text(meta, "Meta", 8.5, RED, bold=True,
+                  align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, mx=0.01)
+        for i in range(9):
+            cell_border(tbl.cell(1, c0 + i), 'B', GREY1, 1.25)
 
-    # cabecalho: nome do canal, meses e coluna de meta
-    cell_text(tbl.cell(0, 0), canal["nome"], 10, GREY1, bold=True,
-              anchor=MSO_ANCHOR.MIDDLE, mx=0.06)
-    for i, mes in enumerate(MESES):
-        cell_text(tbl.cell(0, i + 1), "%s/26" % mes, 9.5, GREY1, bold=True,
-                  align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
-    cell_text(tbl.cell(0, 9), "Meta", 9.5, RED, bold=True,
-              align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
-    for c in range(10):
-        cell_border(tbl.cell(0, c), 'T', GREY1, 1.25)
-        cell_border(tbl.cell(0, c), 'B', GREY1, 1.25)
 
-    for ri, (rotulo, chave, kind) in enumerate(LINHAS, start=1):
-        vals = serie(canal, chave)
+def corpo(tbl, inicio):
+    for ri, (rotulo, chave, kind) in enumerate(LINHAS, start=2):
         # taxas medidas sobre o total de leads ganham fundo, para separar do
         # resto do funil, que usa a etapa anterior como base
         sobre_leads = chave in ("fat_leads", "ven_leads")
         forte = chave == "ven_leads"
         fundo = BAND if sobre_leads and not forte else None
-        size = 10 if kind == "num" or sobre_leads else 9.5
+        destaque = rotulo.startswith("#") or sobre_leads
 
-        cell_text(tbl.cell(ri, 0), rotulo, size,
-                  GREY1 if rotulo.startswith("#") or sobre_leads else GREY2,
-                  bold=rotulo.startswith("#") or sobre_leads,
-                  anchor=MSO_ANCHOR.MIDDLE, mx=0.06)
+        cell_text(tbl.cell(ri, 0), rotulo, PT_DADO, GREY1 if destaque else GREY2,
+                  bold=destaque, anchor=MSO_ANCHOR.MIDDLE, mx=0.04)
         cell_box(tbl.cell(ri, 0), fill=fundo)
+        cell_border(tbl.cell(ri, 0), 'T', GREY5, 0.5)
 
-        for i, v in enumerate(vals):
-            cell = tbl.cell(ri, i + 1)
-            cor = GREY1 if kind == "num" or sobre_leads else GREY2
-            bold = kind == "num" or sobre_leads
-            if forte:
-                fill_heat, cor, bold = heat(v)
-                cell_box(cell, fill=fill_heat)
-            else:
-                cell_box(cell, fill=fundo)
-            if v is None:
-                cor = GREY4
-            cell_text(cell, fmt(v, kind), size, cor, bold=bold,
-                      align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+        for canal, c0 in zip(CANAIS, inicio):
+            vals = serie(canal, chave)
+            for i, v in enumerate(vals):
+                cell = tbl.cell(ri, c0 + i)
+                cor, bold = (GREY1, True) if destaque else (GREY2, False)
+                if forte:
+                    fill_heat, cor, bold = heat(v)
+                    cell_box(cell, fill=fill_heat)
+                else:
+                    cell_box(cell, fill=fundo)
+                cell_text(cell, fmt(v, kind), PT_DADO, GREY4 if v is None else cor,
+                          bold=bold, align=PP_ALIGN.CENTER,
+                          anchor=MSO_ANCHOR.MIDDLE, mx=0.01)
 
-        mv = meta_cell(canal, chave)
-        cell_box(tbl.cell(ri, 9), fill=METABG)
-        cell_text(tbl.cell(ri, 9), mv or "", 10, RED, bold=True,
-                  align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+            meta = tbl.cell(ri, c0 + 8)
+            cell_box(meta, fill=METABG)
+            cell_text(meta, meta_cell(canal, chave) or "", PT_DADO, RED, bold=True,
+                      align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, mx=0.01)
 
-        for c in range(10):
-            cell_border(tbl.cell(ri, c), 'T', GREY5, 0.5)
-        if forte:
-            for c in range(10):
-                cell_border(tbl.cell(ri, c), 'T', RED, 1.25)
-                cell_border(tbl.cell(ri, c), 'B', RED, 1.25)
-
-    cell_box(tbl.cell(0, 9), fill=METABG,
-             borders=(None, None, GREY1, GREY1), lw=1.25)
-    cell_text(tbl.cell(0, 9), "Meta", 9.5, RED, bold=True,
-              align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
-    return slide
+            for i in range(9):
+                cell_border(tbl.cell(ri, c0 + i), 'T', GREY5, 0.5)
+                if forte:
+                    cell_border(tbl.cell(ri, c0 + i), 'T', RED, 1.25)
+                    cell_border(tbl.cell(ri, c0 + i), 'B', RED, 1.25)
 
 
-# ---------------------------------------------------------------- pagina de resumo
-COLS_RESUMO = ["Canal", "Leads 1º mês", "Leads ago/26", "Δ leads",
-               "Vendas 1º mês", "Vendas ago/26", "Conv. 1º mês", "Conv. ago/26",
-               "Δ conversão"]
+def build():
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Inches(SW), Inches(SH)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+
+    txt(slide, MARGIN_L, TITLE_Y, 10.85, TITLE_H, TITULO, size=18, color=GREY1,
+        anchor=MSO_ANCHOR.TOP, line=1.06)
+    txt(slide, 11.25, TITLE_Y + 0.36, 1.78, 0.22, "/ P R E L I M I N A R", size=9,
+        color=GREY3, align=PP_ALIGN.RIGHT)
+    hline(slide, MARGIN_L, RULE_Y, MARGIN_R, RED, 2.25)
+
+    tbl, inicio = monta_tabela(slide)
+    cabecalho(tbl, inicio)
+    corpo(tbl, inicio)
+
+    # leitura de uma linha por painel, alinhada com as colunas do painel
+    largs, _ = colunas()
+    for canal, c0 in zip(CANAIS, inicio):
+        x = MARGIN_L + sum(largs[:c0])
+        txt(slide, x, READ_Y, sum(largs[c0:c0 + 9]), READ_H, canal["leitura"],
+            size=8.5, color=GREY2, anchor=MSO_ANCHOR.TOP, line=1.16)
+
+    txt(slide, MARGIN_L, NOTE_Y, MARGIN_R - MARGIN_L, 0.48, NOTA, size=8,
+        color=GREY3, anchor=MSO_ANCHOR.TOP, line=1.18)
+
+    out = "/home/user/Gerais/output/funil_conversao_canais.pptx"
+    prs.save(out)
+    print("saved %s (%d pagina)" % (out, len(prs.slides)))
 
 
-def linha_resumo(nome, leads, vendas, i0):
-    c0 = vendas[i0] / leads[i0] * 100.0
-    c1 = vendas[-1] / leads[-1] * 100.0
-    return [nome, fmt(leads[i0], "num"), fmt(leads[-1], "num"),
-            "%+d%%" % round((leads[-1] / leads[i0] - 1) * 100),
-            fmt(vendas[i0], "num"), fmt(vendas[-1], "num"),
-            fmt(c0, "pct2"), fmt(c1, "pct2"),
-            "%+d%%" % round((c1 / c0 - 1) * 100)]
-
-
-def pagina_resumo(prs):
-    slide = nova_pagina(prs, TITULO_RESUMO, nota=NOTA_RESUMO)
-
-    tot_l = [a + b + (c or 0) for a, b, c in
-             zip(CANAIS[0]["leads"], CANAIS[2]["leads"], CANAIS[1]["leads"])]
-    tot_v = [a + b + (c or 0) for a, b, c in
-             zip(CANAIS[0]["ven"], CANAIS[2]["ven"], CANAIS[1]["ven"])]
-    meta_l = sum(c["meta_leads"] for c in CANAIS)
-
-    linhas = [linha_resumo(c["nome"], c["leads"], c["ven"], primeiro_mes(c))
-              for c in CANAIS]
-    linhas.append(linha_resumo("Consolidado", tot_l, tot_v, 0))
-    linhas.append(["Meta mensal", fmt(meta_l, "num"), fmt(meta_l, "num"), "–",
-                   fmt(meta_l * META_CONV / 100.0, "num"),
-                   fmt(meta_l * META_CONV / 100.0, "num"),
-                   fmt(META_CONV, "pct2"), fmt(META_CONV, "pct2"), "–"])
-
-    larg = [2.65] + [1.26] * 8
-    alt = [0.46] + [0.52] * len(linhas)
-    tbl = nova_tabela(slide, MARGIN_L, 1.30, larg, alt)
-
-    for c, titulo in enumerate(COLS_RESUMO):
-        cell_text(tbl.cell(0, c), titulo, 10, GREY1, bold=True,
-                  align=PP_ALIGN.LEFT if c == 0 else PP_ALIGN.CENTER,
-                  anchor=MSO_ANCHOR.MIDDLE, mx=0.07)
-        cell_border(tbl.cell(0, c), 'T', GREY1, 1.25)
-        cell_border(tbl.cell(0, c), 'B', GREY1, 1.25)
-
-    for ri, vals in enumerate(linhas, start=1):
-        meta_row = vals[0] == "Meta mensal"
-        cons_row = vals[0] == "Consolidado"
-        fundo = METABG if meta_row else (BAND if cons_row else None)
-        for c, v in enumerate(vals):
-            cell = tbl.cell(ri, c)
-            cell_box(cell, fill=fundo)
-            cor, bold = GREY1, (cons_row or meta_row or c == 0)
-            if meta_row:
-                cor = RED
-            elif c in (3, 8) and v not in ("–",):
-                cor = FOREST if v.startswith("+") else RUBY
-                bold = True
-            elif c == 7 and not meta_row:
-                cor = FOREST if float(v[:-1].replace(",", ".")) >= META_CONV else GREY1
-                bold = True
-            cell_text(cell, v, 11 if c == 0 else 11, cor, bold=bold,
-                      align=PP_ALIGN.LEFT if c == 0 else PP_ALIGN.CENTER,
-                      anchor=MSO_ANCHOR.MIDDLE, mx=0.07)
-            cell_border(cell, 'T', GREY5, 0.5)
-        if cons_row or meta_row:
-            for c in range(9):
-                cell_border(tbl.cell(ri, c), 'T', GREY1, 1.0)
-
-    txt(slide, MARGIN_L, 4.62, 4.0, 0.26, "Três leituras", size=12, bold=True,
-        color=GREY1, anchor=MSO_ANCHOR.TOP)
-    col_w = (MARGIN_R - MARGIN_L - 2 * 0.34) / 3.0
-    for i, (chapeu, corpo) in enumerate(LEITURAS):
-        cx = MARGIN_L + i * (col_w + 0.34)
-        hline(slide, cx, 5.04, cx + col_w, RED, 1.5)
-        txt(slide, cx, 5.14, 0.26, 0.24, "%d" % (i + 1), size=13, bold=True, color=RED,
-            anchor=MSO_ANCHOR.TOP)
-        txt(slide, cx + 0.28, 5.14, col_w - 0.28, 1.70,
-            [(chapeu, {"size": 10.5, "bold": True, "color": GREY1}), ("\n", {}),
-             (corpo, {"size": 10, "color": GREY2})],
-            anchor=MSO_ANCHOR.TOP, line=1.24)
-    return slide
-
-
-# ---------------------------------------------------------------- build
-prs = Presentation()
-prs.slide_width, prs.slide_height = Inches(SW), Inches(SH)
-pagina_resumo(prs)
-for canal in CANAIS:
-    pagina_canal(prs, canal)
-
-OUT = "/home/user/Gerais/output/funil_conversao_canais.pptx"
-prs.save(OUT)
-print("saved %s (%d paginas)" % (OUT, len(prs.slides)))
+build()

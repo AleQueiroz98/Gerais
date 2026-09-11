@@ -465,17 +465,17 @@ python3 build_recap_alavancas.py ../output/recap_alavancas_conversao.pptx
 
 # Funil lead → venda por canal (jan-ago/26)
 
-Deck de 4 páginas (16:9): uma de resumo e uma por canal — **CV** (já sem Liza e
-sem Central), **Liza** e **Central** —, todas com **tabelas nativas do
-PowerPoint**. Cada número fica na própria célula, então dá para selecionar o
-bloco e colar direto no Excel.
+Página única (16:9) com os três painéis lado a lado — **CV** (já sem Liza e sem
+Central), **Liza** e **Central** —, numa **tabela nativa do PowerPoint**: cada
+número fica na própria célula, então dá para selecionar o bloco e colar direto
+no Excel.
 
 ## Estrutura
 
 | Caminho | Conteúdo |
 |---|---|
-| `scripts/build_funil_conversao.py` | Monta as 4 páginas do zero; volumes brutos e leituras no topo do arquivo |
-| `output/funil_conversao_canais.pptx` | **Entregável** — resumo + uma página por canal |
+| `scripts/build_funil_conversao.py` | Monta a página do zero; volumes brutos e leituras no topo do arquivo |
+| `output/funil_conversao_canais.pptx` | **Entregável** — a página em PPT |
 
 ```bash
 pip install python-pptx Pillow
@@ -485,24 +485,25 @@ python3 scripts/pptx_preview.py output/funil_conversao_canais.pptx /tmp/prev.htm
 
 ## Notas de layout
 
-- **Tabelas nativas, prontas para o Excel.** Um valor por célula, sem
-  abreviação (`454.314`, não `454k`) e em formato pt-BR, que o Excel converte
-  em número ao colar. Os rótulos e a ordem das linhas seguem a planilha de
-  origem, para o bloco colar alinhado com ela.
-- **Uma página por canal.** A 9pt, as 27 colunas de números dos três canais não
-  cabem lado a lado em 13,3"; cada canal ganha a própria página, com 8 meses
-  mais a coluna de meta e folga de sobra na largura.
-- **Fonte de 9pt para cima** em toda a página, nota e fonte inclusive.
+- **Tabela nativa, pronta para o Excel.** Uma só tabela de 13×30, um valor por
+  célula, sem abreviação (`454.314`, não `454k`) e em formato pt-BR, que o
+  Excel converte em número ao colar. Os rótulos e a ordem das linhas seguem a
+  planilha de origem, para o bloco colar alinhado com ela.
+- **Larguras calculadas, não chutadas.** Cada painel recebe a largura do seu
+  número mais largo a 8pt — o CV precisa de mais espaço por causa dos leads na
+  casa dos 454 mil —, e o conjunto fecha exatamente os 12,73" úteis da página.
+  Duas colunas-espaçadoras estreitas separam os painéis.
+- **Fonte de 8pt para cima** em toda a página, nota e fonte inclusive.
 - **Taxas recalculadas**, nunca transcritas: o arquivo guarda só os volumes
   brutos (leads, fichas enviadas, aprovadas, faturadas e vendas) e todas as
   porcentagens saem daí.
 - **Heatmap na linha `% de vendas`**, medido contra a meta de 0,94%: verde
   quando o mês bate a meta, intensidade de vermelho proporcional à distância
   abaixo dela, e moldura vermelha na linha inteira.
-- **Coluna Meta** em cinza à direita, preenchida só onde há meta definida
-  (leads, vendas e % de vendas); as demais células ficam vazias.
-- Chip de variação da conversão no topo de cada página de canal (último mês com
-  dado vs. primeiro), em verde ou rubi.
+- **Coluna Meta** em cinza à direita de cada painel, preenchida só onde há meta
+  definida (leads, vendas e % de vendas); as demais células ficam vazias.
+- Variação da conversão na barra de cada canal (último mês com dado vs.
+  primeiro), em menta ou rosa — tons claros, porque a barra é escura.
 
 ## Leitura dos dados
 
@@ -516,8 +517,7 @@ python3 scripts/pptx_preview.py output/funil_conversao_canais.pptx /tmp/prev.htm
 ## Ajustes de conteúdo
 
 - **Título reescrito.** O rascunho partia de "resultado tem melhorado x%"; no
-  consolidado a conversão cai 10% e só a Central sobe. O título de cada página
-  traz a leitura real do canal.
+  consolidado a conversão cai 10% e só a Central sobe.
 - **Coluna de métricas alinhada à planilha.** O rascunho repetia
   `# fichas enviadas` e trazia `% fichas efetivadas`; a lista virou o funil da
   planilha de origem, sem repetição. A base de cada taxa está na nota de
@@ -527,5 +527,4 @@ python3 scripts/pptx_preview.py output/funil_conversao_canais.pptx /tmp/prev.htm
 - **Liza revisada** (vendas de 82, 157, 166, 297 e 389 em abr-ago/26). Com os
   números novos o canal começa **acima** da meta, a 1,01%, e cai a 0,67% ao
   saltar de 31k para 58k leads — trade-off de volume × qualidade, não colapso
-  de conversão. Some também a inversão entre fichas faturadas e vendas que a
-  versão anterior sinalizava em nota.
+  de conversão.
