@@ -40,6 +40,8 @@ python3 scripts/check_ambiente.py   # no Windows: py scripts\check_ambiente.py
 | `output/260903__Status_frentes_3paginas.pptx` | **Entregável atual** — deck editável de 3 páginas com o status das 4 frentes |
 | `scripts/build_recap_alavancas.py` | Monta o recap da agenda de valor (conversão por informação coletada) |
 | `output/recap_alavancas_conversao.pptx` | **Entregável atual** — recap redesenhado, builds das duas alavancas e página da alavanca 1 |
+| `scripts/build_lead_quente_fi.py` | Monta as cinco páginas de lead quente e F&I multibanco reproduzidas dos prints |
+| `output/lead_quente_fi_multibanco.pptx` | **Entregável atual** — 5 páginas editáveis: lead quente (2 versões), visão geral de F&I (2 versões) e plano de execução |
 | `source/referencia/` | **Documentos de referência** — solte aqui o memo/deck que deve valer como fonte da verdade |
 | `scripts/ler_referencia.py` | Converte os PDFs e PPTXs dessa pasta em texto pesquisável (`source/referencia/_texto/`) |
 | `.claude/agents/referencia.md` | Agente que usa esses documentos como fonte da verdade para conferir e atualizar os decks |
