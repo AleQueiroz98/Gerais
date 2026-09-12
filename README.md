@@ -528,3 +528,58 @@ python3 scripts/pptx_preview.py output/funil_conversao_canais.pptx /tmp/prev.htm
   números novos o canal começa **acima** da meta, a 1,01%, e cai a 0,67% ao
   saltar de 31k para 58k leads — trade-off de volume × qualidade, não colapso
   de conversão.
+
+---
+
+# F&I Multibanco — visão geral
+
+Página única (16:9) recriando o HTML `source/fmi_multibanco.html` em PowerPoint
+editável: faixa da **Ambição**, os três cartões de **valor para...** e as
+**cinco frentes** numeradas. Tudo é shape nativo — retângulos, conectores e
+freeforms —, nada de print colado, então dá para editar texto, cor e posição
+direto no PowerPoint.
+
+## Estrutura
+
+| Caminho | Conteúdo |
+|---|---|
+| `source/fmi_multibanco.html` | Página HTML de origem (canvas de 1008×660) |
+| `scripts/build_fmi_multibanco.py` | Monta a página do zero; layout escrito nos px do HTML |
+| `output/fmi_multibanco.pptx` | **Entregável** — a página em PPT |
+
+```bash
+pip install python-pptx Pillow
+python3 scripts/build_fmi_multibanco.py
+python3 scripts/pptx_preview.py output/fmi_multibanco.pptx /tmp/prev.html
+```
+
+## Notas de layout
+
+- **Coordenadas em px do HTML.** O arquivo descreve a página no mesmo canvas de
+  1008×660 do original e converte na hora de desenhar: `X()` usa a escala
+  horizontal (a página abre em largura total, como o `width:100vw` do HTML) e
+  `Y()`/`F()` usam a vertical, que também define o corpo das fontes (31px do
+  título → 25,4pt). Mudar um espaçamento é mexer no mesmo número que está no
+  CSS.
+- **Ícones vetoriais, tirados dos mesmos paths SVG** do HTML: os arcos viram
+  polilinhas amostradas da curva de Bézier, os traços retos viram conectores
+  (freeform de bounding box nula não renderiza) e os círculos, ovais. Continuam
+  editáveis e recoloríveis — traço vermelho nos cartões, preto nas frentes,
+  exceto a frente 1.
+- **Entrelinha exata, em pontos** (`line-height` do CSS × corpo), em vez de
+  múltiplos, para a página manter o ritmo vertical do HTML.
+- **Círculos e ícones usam a escala vertical nos dois eixos**, para não
+  deformar quando a página estica na largura.
+- **16:9 em vez de 1008×660.** O título cabe em uma linha só (era o que os
+  `<br>` do HTML pediam; no canvas estreito ele quebrava em três) e os blocos
+  ficam proporcionalmente mais largos, como o próprio HTML faz numa tela larga.
+- **Filete do divisor de seção para antes do texto.** No HTML o `:after` do
+  ícone tem 85px fixos e passa por cima de "cinco frentes", parecendo um texto
+  riscado; aqui ele para na margem do rótulo.
+
+## Preview de .pptx
+
+`scripts/pptx_preview.py` passou a entender três coisas que esta página usa:
+gradiente (a faixa da Ambição), geometria `ellipse` e freeforms/conectores —
+estes desenhados como SVG, e não mais como uma caixa com borda em volta do
+bounding box. Vale para todos os decks do repositório.

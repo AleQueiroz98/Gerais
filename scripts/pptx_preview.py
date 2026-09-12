@@ -14,7 +14,9 @@ import html
 import sys
 
 from pptx import Presentation
+from pptx.enum.dml import MSO_FILL
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
+from pptx.oxml.ns import qn
 from pptx.util import Emu
 
 PX = 100.0   # pixels por polegada
@@ -35,6 +37,85 @@ def color_of(fmt):
         return '#' + str(fmt.fore_color.rgb)
     except Exception:
         return None
+
+
+def gradient_of(shape):
+    """fundo CSS de um shape com preenchimento em gradiente"""
+    try:
+        if shape.fill.type != MSO_FILL.GRADIENT:
+            return None
+        stops = ', '.join('#%s %.0f%%' % (st.color.rgb, st.position * 100)
+                          for st in shape.fill.gradient_stops)
+    except Exception:
+        return None
+    try:
+        ang = shape.fill.gradient_angle
+    except Exception:
+        ang = 90.0
+    return 'linear-gradient(%.0fdeg, %s)' % (ang + 90.0, stops)
+
+
+def prst_of(shape):
+    """nome da geometria pronta (ellipse, roundRect, ...) ou None"""
+    try:
+        prst = shape._element.spPr.find(qn('a:prstGeom'))
+        return prst.get('prst') if prst is not None else None
+    except Exception:
+        return None
+
+
+def freeform_svg(shape, w, h):
+    """desenha o custGeom (freeform) como SVG, preservando o traco"""
+    path = shape._element.spPr.find(qn('a:custGeom'))
+    if path is None:
+        return None
+    path = path.find(qn('a:pathLst')).find(qn('a:path'))
+    pw = float(path.get('w') or 0) or 1.0   # linhas retas tem w ou h = 0
+    ph = float(path.get('h') or 0) or 1.0
+    pts, closed = [], False
+    for el in path:
+        tag = el.tag.split('}')[1]
+        if tag == 'close':
+            closed = True
+            continue
+        pt = el.find(qn('a:pt'))
+        if pt is None:
+            continue
+        pts.append((float(pt.get('x')) / pw * w, float(pt.get('y')) / ph * h))
+    if not pts:
+        return None
+    try:
+        stroke = '#' + str(shape.line.color.rgb)
+        lw = max((shape.line.width.pt if shape.line.width else 0.75) * PX / 72.0, 1.0)
+    except Exception:
+        stroke, lw = '#333333', 1.0
+    return ('<svg style="position:absolute;left:0;top:0;overflow:visible" '
+            'width="%.1f" height="%.1f"><%s points="%s" fill="none" '
+            'stroke="%s" stroke-width="%.1f" stroke-linejoin="round" '
+            'stroke-linecap="round"/></svg>'
+            % (max(w, 1.0), max(h, 1.0), 'polygon' if closed else 'polyline',
+               ' '.join('%.1f,%.1f' % p for p in pts), stroke, lw))
+
+
+def connector_svg(shape, w, h):
+    """conector (linha) desenhado como SVG, respeitando flipH/flipV"""
+    el = shape._element
+    if not el.tag.endswith('}cxnSp'):
+        return None
+    xfrm = el.spPr.find(qn('a:xfrm'))
+    fh = xfrm is not None and xfrm.get('flipH') == '1'
+    fv = xfrm is not None and xfrm.get('flipV') == '1'
+    x1, x2 = (w, 0) if fh else (0, w)
+    y1, y2 = (h, 0) if fv else (0, h)
+    try:
+        stroke = '#' + str(shape.line.color.rgb)
+        lw = max((shape.line.width.pt if shape.line.width else 0.75) * PX / 72.0, 1.0)
+    except Exception:
+        stroke, lw = '#333333', 1.0
+    return ('<svg style="position:absolute;left:0;top:0;overflow:visible" '
+            'width="%.1f" height="%.1f"><line x1="%.1f" y1="%.1f" x2="%.1f" '
+            'y2="%.1f" stroke="%s" stroke-width="%.1f" stroke-linecap="round"/>'
+            '</svg>' % (max(w, 1.0), max(h, 1.0), x1, y1, x2, y2, stroke, lw))
 
 
 def run_color(run):
@@ -123,18 +204,22 @@ def render_shape(shape, parts):
         fill = color_of(shape.fill)
     except Exception:
         pass
-    body = ''
-    if shape.has_text_frame:
+    fill = fill or gradient_of(shape)
+    w, h = px(shape.width), px(shape.height)
+    body = freeform_svg(shape, w, h) or connector_svg(shape, w, h) or ''
+    free = bool(body)          # o traco do freeform ja vai dentro do SVG
+    if not body and shape.has_text_frame:
         body = text_html(shape.text_frame)
+    radius = 'border-radius:50%;' if prst_of(shape) == 'ellipse' else ''
     rot = shape.rotation or 0
     style = ('position:absolute;left:%.1fpx;top:%.1fpx;width:%.1fpx;'
              'height:%.1fpx;box-sizing:border-box;display:flex;'
-             'flex-direction:column;%s;%s%s%s'
-             % (px(shape.left), px(shape.top), px(shape.width),
-                px(shape.height), frame_style(shape.text_frame)
+             'flex-direction:column;%s;%s%s%s%s'
+             % (px(shape.left), px(shape.top), w, h,
+                frame_style(shape.text_frame)
                 if shape.has_text_frame else 'justify-content:flex-start',
-                'background:%s;' % fill if fill else '', border_of(shape),
-                'transform:rotate(%.1fdeg);' % rot if rot else ''))
+                'background:%s;' % fill if fill else '',
+                '' if free else border_of(shape), radius, 'transform:rotate(%.1fdeg);' % rot if rot else ''))
     parts.append('<div style="%s">%s</div>' % (style, body))
 
 
