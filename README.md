@@ -41,6 +41,8 @@ python3 scripts/check_ambiente.py   # no Windows: py scripts\check_ambiente.py
 | `scripts/build_recap_alavancas.py` | Monta o recap da agenda de valor (conversão por informação coletada) |
 | `output/recap_alavancas_conversao.pptx` | **Entregável atual** — recap redesenhado, builds das duas alavancas e página da alavanca 1 |
 | `scripts/build_lead_quente_fi.py` | Monta as cinco páginas de lead quente e F&I multibanco reproduzidas dos prints |
+| `scripts/build_lead_quente_core.py` | Monta a mesma página sobre o master Bain Core, com elementos btfp |
+| `output/lead_quente_core.pptx` | **Entregável** — variante da página no template Bain Core |
 | `output/lead_quente_fi_multibanco.pptx` | **Entregável atual** — 5 páginas editáveis: lead quente (2 versões), visão geral de F&I (2 versões) e plano de execução |
 | `source/referencia/` | **Documentos de referência** — solte aqui o memo/deck que deve valer como fonte da verdade |
 | `scripts/ler_referencia.py` | Converte os PDFs e PPTXs dessa pasta em texto pesquisável (`source/referencia/_texto/`) |
@@ -673,3 +675,35 @@ python3 scripts/pptx_preview.py output/lead_quente.pptx /tmp/prev.html
   texto nem na altura do cartão.
 - **Todo shape tem nome** (`Passo 2 bullets`, `Faixa de merito`, `Sequencia`),
   então o painel de seleção do PowerPoint fica navegável para quem for editar.
+
+## Variante no template Bain Core
+
+`scripts/build_lead_quente_core.py` monta a mesma página sobre o master Bain
+Core em vez de desenhá-la do zero, e sai em `output/lead_quente_core.pptx`. É a
+versão para quando a página entra num deck Bain: herda o rodapé, a barra
+vermelha e o placeholder de título do master, e troca os improvisos do painel
+pelos elementos btfp oficiais.
+
+Depende dos assets do skill `bain-slides` (master Bain Core e elementos btfp).
+Aponte `BAIN_SLIDES_DIR` para a pasta do skill antes de rodar:
+
+```bash
+pip install python-pptx lxml
+BAIN_SLIDES_DIR=/caminho/para/bain-slides python3 scripts/build_lead_quente_core.py
+```
+
+Diferenças em relação à versão fiel ao painel:
+
+- **Elementos btfp no lugar dos improvisos.** Círculos numerados viram
+  `btfpNumberBubble` (contorno vermelho, número vermelho), os chevrons viram
+  `btfpSequenceArrow` e a faixa com medalha vira
+  `btfpConclusionArrowHorizontal`, o elemento canônico da mensagem-chave.
+- **Cartões brancos com borda cinza fina**, sem o degradê: no padrão Bain a cor
+  marca categoria, e aqui os quatro passos são pares.
+- **Título no placeholder do master**, em preto e 24pt, sem a segunda linha em
+  vermelho. Como o placeholder é ancorado embaixo e ocupa a faixa até a barra
+  vermelha, o eyebrow `L2S | LEAD QUENTE` entra logo abaixo da barra, antes do
+  pré-requisito.
+- **Ícones desenhados em line-art vermelho** a partir dos mesmos SVGs do painel.
+  Não são ícones da Toolbox CS: dá para trocá-los pelo add-in sem mexer no resto
+  da página.
