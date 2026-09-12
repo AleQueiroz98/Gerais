@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>L2S | Lead Quente</title>
+<style>
+  :root{
+    --red:#c8102e;
+    --text:#111;
+    --muted:#555;
+    --light:#f3f4f6;
+    --line:#dedede;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:white;
+    font-family: Arial, Helvetica, sans-serif;
+    color:var(--text);
+  }
+  .slide{
+    width:100vw;
+    min-height:100vh;
+    padding:10px 18px 6px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:5px;
+    color:#6b6b6b;
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .redbar{width:35px;height:4px;background:var(--red);margin-bottom:10px}
+  h1{
+    margin:0;
+    font-size:27px;
+    line-height:1.05;
+    font-weight:500;
+    letter-spacing:-0.4px;
+  }
+  h1 .red{color:var(--red);font-weight:700}
+  .subtitle{
+    margin-top:10px;
+    color:#474747;
+    font-size:15px;
+    line-height:1.18;
+  }
+  .steps{
+    display:grid;
+    grid-template-columns: 1fr 30px 1fr 30px 1fr 30px 1fr;
+    margin-top:27px;
+    align-items:stretch;
+  }
+  .card{
+    position:relative;
+    border:1px solid #ececec;
+    background:linear-gradient(#f7f7f8,#fff 28%);
+    padding:52px 20px 12px 20px;
+    min-height:366px;
+  }
+  .num{
+    position:absolute;left:6px;top:-5px;
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--red);color:#fff;font-weight:700;font-size:18px;
+  }
+  .icon{
+    height:60px; display:flex; align-items:center; justify-content:center; margin-bottom:2px;
+  }
+  .icon svg{width:58px;height:58px;stroke:var(--red);fill:none;stroke-width:2.5}
+  .card h2{
+    margin:0 auto 16px auto;
+    text-align:center;
+    font-size:21px;
+    line-height:1.0;
+    font-weight:700;
+    max-width:190px;
+  }
+  .card ul{margin:0 0 0 16px;padding:0;font-size:15px;line-height:1.15;color:#1d1d1d}
+  .card li{margin:0 0 8px 0;padding-left:1px}
+  .owner{
+    position:absolute;left:20px;bottom:10px;
+    font-size:14px;line-height:1.18;font-weight:700;
+  }
+  .arrow{display:flex;align-items:flex-start;justify-content:center;padding-top:24px}
+  .arrow span{font-size:44px;font-weight:200;color:#222;line-height:1}
+
+  .banner{
+    margin-top:12px;
+    height:45px;
+    border:2px solid #d96c7e;
+    border-radius:7px;
+    position:relative;
+    display:flex;align-items:center;
+    padding-left:68px;
+    font-size:16px;font-weight:700;color:var(--red);
+  }
+  .medal{
+    position:absolute;left:-8px;top:-7px;
+    width:52px;height:52px;border-radius:50%;
+    background:var(--red);display:flex;align-items:center;justify-content:center;
+  }
+  .medal svg{width:28px;height:28px;stroke:white;fill:none;stroke-width:2}
+  .footer{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    font-size:10px;color:#333;margin-top:10px;
+  }
+  .brand{font-weight:700;letter-spacing:2px;color:var(--red);font-size:12px;display:flex;align-items:center;gap:8px}
+  .mark{width:15px;height:15px;border:2px solid var(--red);border-radius:50%;position:relative}
+  .mark:after{content:"";position:absolute;width:4px;height:4px;background:var(--red);border-radius:50%;right:-3px;top:-3px}
+  .page{font-size:11px;color:#555;margin-left:8px}
+  .brandwrap{display:flex;align-items:center}
+
+  @media (max-width: 900px){
+    .slide{min-width:900px;min-height:610px}
+  }
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="eyebrow">L2S | LEAD QUENTE</div>
+  <div class="redbar"></div>
+  <h1>Converter o lead quente exige rodar quatro passos:<br><span class="red">comunicar, priorizar, avisar da consequência e realocar</span></h1>
+  <div class="subtitle">Pré-requisito: o número existe e é nominal: leads quentes recebidos, conversão e tempo até o primeiro contato<br>por divisional, loja e CV</div>
+
+  <section class="steps">
+    <div class="card">
+      <div class="num">1</div>
+      <div class="icon">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M10 50V35h8v15zM27 50V22h8v28zM44 50V12h8v38z" />
+        </svg>
+      </div>
+      <h2>Comunicar<br>divisionais</h2>
+      <ul>
+        <li>Glauco leva o número aos divisionais: leads quentes recebidos e conversão por regional</li>
+        <li>Ranking nominal explícito: quem está bem e quem está mal</li>
+        <li>Mensagem única: o acompanhamento passa a ser semanal</li>
+      </ul>
+      <div class="owner">Dono: Glauco<br>Prazo: Semana 1</div>
+    </div>
+    <div class="arrow"><span>›</span></div>
+
+    <div class="card">
+      <div class="num">2</div>
+      <div class="icon">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="19" r="7"/>
+          <circle cx="18" cy="24" r="6"/>
+          <circle cx="46" cy="24" r="6"/>
+          <path d="M20 47v-7c0-7 5-12 12-12s12 5 12 12v7M7 47v-5c0-6 4-10 10-10M57 47v-5c0-6-4-10-10-10"/>
+        </svg>
+      </div>
+      <h2>Priorizar<br>na ponta</h2>
+      <ul>
+        <li>Cascata completa: divisional para regional, regional para GV, GV para CV</li>
+        <li>Cada CV recebe a lista nominal dos leads quentes do dia</li>
+        <li>Instrução única: ligar em 100% da lista no mesmo dia</li>
+      </ul>
+      <div class="owner">Dono: Regionais e GVs<br>Prazo: Semanas 1 e 2</div>
+    </div>
+    <div class="arrow"><span>›</span></div>
+
+    <div class="card">
+      <div class="num">3</div>
+      <div class="icon">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M32 10 54 50H10z"/>
+          <path d="M32 24v13M32 43v2"/>
+        </svg>
+      </div>
+      <h2>Avisar da<br>consequência</h2>
+      <ul>
+        <li>Regra comunicada antes de valer: não converter lead quente reduz o volume recebido</li>
+        <li>Conversão por CV acompanhada semana a semana</li>
+        <li>Sem surpresa: aviso formal antes do primeiro corte</li>
+      </ul>
+      <div class="owner">Dono: Glauco e GVs<br>Prazo: Semana 2</div>
+    </div>
+    <div class="arrow"><span>›</span></div>
+
+    <div class="card">
+      <div class="num">4</div>
+      <div class="icon">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M47 18a18 18 0 0 0-28 2l-5 1 1-6"/>
+          <path d="M17 46a18 18 0 0 0 28-2l5-1-1 6"/>
+          <path d="M45 18h-6M19 46h6"/>
+        </svg>
+      </div>
+      <h2>Realocar<br>o lead quente</h2>
+      <ul>
+        <li>Alocação inicial antes o critério do cliente, como é hoje</li>
+        <li>Dentro da loja, o mix de quente, morno e frio segue a performance do CV</li>
+        <li>Lead quente não tratado no prazo é realocado para quem atende</li>
+      </ul>
+      <div class="owner">Dono: L2S e comercial<br>Prazo: Semanas 3 e 4, em piloto</div>
+    </div>
+  </section>
+
+  <div class="banner">
+    <div class="medal">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 5h12v6c0 5-2 8-6 8s-6-3-6-8zM10 8H5c0 6 2 8 6 8M22 8h5c0 6-2 8-6 8M16 19v5M11 28h10M13 24h6"/></svg>
+    </div>
+    Lead quente passa a ser mérito, não direito: quem converte recebe mais, quem não converte recebe menos
+  </div>
+
+  <div class="footer">
+    <div>Fonte: análise Bain; discussão com liderança comercial Localiza Seminovos</div>
+    <div class="brandwrap"><div class="brand">BAIN &amp; COMPANY <span class="mark"></span></div><div class="page">1</div></div>
+  </div>
+</div>
+</body>
+</html>

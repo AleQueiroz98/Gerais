@@ -266,37 +266,37 @@ def _p32(x, y, s, a, b):
     return (x + a / 32.0 * s, y + b / 32.0 * s)
 
 
-def _lw32(s):
-    """stroke-width 2 do viewBox, em pt"""
-    return max(0.75, 2.0 / 32.0 * s * 72.0)
+def _lw32(s, w=2.0):
+    """stroke-width `w` do viewBox, em pt"""
+    return max(0.75, w / 32.0 * s * 72.0)
 
 
-def _cx32(sl, x, y, s, p0, p1, c):
+def _cx32(sl, x, y, s, p0, p1, c, w=2.0):
     """traco reto: conector (freeform de bounding box nula nao renderiza)"""
     (x0, y0), (x1, y1) = _p32(x, y, s, *p0), _p32(x, y, s, *p1)
     cn = sl.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(x0), Inches(y0),
                                  Inches(x1), Inches(y1))
     cn.line.color.rgb = c
-    cn.line.width = Pt(_lw32(s))
+    cn.line.width = Pt(_lw32(s, w))
     cn.line._get_or_add_ln().set('cap', 'rnd')
     return cn
 
 
-def _ln32(sl, x, y, s, pts, c, close=False):
+def _ln32(sl, x, y, s, pts, c, close=False, w=2.0):
     """polilinha no viewBox 32x32"""
     if len(pts) == 2 and not close:
-        return _cx32(sl, x, y, s, pts[0], pts[1], c)
+        return _cx32(sl, x, y, s, pts[0], pts[1], c, w)
     e = [(Emu(int(round(a * EMU))), Emu(int(round(b * EMU))))
          for a, b in (_p32(x, y, s, a, b) for a, b in pts)]
     bld = sl.shapes.build_freeform(e[0][0], e[0][1])
     bld.add_line_segments(e[1:], close=close)
-    return _clean(bld.convert_to_shape(), None, c, _lw32(s))
+    return _clean(bld.convert_to_shape(), None, c, _lw32(s, w))
 
 
-def _el32(sl, x, y, s, cx, cy, r, c):
+def _el32(sl, x, y, s, cx, cy, r, c, w=2.0):
     px, py = _p32(x, y, s, cx - r, cy - r)
     d = 2 * r / 32.0 * s
-    return _ell(sl, px, py, d, d, None, c, _lw32(s))
+    return _ell(sl, px, py, d, d, None, c, _lw32(s, w))
 
 
 def _bez32(p0, p1, p2, p3, n=14):
@@ -310,6 +310,34 @@ def _bez32(p0, p1, p2, p3, n=14):
                     u ** 3 * p0[1] + 3 * u * u * t * p1[1]
                     + 3 * u * t * t * p2[1] + t ** 3 * p3[1]))
     return out
+
+
+def _svgarc(p0, p1, r, large, sweep, n=16):
+    """arco SVG `a r r 0 large sweep x y` -> polilinha (sem repetir p0)"""
+    (x1, y1), (x2, y2) = p0, p1
+    dx, dy = (x1 - x2) / 2.0, (y1 - y2) / 2.0
+    lam = (dx * dx + dy * dy) / (r * r)
+    if lam > 1:
+        r *= math.sqrt(lam)
+    q = r * r - (dx * dx + dy * dy)
+    co = math.sqrt(max(0.0, q / (dx * dx + dy * dy))) * (1 if large != sweep
+                                                        else -1)
+    cx = co * dy + (x1 + x2) / 2.0
+    cy = -co * dx + (y1 + y2) / 2.0
+    t1 = math.atan2(y1 - cy, x1 - cx)
+    dt = math.atan2(y2 - cy, x2 - cx) - t1
+    if sweep == 0 and dt > 0:
+        dt -= 2 * math.pi
+    if sweep == 1 and dt < 0:
+        dt += 2 * math.pi
+    return [(cx + r * math.cos(t1 + dt * i / float(n)),
+             cy + r * math.sin(t1 + dt * i / float(n))) for i in range(1, n + 1)]
+
+
+def _v(pts, view=64):
+    """pontos de um viewBox `view` -> o 32x32 da biblioteca"""
+    k = 32.0 / view
+    return [(a * k, b * k) for a, b in pts]
 
 
 def _semi32(cx, cy, r, n=12):
@@ -374,13 +402,68 @@ def rede_linha(sl, x, y, s, c, bg=WHITE):
     _ln32(sl, x, y, s, [(11, 17), (20, 23)], c)
 
 
+def barras_linha(sl, x, y, s, c, bg=WHITE):
+    """grafico de barras ascendente, so contorno"""
+    for bx, by, bw, bh in ((10, 35, 8, 15), (27, 22, 8, 28), (44, 12, 8, 38)):
+        _ln32(sl, x, y, s, _v([(bx, by), (bx + bw, by), (bx + bw, by + bh),
+                               (bx, by + bh)]), c, close=True, w=1.25)
+
+
+def pessoas_grupo_linha(sl, x, y, s, c, bg=WHITE):
+    """tres pessoas lado a lado, so contorno (a cascata ate a ponta)"""
+    for cx, cy, r in ((32, 19, 7), (18, 24, 6), (46, 24, 6)):
+        _el32(sl, x, y, s, cx / 2.0, cy / 2.0, r / 2.0, c, w=1.25)
+    corpo = [(20, 47), (20, 40)] + _svgarc((20, 40), (44, 40), 12, 0, 1) \
+        + [(44, 47)]
+    esq = [(7, 47), (7, 42)] + _svgarc((7, 42), (17, 32), 10, 0, 1)
+    dir_ = [(57, 47), (57, 42)] + _svgarc((57, 42), (47, 32), 10, 0, 0)
+    for pts in (corpo, esq, dir_):
+        _ln32(sl, x, y, s, _v(pts), c, w=1.25)
+
+
+def alerta_linha(sl, x, y, s, c, bg=WHITE):
+    """triangulo de atencao com exclamacao, so contorno"""
+    _ln32(sl, x, y, s, _v([(32, 10), (54, 50), (10, 50)]), c, close=True,
+          w=1.25)
+    _ln32(sl, x, y, s, _v([(32, 24), (32, 37)]), c, w=1.25)
+    _ln32(sl, x, y, s, _v([(32, 43), (32, 45)]), c, w=1.25)
+
+
+def ciclo_linha(sl, x, y, s, c, bg=WHITE):
+    """duas setas de ciclo, so contorno (realocar)"""
+    cima = [(47, 18)] + _svgarc((47, 18), (19, 20), 18, 0, 0) + [(14, 21),
+                                                                 (15, 15)]
+    baixo = [(17, 46)] + _svgarc((17, 46), (45, 44), 18, 0, 0) + [(50, 43),
+                                                                  (49, 49)]
+    for pts in (cima, baixo):
+        _ln32(sl, x, y, s, _v(pts), c, w=1.25)
+    _ln32(sl, x, y, s, _v([(45, 18), (39, 18)]), c, w=1.25)
+    _ln32(sl, x, y, s, _v([(19, 46), (25, 46)]), c, w=1.25)
+
+
+def trofeu_linha(sl, x, y, s, c, bg=WHITE):
+    """trofeu, so contorno (faixa de merito)"""
+    taca = ([(10, 5), (22, 5), (22, 11)] + _svgarc((22, 11), (16, 19), 8, 0, 1)
+            + _svgarc((16, 19), (10, 11), 8, 0, 1))
+    _ln32(sl, x, y, s, taca, c, close=True)
+    _ln32(sl, x, y, s, [(10, 8), (5, 8)] + _svgarc((5, 8), (11, 16), 8, 0, 0), c)
+    _ln32(sl, x, y, s, [(22, 8), (27, 8)] + _svgarc((27, 8), (21, 16), 8, 0, 1), c)
+    _ln32(sl, x, y, s, [(16, 19), (16, 24)], c)
+    _ln32(sl, x, y, s, [(13, 24), (19, 24)], c)
+    _ln32(sl, x, y, s, [(11, 28), (21, 28)], c)
+
+
 ICONS = {'barras': barras, 'pessoa': pessoa, 'pessoas': pessoas,
          'pessoas_cheio': pessoas_cheio, 'alerta': alerta, 'ciclo': ciclo,
          'banco': banco, 'engrenagem': engrenagem, 'monitor': monitor,
          'rede': rede, 'alvo': alvo, 'trofeu': trofeu, 'carro': carro,
          'pessoas_linha': pessoas_linha, 'banco_linha': banco_linha,
          'carro_linha': carro_linha, 'engrenagem_linha': engrenagem_linha,
-         'monitor_linha': monitor_linha, 'rede_linha': rede_linha}
+         'monitor_linha': monitor_linha, 'rede_linha': rede_linha,
+         'barras_linha': barras_linha,
+         'pessoas_grupo_linha': pessoas_grupo_linha,
+         'alerta_linha': alerta_linha, 'ciclo_linha': ciclo_linha,
+         'trofeu_linha': trofeu_linha}
 
 
 def icon(sl, kind, x, y, s, c, bg=WHITE):

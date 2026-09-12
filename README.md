@@ -617,3 +617,59 @@ python3 scripts/pptx_preview.py output/fmi_multibanco.pptx /tmp/prev.html
 gradiente (a faixa da Ambição), geometria `ellipse` e freeforms/conectores —
 estes desenhados como SVG, e não mais como uma caixa com borda em volta do
 bounding box. Vale para todos os decks do repositório.
+
+
+---
+
+# Lead quente — os quatro passos para converter
+
+Página única (16:9) recriando o painel `source/lead_quente.html` em PowerPoint
+editável: os quatro cartões numerados (comunicar divisionais, priorizar na
+ponta, avisar da consequência e realocar o lead quente), os chevrons de
+sequência entre eles e a faixa de mérito no rodapé.
+
+É a versão **fiel ao painel** — cartões com borda e degradê, ícones de linha,
+bolhas vermelhas cheias e a faixa contornada. A variante desenhada a partir dos
+prints (cartões cinza, ícones cheios) continua nas páginas 1 e 4 de
+`scripts/build_lead_quente_fi.py`; as duas convivem, uma por ocasião de uso.
+
+## Estrutura
+
+| Caminho | Conteúdo |
+|---|---|
+| `source/lead_quente.html` | Painel HTML de origem (1280×720 CSS px) |
+| `scripts/build_lead_quente.py` | Monta a página do zero, nos px do HTML |
+| `output/lead_quente.pptx` | **Entregável** — a página em PPT |
+
+```bash
+pip install python-pptx
+python3 scripts/build_lead_quente.py output/lead_quente.pptx
+python3 scripts/pptx_preview.py output/lead_quente.pptx /tmp/prev.html
+```
+
+| Passo | Dono | Prazo |
+|---|---|---|
+| 1. Comunicar divisionais | Glauco | Semana 1 |
+| 2. Priorizar na ponta | Regionais e GVs | Semanas 1 e 2 |
+| 3. Avisar da consequência | Glauco e GVs | Semana 2 |
+| 4. Realocar o lead quente | L2S e comercial | Semanas 3 e 4, em piloto |
+
+## Notas de layout
+
+- **Coordenadas em px do HTML.** O script descreve a página no mesmo canvas de
+  1280×720 do painel; `I()` converte para polegadas e `pt()` para corpo de
+  fonte, a 96 px por polegada. Mudar um espaçamento é mexer no mesmo número que
+  está no CSS.
+- **Ícones na família `*_linha` de `icons_bain.py`**, convertidos dos mesmos
+  paths SVG do painel: `barras_linha`, `pessoas_grupo_linha`, `alerta_linha`,
+  `ciclo_linha` e `trofeu_linha`. Os arcos (`a r r 0 large sweep x y`) viram
+  polilinhas por `_svgarc()` e `_v()` traz o viewBox de 64 para o 32 da
+  biblioteca. Os helpers de linha ganharam largura de traço opcional (`w`),
+  com o padrão de antes — os ícones já existentes não mudam.
+- **`flat()` em todo shape.** O tema padrão do python-pptx traz sombra via
+  `p:style`/`effectRef`; sem removê-la os cartões e chevrons saem com sombra.
+- **Bullets em 14 px, não 15 px.** No HTML o cartão 1 estoura e o terceiro
+  bullet encavala o bloco dono/prazo. Um ponto a menos resolve sem mexer no
+  texto nem na altura do cartão.
+- **Todo shape tem nome** (`Passo 2 bullets`, `Faixa de merito`, `Sequencia`),
+  então o painel de seleção do PowerPoint fica navegável para quem for editar.
