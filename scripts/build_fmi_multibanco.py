@@ -22,6 +22,8 @@ from pptx.enum.shapes import MSO_SHAPE, MSO_CONNECTOR
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR, MSO_AUTO_SIZE
 from PIL import ImageFont
 
+from icons_bain import icon
+
 # ------------------------------------------------------------------ canvas
 SW, SH = 13.333, 7.5          # slide 16:9, em polegadas
 HW, HH = 1008.0, 660.0        # canvas do HTML, em px
@@ -210,120 +212,9 @@ def hrule(sl, x1, x2, y, color, thick_px=2.0):
     return rect(sl, x1, y - thick_px / 2.0, x2 - x1, thick_px, color)
 
 
-# ------------------------------------------------------- icones (viewBox 32)
-def _pt(ox, oy, size, a, b):
-    """ponto do viewBox 32x32 -> polegadas (escala uniforme)"""
-    return Inches(X(ox) + a / 32.0 * size), Inches(Y(oy) + b / 32.0 * size)
-
-
-def _stroke(sh, color, lw):
-    sh.shadow.inherit = False
-    sh.fill.background()
-    sh.line.color.rgb = color
-    sh.line.width = Pt(lw)
-    return sh
-
-
-def _seg(sl, ox, oy, size, p1, p2, color, lw):
-    """segmento reto: conector (freeform de bbox nula nao renderiza)"""
-    x1, y1 = _pt(ox, oy, size, p1[0], p1[1])
-    x2, y2 = _pt(ox, oy, size, p2[0], p2[1])
-    cn = sl.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, x1, y1, x2, y2)
-    cn.line.color.rgb = color
-    cn.line.width = Pt(lw)
-    return cn
-
-
-def _poly(sl, ox, oy, size, pts, color, lw, close=False):
-    if len(pts) == 2 and not close:
-        return _seg(sl, ox, oy, size, pts[0], pts[1], color, lw)
-    x0, y0 = _pt(ox, oy, size, pts[0][0], pts[0][1])
-    b = sl.shapes.build_freeform(x0, y0)
-    b.add_line_segments([_pt(ox, oy, size, a, c) for a, c in pts[1:]], close=close)
-    return _stroke(b.convert_to_shape(), color, lw)
-
-
-def _circle(sl, ox, oy, size, cx, cy, r, color, lw):
-    x, y = _pt(ox, oy, size, cx - r, cy - r)
-    sh = sl.shapes.add_shape(MSO_SHAPE.OVAL, x, y,
-                             Inches(2 * r / 32.0 * size), Inches(2 * r / 32.0 * size))
-    return _stroke(sh, color, lw)
-
-
-def _bezier(p0, p1, p2, p3, n=14):
-    out = []
-    for i in range(1, n + 1):
-        t = i / float(n)
-        u = 1 - t
-        out.append((u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0],
-                    u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]))
-    return out
-
-
-def _arc_up(cx, cy, r, n=12):
-    """semicircunferencia com a barriga para cima, da direita para a esquerda"""
-    import math
-    return [(cx + r * math.cos(math.pi * i / n), cy - r * math.sin(math.pi * i / n))
-            for i in range(n + 1)]
-
-
-def icon_people(sl, ox, oy, size, color, lw):
-    _circle(sl, ox, oy, size, 11, 10, 4, color, lw)
-    _circle(sl, ox, oy, size, 21, 10, 4, color, lw)
-    a = [(4, 25)] + _bezier((4, 25), (4.5, 19), (8, 16), (12, 16)) \
-                  + _bezier((12, 16), (16, 16), (19.5, 19), (20, 25))
-    b = [(13, 25)] + _bezier((13, 25), (13.5, 20), (16.5, 17.5), (20, 17.5)) \
-                   + _bezier((20, 17.5), (23.5, 17.5), (26.5, 20), (27, 25))
-    _poly(sl, ox, oy, size, a, color, lw)
-    _poly(sl, ox, oy, size, b, color, lw)
-
-
-def icon_bank(sl, ox, oy, size, color, lw):
-    _poly(sl, ox, oy, size, [(5, 12), (16, 5), (27, 12)], color, lw)
-    _poly(sl, ox, oy, size, [(7, 13), (25, 13)], color, lw)
-    for cx in (9, 15, 21):
-        _poly(sl, ox, oy, size, [(cx, 13), (cx, 25)], color, lw)
-    _poly(sl, ox, oy, size, [(5, 26), (27, 26)], color, lw)
-
-
-def icon_car(sl, ox, oy, size, color, lw):
-    body = [(4, 19), (7, 12), (25, 12), (28, 19), (28, 25), (25, 25)] \
-        + _arc_up(21, 25, 4)[1:] + [(15, 25)] + _arc_up(11, 25, 4)[1:] + [(4, 25)]
-    _poly(sl, ox, oy, size, body, color, lw, close=True)
-    _poly(sl, ox, oy, size, [(8, 12), (11, 8), (21, 8), (24, 12)], color, lw)
-    _circle(sl, ox, oy, size, 11, 24, 2.5, color, lw)
-    _circle(sl, ox, oy, size, 21, 24, 2.5, color, lw)
-
-
-def icon_tech(sl, ox, oy, size, color, lw):
-    _circle(sl, ox, oy, size, 16, 16, 5, color, lw)
-    _circle(sl, ox, oy, size, 16, 16, 10, color, lw)
-    for seg in ((16, 3, 16, 7), (16, 25, 16, 29), (3, 16, 7, 16), (25, 16, 29, 16),
-                (7, 7, 10, 10), (22, 22, 25, 25), (25, 7, 22, 10), (10, 22, 7, 25)):
-        _poly(sl, ox, oy, size, [(seg[0], seg[1]), (seg[2], seg[3])], color, lw)
-
-
-def icon_screen(sl, ox, oy, size, color, lw):
-    _poly(sl, ox, oy, size, [(5, 5), (27, 5), (27, 21), (5, 21)], color, lw, close=True)
-    _poly(sl, ox, oy, size, [(12, 27), (20, 27)], color, lw)
-    _poly(sl, ox, oy, size, [(16, 21), (16, 27)], color, lw)
-
-
-def icon_network(sl, ox, oy, size, color, lw):
-    _circle(sl, ox, oy, size, 8, 16, 3, color, lw)
-    _circle(sl, ox, oy, size, 23, 8, 3, color, lw)
-    _circle(sl, ox, oy, size, 23, 24, 3, color, lw)
-    _poly(sl, ox, oy, size, [(11, 15), (20, 9)], color, lw)
-    _poly(sl, ox, oy, size, [(11, 17), (20, 23)], color, lw)
-
-
 def draw_icon(sl, kind, x, y, size_px, color):
-    """size_px = lado do icone em px do HTML; traco = stroke-width 2 do SVG"""
-    size = Y(size_px)                      # escala uniforme (nao deforma)
-    lw = max(0.75, 2.0 / 32.0 * size_px * FPT)
-    {'people': icon_people, 'bank': icon_bank, 'car': icon_car,
-     'tech': icon_tech, 'screen': icon_screen, 'network': icon_network}[kind](
-        sl, x, y, size, color, lw)
+    """icone de linha da biblioteca compartilhada; size_px = lado em px do HTML"""
+    icon(sl, kind, X(x), Y(y), Y(size_px), color)   # escala vertical: nao deforma
 
 
 # ------------------------------------------------------------------ conteudo
@@ -333,27 +224,27 @@ H1 = [('Entregar a plataforma de F&I multibanco depende de cinco frentes,', INK)
 AMBICAO = ['Plataforma de F&I multibanco e ponta a ponta que faz o lojista vender mais,',
            'com simulação e envio de ficha em um só fluxo']
 BENEFITS = [
-    ('people', 'Lojista e seu cliente',
+    ('pessoas_linha', 'Lojista e seu cliente',
      'Mais aprovação, menos retrabalho e resposta em minutos'),
-    ('car', 'Localiza',
+    ('carro_linha', 'Localiza',
      'Mais penetração de F&I e relação mais forte com a rede de lojistas'),
-    ('bank', 'Banco',
+    ('banco_linha', 'Banco',
      'Originação qualificada com custo de aquisição menor'),
 ]
 SECTION = 'cinco frentes, escaladas em ondas'
 FRONTS = [
-    ('bank', ['Bancos'],
+    ('banco_linha', ['Bancos'],
      'Integrar em ondas, dos bancos menores aos maiores, à medida que a '
      'proposta de valor se confirma'),
-    ('tech', ['Tecnologia'],
+    ('engrenagem_linha', ['Tecnologia'],
      'APIs para simulação via Corban do lojista e envio da ficha a múltiplos '
      'bancos em um único disparo'),
-    ('screen', ['Interface', 'da plataforma'],
+    ('monitor_linha', ['Interface', 'da plataforma'],
      'Melhoria contínua guiada pelo uso do vendedor, com ciclos curtos de release'),
-    ('people', ['Lojistas'],
+    ('pessoas_linha', ['Lojistas'],
      'Piloto em pequena escala para provar a proposta de valor e, confirmada, '
      'escalar por onda'),
-    ('network', ['Ecossistema'],
+    ('rede_linha', ['Ecossistema'],
      'Novos serviços e integração com Valorização depois que o núcleo estiver estável'),
 ]
 FOOTNOTE = 'Fonte: análise Bain. Preliminar, para discussão'

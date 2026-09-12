@@ -13,7 +13,7 @@ nessa cor para abrir "furos" (o miolo da engrenagem, o vao das rodas).
 import math
 
 from pptx.dml.color import RGBColor
-from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
 from pptx.oxml.ns import qn
 from pptx.util import Emu, Inches, Pt
 
@@ -257,10 +257,130 @@ def carro(sl, x, y, s, c, bg=WHITE):
         _ell(sl, x + s * (cx - 0.052), y + s * 0.688, s * 0.104, s * 0.104, bg)
 
 
+# ------------------------------- icones de linha (line art, viewBox 32x32)
+# Mesma familia de traco dos SVGs da pagina F&I multibanco: contorno fino,
+# sem preenchimento. Coexistem com os icones cheios acima --- escolha um
+# estilo por pagina.
+def _p32(x, y, s, a, b):
+    """ponto do viewBox 32x32 -> polegadas"""
+    return (x + a / 32.0 * s, y + b / 32.0 * s)
+
+
+def _lw32(s):
+    """stroke-width 2 do viewBox, em pt"""
+    return max(0.75, 2.0 / 32.0 * s * 72.0)
+
+
+def _cx32(sl, x, y, s, p0, p1, c):
+    """traco reto: conector (freeform de bounding box nula nao renderiza)"""
+    (x0, y0), (x1, y1) = _p32(x, y, s, *p0), _p32(x, y, s, *p1)
+    cn = sl.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(x0), Inches(y0),
+                                 Inches(x1), Inches(y1))
+    cn.line.color.rgb = c
+    cn.line.width = Pt(_lw32(s))
+    cn.line._get_or_add_ln().set('cap', 'rnd')
+    return cn
+
+
+def _ln32(sl, x, y, s, pts, c, close=False):
+    """polilinha no viewBox 32x32"""
+    if len(pts) == 2 and not close:
+        return _cx32(sl, x, y, s, pts[0], pts[1], c)
+    e = [(Emu(int(round(a * EMU))), Emu(int(round(b * EMU))))
+         for a, b in (_p32(x, y, s, a, b) for a, b in pts)]
+    bld = sl.shapes.build_freeform(e[0][0], e[0][1])
+    bld.add_line_segments(e[1:], close=close)
+    return _clean(bld.convert_to_shape(), None, c, _lw32(s))
+
+
+def _el32(sl, x, y, s, cx, cy, r, c):
+    px, py = _p32(x, y, s, cx - r, cy - r)
+    d = 2 * r / 32.0 * s
+    return _ell(sl, px, py, d, d, None, c, _lw32(s))
+
+
+def _bez32(p0, p1, p2, p3, n=14):
+    """amostra a curva de Bezier cubica (os `c`/`s` dos paths SVG)"""
+    out = []
+    for i in range(1, n + 1):
+        t = i / float(n)
+        u = 1 - t
+        out.append((u ** 3 * p0[0] + 3 * u * u * t * p1[0]
+                    + 3 * u * t * t * p2[0] + t ** 3 * p3[0],
+                    u ** 3 * p0[1] + 3 * u * u * t * p1[1]
+                    + 3 * u * t * t * p2[1] + t ** 3 * p3[1]))
+    return out
+
+
+def _semi32(cx, cy, r, n=12):
+    """semicircunferencia de barriga para cima, da direita para a esquerda"""
+    return [(cx + r * math.cos(math.pi * i / n),
+             cy - r * math.sin(math.pi * i / n)) for i in range(n + 1)]
+
+
+def pessoas_linha(sl, x, y, s, c, bg=WHITE):
+    """duas pessoas, so contorno"""
+    _el32(sl, x, y, s, 11, 10, 4, c)
+    _el32(sl, x, y, s, 21, 10, 4, c)
+    _ln32(sl, x, y, s, [(4, 25)] + _bez32((4, 25), (4.5, 19), (8, 16), (12, 16))
+          + _bez32((12, 16), (16, 16), (19.5, 19), (20, 25)), c)
+    _ln32(sl, x, y, s, [(13, 25)]
+          + _bez32((13, 25), (13.5, 20), (16.5, 17.5), (20, 17.5))
+          + _bez32((20, 17.5), (23.5, 17.5), (26.5, 20), (27, 25)), c)
+
+
+def banco_linha(sl, x, y, s, c, bg=WHITE):
+    """predio classico, so contorno"""
+    _ln32(sl, x, y, s, [(5, 12), (16, 5), (27, 12)], c)
+    _ln32(sl, x, y, s, [(7, 13), (25, 13)], c)
+    for cx in (9, 15, 21):
+        _ln32(sl, x, y, s, [(cx, 13), (cx, 25)], c)
+    _ln32(sl, x, y, s, [(5, 26), (27, 26)], c)
+
+
+def carro_linha(sl, x, y, s, c, bg=WHITE):
+    """carro de frente, so contorno, com os vaos das rodas"""
+    body = [(4, 19), (7, 12), (25, 12), (28, 19), (28, 25), (25, 25)] \
+        + _semi32(21, 25, 4)[1:] + [(15, 25)] + _semi32(11, 25, 4)[1:] + [(4, 25)]
+    _ln32(sl, x, y, s, body, c, close=True)
+    _ln32(sl, x, y, s, [(8, 12), (11, 8), (21, 8), (24, 12)], c)
+    _el32(sl, x, y, s, 11, 24, 2.5, c)
+    _el32(sl, x, y, s, 21, 24, 2.5, c)
+
+
+def engrenagem_linha(sl, x, y, s, c, bg=WHITE):
+    """circulos concentricos com raios (tecnologia)"""
+    _el32(sl, x, y, s, 16, 16, 5, c)
+    _el32(sl, x, y, s, 16, 16, 10, c)
+    for a, b, d, e in ((16, 3, 16, 7), (16, 25, 16, 29), (3, 16, 7, 16),
+                       (25, 16, 29, 16), (7, 7, 10, 10), (22, 22, 25, 25),
+                       (25, 7, 22, 10), (10, 22, 7, 25)):
+        _ln32(sl, x, y, s, [(a, b), (d, e)], c)
+
+
+def monitor_linha(sl, x, y, s, c, bg=WHITE):
+    """tela com pe, so contorno"""
+    _ln32(sl, x, y, s, [(5, 5), (27, 5), (27, 21), (5, 21)], c, close=True)
+    _ln32(sl, x, y, s, [(12, 27), (20, 27)], c)
+    _ln32(sl, x, y, s, [(16, 21), (16, 27)], c)
+
+
+def rede_linha(sl, x, y, s, c, bg=WHITE):
+    """tres nos ligados, so contorno (ecossistema)"""
+    _el32(sl, x, y, s, 8, 16, 3, c)
+    _el32(sl, x, y, s, 23, 8, 3, c)
+    _el32(sl, x, y, s, 23, 24, 3, c)
+    _ln32(sl, x, y, s, [(11, 15), (20, 9)], c)
+    _ln32(sl, x, y, s, [(11, 17), (20, 23)], c)
+
+
 ICONS = {'barras': barras, 'pessoa': pessoa, 'pessoas': pessoas,
          'pessoas_cheio': pessoas_cheio, 'alerta': alerta, 'ciclo': ciclo,
          'banco': banco, 'engrenagem': engrenagem, 'monitor': monitor,
-         'rede': rede, 'alvo': alvo, 'trofeu': trofeu, 'carro': carro}
+         'rede': rede, 'alvo': alvo, 'trofeu': trofeu, 'carro': carro,
+         'pessoas_linha': pessoas_linha, 'banco_linha': banco_linha,
+         'carro_linha': carro_linha, 'engrenagem_linha': engrenagem_linha,
+         'monitor_linha': monitor_linha, 'rede_linha': rede_linha}
 
 
 def icon(sl, kind, x, y, s, c, bg=WHITE):

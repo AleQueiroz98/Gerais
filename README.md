@@ -592,11 +592,14 @@ python3 scripts/pptx_preview.py output/fmi_multibanco.pptx /tmp/prev.html
   `Y()`/`F()` usam a vertical, que também define o corpo das fontes (31px do
   título → 25,4pt). Mudar um espaçamento é mexer no mesmo número que está no
   CSS.
-- **Ícones vetoriais, tirados dos mesmos paths SVG** do HTML: os arcos viram
-  polilinhas amostradas da curva de Bézier, os traços retos viram conectores
-  (freeform de bounding box nula não renderiza) e os círculos, ovais. Continuam
-  editáveis e recoloríveis — traço vermelho nos cartões, preto nas frentes,
-  exceto a frente 1.
+- **Ícones vetoriais, tirados dos mesmos paths SVG** do HTML e guardados em
+  `scripts/icons_bain.py` como a família `*_linha` (`banco_linha`,
+  `carro_linha`, `pessoas_linha`, `engrenagem_linha`, `monitor_linha`,
+  `rede_linha`): os arcos viram polilinhas amostradas da curva de Bézier, os
+  traços retos viram conectores (freeform de bounding box nula não renderiza) e
+  os círculos, ovais. Convivem com os ícones cheios já existentes — um estilo
+  por página. Continuam editáveis e recoloríveis: traço vermelho nos cartões,
+  preto nas frentes, exceto a frente 1.
 - **Entrelinha exata, em pontos** (`line-height` do CSS × corpo), em vez de
   múltiplos, para a página manter o ritmo vertical do HTML.
 - **Círculos e ícones usam a escala vertical nos dois eixos**, para não
