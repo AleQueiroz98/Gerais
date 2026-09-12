@@ -40,6 +40,37 @@ python3 scripts/check_ambiente.py   # no Windows: py scripts\check_ambiente.py
 | `output/260903__Status_frentes_3paginas.pptx` | **Entregável atual** — deck editável de 3 páginas com o status das 4 frentes |
 | `scripts/build_recap_alavancas.py` | Monta o recap da agenda de valor (conversão por informação coletada) |
 | `output/recap_alavancas_conversao.pptx` | **Entregável atual** — recap redesenhado, builds das duas alavancas e página da alavanca 1 |
+| `scripts/build_lead_quente_fi.py` | Monta as cinco páginas de lead quente e F&I multibanco reproduzidas dos prints |
+| `output/lead_quente_fi_multibanco.pptx` | **Entregável atual** — 5 páginas editáveis: lead quente (2 versões), visão geral de F&I (2 versões) e plano de execução |
+| `source/referencia/` | **Documentos de referência** — solte aqui o memo/deck que deve valer como fonte da verdade |
+| `scripts/ler_referencia.py` | Converte os PDFs e PPTXs dessa pasta em texto pesquisável (`source/referencia/_texto/`) |
+| `.claude/agents/referencia.md` | Agente que usa esses documentos como fonte da verdade para conferir e atualizar os decks |
+
+## Documento de referência
+
+Para trabalhar a partir de um documento (memo estratégico, deck do cliente,
+PDF de processo):
+
+1. Solte o arquivo em `source/referencia/` — PDF, PPTX, TXT, MD, CSV ou HTML.
+2. Rode o extrator:
+
+```bash
+python3 scripts/ler_referencia.py   # no Windows: py scripts\ler_referencia.py
+```
+
+   Cada documento vira um `.md` pesquisável em `source/referencia/_texto/`,
+   com marcação de página (PDF) ou slide (PPTX), tabelas e notas do
+   apresentador. O que já está atualizado aparece como `[ = ]` e é pulado;
+   `--forcar` refaz tudo e `--listar` só mostra o que há na pasta.
+
+3. Peça o trabalho ao agente `referencia` (definido em
+   `.claude/agents/referencia.md`), por exemplo: *"usa o agente referencia:
+   confere os prazos da frente 4 contra o memo v2"*.
+
+O agente trata o documento como fonte da verdade: cita a página ou o slide de
+onde tirou cada número e, quando o documento contradiz o que já está em
+`scripts/overrides.json` ou nos decks de `output/`, mostra os dois lados antes
+de mudar qualquer coisa. Detalhes em `source/referencia/LEIA-ME.md`.
 
 ## Como regerar
 
