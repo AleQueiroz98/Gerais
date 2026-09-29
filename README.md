@@ -44,8 +44,8 @@ python3 scripts/check_ambiente.py   # no Windows: py scripts\check_ambiente.py
 | `scripts/build_lead_quente_core.py` | Monta a mesma página sobre o master Bain Core, com elementos btfp |
 | `output/lead_quente_core.pptx` | **Entregável** — variante da página no template Bain Core |
 | `output/lead_quente_fi_multibanco.pptx` | **Entregável atual** — 5 páginas editáveis: lead quente (2 versões), visão geral de F&I (2 versões) e plano de execução |
-| `scripts/build_status_frente2.py` | Monta a página de status de setembro/26 da frente 2 (1/2), com o painel de resultados-chave e a tabela de status, reproduzindo o print enviado |
-| `output/260925__Status_frente2_resultados.pptx` | **Entregável atual** — cabeçalho, menu de frentes, painel de resultados (qualidade dos leads e volume/conversão) e tabela de status, tudo em tabelas nativas |
+| `scripts/build_status_frente2.py` | Monta as duas páginas de status de setembro/26 da frente 2 (1/2 e 2/2), reproduzindo os prints enviados |
+| `output/260925__Status_frente2_resultados.pptx` | **Entregável atual** — 1/2: qualidade dos leads e volume/conversão; 2/2: alocação em lojas piloto/restantes (v1.0 e v2.0) e status dos entregáveis; tudo em tabelas nativas |
 | `source/referencia/` | **Documentos de referência** — solte aqui o memo/deck que deve valer como fonte da verdade |
 | `scripts/ler_referencia.py` | Converte os PDFs e PPTXs dessa pasta em texto pesquisável (`source/referencia/_texto/`) |
 | `.claude/agents/referencia.md` | Agente que usa esses documentos como fonte da verdade para conferir e atualizar os decks |

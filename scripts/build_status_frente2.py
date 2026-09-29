@@ -1,19 +1,26 @@
 # -*- coding: utf-8 -*-
-"""Pagina unica (16:9) do acompanhamento de setembro/26 da frente 2, parte 1/2:
-qualificacao de leads (site, Meta, classificados) e o novo painel de
-resultados-chave (qualidade dos leads e volume/conversao), reproduzindo o
-print enviado.
+"""Duas paginas (16:9) do acompanhamento de setembro/26 da frente 2,
+reproduzindo os prints enviados:
+
+  pagina 1/2  qualificacao de leads (site, Meta, classificados) e o painel de
+              resultados-chave (qualidade dos leads e volume/conversao)
+  pagina 2/2  alocacao em lojas piloto/restantes (v1.0 e v2.0 do modelo) e o
+              status dos entregaveis de cada versao
 
 Cabecalho, menu de frentes e a pastilha de status reaproveitam os tokens de
-`deckstyle.py`, na mesma identidade visual do restante do deck. Tudo em
-tabelas nativas do PowerPoint (o mini-painel de resultados e a grade de
-status), editaveis celula a celula; nenhum dado tabular fica em caixa de
-texto solta. Os selos de letra (A, B, C, D) ao lado do numero do entregavel
-sao ovais desenhados por cima da tabela, como o selo numerado da frente em
-build.py.
+`deckstyle.py`, na mesma identidade visual do restante do deck; a pagina 2/2
+troca a faixa verde com icone da 1/2 pela faixa preta e centralizada do print
+(`panel_header(..., black=True)`). Tudo em tabelas nativas do PowerPoint,
+editaveis celula a celula; nenhum dado tabular fica em caixa de texto solta.
 
-Conteudo desta pagina (snapshot de 25/set/26), abaixo. Para atualizar em um
-proximo ciclo, edite so os dados no topo do arquivo.
+Os selos de letra (A, B, C, D) ao lado do numero do entregavel sao ovais
+desenhados por cima da tabela, como o selo numerado da frente em build.py. Na
+pagina 2/2, os grupos "Lojas Piloto/Restantes" e "V1.0/V2.0 do modelo" viram
+pilulas verticais (`vertical_pill`, texto girado 270) desenhadas ao lado das
+tabelas, ja que uma celula de tabela nao pode ter cantos arredondados.
+
+Conteudo das duas paginas (snapshot de 25/set/26), abaixo. Para atualizar em
+um proximo ciclo, edite so os dados no topo do arquivo.
 
     python3 build_status_frente2.py
 """
@@ -102,6 +109,10 @@ TIME = 'Priscila Martins, Yure Cangussu, Thais Pimenta, Luma Gomes'
 MESES = ['Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set*']
 
 # icone (callable icon_fn(slide,x,y,s,color)), cor, rotulo, legenda, valores mensais
+PANEL_GREEN = RGBColor(0x1F, 0x4E, 0x3D)
+PANEL_GREEN_LT = RGBColor(0x9F, 0xD4, 0xB8)
+CHIP_BG = RGBColor(0xE9, 0xEC, 0xF4)
+CHIP_SET_BG = RGBColor(0xDD, 0xE1, 0xEC)
 AZUL_ICO = RGBColor(0x2F, 0x5B, 0xA8)
 LARANJA_ICO = RGBColor(0xE0, 0x6C, 0x3C)
 VERDE_ICO = RGBColor(0x2F, 0x8F, 0x5B)
@@ -181,6 +192,85 @@ STATUS_ROWS = [
          prog=['N/A'], prox=['N/A'], esc=['N/A']),
 ]
 
+# ------------------------------------------------------------------ conteudo da pagina 2/2
+TITULO_P2 = 'Tratamento, priorização e alocação de leads (2/2)'
+LIDERES_P2 = 'João Azevedo'
+
+MESES_P2 = ['fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set']
+
+# cada bloco: rotulo do grupo, letra do selo, cor da pilula, linhas
+# (rotulo da linha, com heatmap?, valores)
+RESULT_BLOCKS_P2 = [
+    dict(label='Lojas Piloto', selo='A', linhas=[
+        ('% alocado certo',  False, ['43%', '48%', '49%', '47%', '47%', '49%', '46%', '53%']),
+        ('% alocado errado', False, ['57%', '52%', '51%', '53%', '53%', '51%', '54%', '47%']),
+        ('% conv. média - alocado certo',  True,
+         ['0,74%', '0,63%', '0,55%', '0,50%', '0,63%', '0,52%', '0,45%', '0,36%']),
+        ('% conv. média - alocado errado', True,
+         ['0,41%', '0,50%', '0,48%', '0,30%', '0,38%', '0,34%', '0,38%', '0,34%']),
+    ]),
+    dict(label='Lojas Restantes', selo='B', linhas=[
+        ('% alocado certo',  False, ['33%', '35%', '31%', '30%', '33%', '36%', '30%', '36%']),
+        ('% alocado errado', False, ['67%', '65%', '69%', '70%', '67%', '64%', '70%', '64%']),
+        ('% conv. média - alocado certo',  True,
+         ['0,60%', '0,69%', '0,49%', '0,53%', '0,68%', '0,53%', '0,54%', '0,33%']),
+        ('% conv. média - alocado errado', True,
+         ['0,41%', '0,49%', '0,33%', '0,34%', '0,40%', '0,45%', '0,39%', '0,25%']),
+    ]),
+]
+
+STATUS_ROWS_P2 = [
+    dict(id='2.4.1', selos=[],
+         desc='Modelo simplificado de alocação (v1.0) desenhado',
+         bold=[], resp='João Azevedo', prazo='28/ago', status='verde', rotulo=None,
+         prog=['N/A'], prox=['N/A'], esc=['N/A']),
+    dict(id='2.4.2', selos=[],
+         desc='Lojas para lançamento do piloto escolhidas',
+         bold=[], resp='João Azevedo', prazo='01/set', status='verde', rotulo=None,
+         prog=['N/A'], prox=['N/A'], esc=['N/A']),
+    dict(id='2.4.3', selos=['A'],
+         desc='Modelo simplificado de alocação (v1.0) desenvolvido e lançado em ~70 lojas',
+         bold=[], resp='Yure Cangussu', prazo='01/set', status='amarelo', rotulo=None,
+         prog=['Análise preliminar realizada'],
+         prox=['Ajustar desenvolvimento do piloto (TBC)'],
+         esc=['N/A']),
+    dict(id='2.4.4', selos=[],
+         desc='Riscos mapeados e plano de contingência definido',
+         bold=[], resp='João Azevedo', prazo='11/set', status='amarelo', rotulo=None,
+         prog=['Desenho dos pilotos considerando caps de leads/CV'],
+         prox=['Mapear riscos existentes', 'Estruturar planos de mitigação'],
+         esc=['N/A']),
+    dict(id='2.4.5', selos=[],
+         desc='~5 pilotos do modelo robusto desenhados e lançados em 20 lojas em cada',
+         bold=[], resp='Yure Cangussu e Clarice', prazo='18/out', status='amarelo', rotulo=None,
+         prog=['Base estruturada com variáveis disponíveis para avaliar resultado histórico'],
+         prox=['Concluir o desenho dos ~5 pilotos e iniciar o desenvolvimento'],
+         esc=['N/A']),
+    dict(id='2.4.6', selos=[],
+         desc='Escala do piloto de melhor conversão entre os testados para todas as lojas',
+         bold=[], resp='Yure Cangussu e João Azevedo', prazo='13/nov', status='vermelho',
+         rotulo='Não iniciado', prog=['N/A'], prox=['N/A'], esc=['N/A']),
+    dict(id='2.4.7', selos=['B'],
+         desc='Modelo de clusterização revisado com base nas distâncias entre lojas e '
+              'novo modelo de alocação',
+         bold=[], resp='João Azevedo', prazo='25/set', status='amarelo', rotulo=None,
+         prog=['N/A'],
+         prox=['Avaliar reclusterização com base no resultado do piloto das 70 lojas'],
+         esc=['N/A']),
+    dict(id='2.4.8', selos=['B'],
+         desc='Piloto de alocação total dos leads muito frios na Liza para aquecimento do lead',
+         bold=[], resp='João Azevedo', prazo='11/set', status='amarelo', rotulo=None,
+         prog=['Expansão do envio de leads muito frios para a Liza em outras 100 lojas'],
+         prox=['Avaliar resultado do piloto', 'Escalar para todos os leads muito frios'],
+         esc=['N/A']),
+]
+# (rotulo, cor de fundo, cor do texto, indice inicial, indice final) 1-based
+GRUPOS_P2 = [
+    ('V 1.0 do modelo de alocação', PANEL_GREEN_LT, PANEL_GREEN, 1, 4),
+    ('V 2.0 do modelo',             PANEL_GREEN_LT, PANEL_GREEN, 5, 8),
+]
+
+
 # ------------------------------------------------------------------ heatmap
 # escala de 3 cores classica (Excel), interpolada: verde (minimo da linha) ->
 # amarelo (meio) -> vermelho (maximo da linha), igual a formatacao condicional
@@ -233,6 +323,18 @@ def heat_last_only(vals):
     return [HEAT_RED if i == len(vals) - 1 else None for i in range(len(vals))]
 
 
+def heat_conv(vals):
+    """verde no maximo da propria linha, vermelho no minimo (conversao: maior e melhor)"""
+    nums = [(i, float(v.replace('%', '').replace(',', '.'))) for i, v in enumerate(vals)]
+    mn = min(v for _, v in nums)
+    mx = max(v for _, v in nums)
+    out = [None] * len(vals)
+    for i, v in nums:
+        t = 0.5 if mx == mn else 1.0 - (v - mn) / (mx - mn)
+        out[i] = _heat_at(t)
+    return out
+
+
 # ------------------------------------------------------------------ geometria
 SW, SH = 13.3333, 7.5
 ML = 0.42
@@ -246,11 +348,6 @@ PT_NAV = 9.0
 PT_PANEL, PT_SECT, PT_SUBSECT = 10.5, 9.5, 7.5
 PT_HEAD, PT_BODY, PT_FOOT = 7.5, 8.0, 7.0
 BODY_STEPS_STATUS = (8.0, 7.5, 7.0, 6.5, 6.0)
-
-PANEL_GREEN = RGBColor(0x1F, 0x4E, 0x3D)
-PANEL_GREEN_LT = RGBColor(0x9F, 0xD4, 0xB8)
-CHIP_BG = RGBColor(0xE9, 0xEC, 0xF4)
-CHIP_SET_BG = RGBColor(0xDD, 0xE1, 0xEC)
 BAR = 0.075
 
 
@@ -361,20 +458,26 @@ def bullet_list(cell, items, size, color, bold_map=None):
     cell_paras(cell, paras, anchor=MSO_ANCHOR.MIDDLE, space=2.0)
 
 
-def panel_header(slide, x, y, w, title, right_text=None, icon_fn=None):
-    """faixa verde-escura do painel, como tabela 1x2 (editavel, nao textbox)"""
+def panel_header(slide, x, y, w, title, right_text=None, icon_fn=None, black=False):
+    """faixa do painel, como tabela 1x2 (editavel, nao textbox).
+
+    black=True reproduz o estilo mais denso/planilha da pagina 2/2: faixa
+    preta, titulo centralizado, sem icone.
+    """
     h = 0.30
     tbl = new_table(slide, x, y, w, 1, [w * 0.55, w * 0.45] if right_text else [w], [h])
     c = tbl.cell(0, 0)
-    cell_box(c, PANEL_GREEN)
-    mx = 0.40 if icon_fn else 0.12
-    cell_text(c, [(title, True)], PT_PANEL, WHITE, anchor=MSO_ANCHOR.MIDDLE, mx=mx)
+    cell_box(c, BLACK if black else PANEL_GREEN)
+    align = PP_ALIGN.CENTER if black else PP_ALIGN.LEFT
+    mx = 0.12 if black else (0.40 if icon_fn else 0.12)
+    cell_text(c, [(title, True)], PT_PANEL, WHITE, align=align,
+              anchor=MSO_ANCHOR.MIDDLE, mx=mx)
     if icon_fn:
         icon_s = 0.20
         icon_fn(slide, x + 0.12, y + (h - icon_s) / 2.0, icon_s, PANEL_GREEN_LT)
     if right_text:
         c2 = tbl.cell(0, 1)
-        cell_box(c2, PANEL_GREEN)
+        cell_box(c2, BLACK if black else PANEL_GREEN)
         cell_text(c2, [(right_text, False)], PT_SUBSECT, PANEL_GREEN_LT,
                   align=PP_ALIGN.RIGHT, anchor=MSO_ANCHOR.MIDDLE, mx=0.12)
     return y + h
@@ -415,8 +518,24 @@ def badge(slide, x, y, d, letter):
     return s
 
 
+def vertical_pill(slide, x, y, w, h, fill, text, color, size):
+    """capsula vertical (texto girado 270) para agrupar linhas de uma tabela,
+    como as faixas "Lojas Piloto/Restantes" e "V1.0/V2.0" do print"""
+    adj = min(0.5, (w / 2) / h) if h > 0 else 0.5
+    s = rect(slide, x, y, w, h, fill=fill, shape=MSO_SHAPE.ROUNDED_RECTANGLE, adj=adj)
+    tf = s.text_frame
+    tf.word_wrap = True
+    tf._txBody.bodyPr.set('vert', 'vert270')
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.CENTER
+    style_run(p.add_run(), text, size, color, True)
+    return s
+
+
 # ------------------------------------------------------------------ cabecalho
-def header(slide, frentes):
+def header(slide, frentes, frente_id=FRENTE_ID, titulo=TITULO, objetivo=OBJETIVO,
+           obj_bold=OBJ_BOLD, lideres=LIDERES, time_=TIME):
     y = TOP
     w_lid, w_time = 1.55, 2.55
     w_main = CW - BAR - w_lid - w_time
@@ -424,11 +543,11 @@ def header(slide, frentes):
     MAIN_ML = BADGE + GAP + 0.18
 
     txt_w = w_main - MAIN_ML - CELL_MX
-    tit_n = nlines(TITULO, PT_TITLE, txt_w, True)
-    obj_n = nlines(OBJETIVO, PT_OBJ, txt_w)
+    tit_n = nlines(titulo, PT_TITLE, txt_w, True)
+    obj_n = nlines(objetivo, PT_OBJ, txt_w)
     h_main = tit_n * lh(PT_TITLE) + 0.05 + obj_n * lh(PT_OBJ)
-    side_n = max(nlines(LIDERES, PT_VALUE, w_lid - 2 * CELL_MX),
-                 nlines(TIME, PT_VALUE, w_time - 2 * CELL_MX))
+    side_n = max(nlines(lideres, PT_VALUE, w_lid - 2 * CELL_MX),
+                 nlines(time_, PT_VALUE, w_time - 2 * CELL_MX))
     h_side = lh(PT_LABEL) + 0.05 + side_n * lh(PT_VALUE)
     hdr_h = max(h_main, h_side) + 0.20
 
@@ -438,14 +557,14 @@ def header(slide, frentes):
         cell_box(hdr.cell(0, c), GRAY_X_LIGHT)
 
     c = hdr.cell(0, 1)
-    tf = cell_text(c, [(TITULO, True)], PT_TITLE, BLACK, mt=0.10, mb=0.10)
+    tf = cell_text(c, [(titulo, True)], PT_TITLE, BLACK, mt=0.10, mb=0.10)
     c.margin_left = Inches(MAIN_ML)
     p2 = tf.add_paragraph()
     p2.space_before = Pt(3)
-    for seg, b in split_bold(OBJETIVO, OBJ_BOLD):
+    for seg, b in split_bold(objetivo, obj_bold):
         style_run(p2.add_run(), seg, PT_OBJ, TEXT_REG, b)
 
-    for col, lab, val in ((2, 'Líder(es)', LIDERES), (3, 'Time de trabalho', TIME)):
+    for col, lab, val in ((2, 'Líder(es)', lideres), (3, 'Time de trabalho', time_)):
         c = hdr.cell(0, col)
         tf = cell_text(c, [(lab.upper(), True)], PT_LABEL, TEXT_HELPER, mt=0.10, mb=0.10)
         p2 = tf.add_paragraph()
@@ -455,7 +574,7 @@ def header(slide, frentes):
     bx = ML + BAR + 0.16
     by = TOP + 0.10 + (lh(PT_TITLE) - BADGE) / 2.0
     rect(slide, bx, by, BADGE, BADGE, fill=GREEN, shape=MSO_SHAPE.OVAL)
-    textbox(slide, bx, by + 0.045, BADGE, 0.20, str(FRENTE_ID), size=11,
+    textbox(slide, bx, by + 0.045, BADGE, 0.20, str(frente_id), size=11,
             color=BLACK, bold=True, align=PP_ALIGN.CENTER)
 
     y += hdr_h + 0.11
@@ -472,7 +591,7 @@ def header(slide, frentes):
     nav_h = lh(nav_pt) + 0.06
     xx = ML
     for g, wgt in zip(frentes, ws):
-        active = g['id'] == FRENTE_ID
+        active = g['id'] == frente_id
         tb = textbox(slide, xx, y, wgt + 0.04, nav_h, '', size=nav_pt)
         style_run(tb.text_frame.paragraphs[0].add_run(), '%d. %s' % (g['id'], g['nome']),
                    nav_pt, GREEN_DEEP if active else NAV_IDLE, bold=active)
@@ -538,6 +657,78 @@ def mini_table(slide, x, y, w, bloco, heat_fn):
     return y + sum(heights)
 
 
+def result_block_p2(slide, x, y, w, bloco):
+    """bloco de resultados da pagina 2/2: pilula vertical (grupo + selo) a
+    esquerda de uma tabela "2026 | fev..set" com 4 metricas (2 planas, 2 com
+    heatmap de conversao)"""
+    def fh(pt):
+        return pt * 1.30 / 72.0
+
+    sidebar_w, gap = 0.22, 0.06
+    tbl_x, tbl_w = x + sidebar_w + gap, w - sidebar_w - gap
+    n_meses = len(MESES_P2)
+    lab_w = tbl_w * 0.31
+    col_w = (tbl_w - lab_w) / n_meses
+    widths = [lab_w] + [col_w] * n_meses
+    col_mx = 0.02
+
+    head_h = fh(PT_HEAD) + 0.10
+    row_pt = 7.5
+    row_hs = []
+    for nome, _heat, _vals in bloco['linhas']:
+        n = nlines(nome, row_pt, lab_w - 2 * CELL_MX)
+        row_hs.append(max(0.19, n * fh(row_pt) + 0.06))
+    heights = [head_h] + row_hs
+
+    tbl = new_table(slide, tbl_x, y, tbl_w, len(heights), widths, heights)
+    cell_box(tbl.cell(0, 0), GRAY_X_LIGHT, (None, None, None, GRAY_MEDIUM), lw=0.5)
+    cell_text(tbl.cell(0, 0), [('2026', True)], PT_HEAD, TEXT_HELPER, mx=0.06,
+              anchor=MSO_ANCHOR.MIDDLE)
+    for ci, mes in enumerate(MESES_P2, start=1):
+        c = tbl.cell(0, ci)
+        cell_box(c, GRAY_X_LIGHT, (None, None, None, GRAY_MEDIUM), lw=0.5)
+        cell_text(c, [(mes, True)], PT_HEAD, TEXT_HELPER, align=PP_ALIGN.CENTER,
+                  anchor=MSO_ANCHOR.MIDDLE, mx=col_mx)
+
+    for ri, (nome, heat_on, vals) in enumerate(bloco['linhas'], start=1):
+        sep = GRAY_MEDIUM if ri == len(bloco['linhas']) else GRAY_LIGHT
+        c = tbl.cell(ri, 0)
+        cell_box(c, WHITE, (None, None, None, sep), lw=0.5)
+        cell_text(c, [(nome, False)], row_pt, TEXT_DARK, mx=0.06,
+                  anchor=MSO_ANCHOR.MIDDLE)
+        cores = heat_conv(vals) if heat_on else [None] * len(vals)
+        for ci, (val, heat) in enumerate(zip(vals, cores), start=1):
+            cc = tbl.cell(ri, ci)
+            if heat:
+                bg, fg = heat
+                cell_box(cc, bg, (WHITE, WHITE, None, sep), lw=1.0)
+            else:
+                cell_box(cc, WHITE, (None, None, None, sep), lw=0.5)
+                fg = TEXT_DARK
+            cell_text(cc, [(val, heat is not None)], row_pt, fg,
+                      align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, mx=col_mx)
+
+    total_h = sum(heights)
+    vertical_pill(slide, x, y + 0.02, sidebar_w, total_h - 0.04, PANEL_GREEN,
+                  bloco['label'], WHITE, 7.5)
+    bd = 0.20
+    badge(slide, x + (sidebar_w - bd) / 2.0, y + total_h + 0.05, bd, bloco['selo'])
+    return y + total_h + 0.05 + bd
+
+
+def left_panel_p2(slide, x, y, w, bottom):
+    y = panel_header(slide, x, y, w, 'Resultados-chave', black=True)
+    y += 0.14
+    for i, bloco in enumerate(RESULT_BLOCKS_P2):
+        y = result_block_p2(slide, x, y, w, bloco)
+        if i < len(RESULT_BLOCKS_P2) - 1:
+            y += 0.18
+
+    nota_n = nlines(NOTA, PT_FOOT, w)
+    textbox(slide, x, bottom - nota_n * lh(PT_FOOT), w, nota_n * lh(PT_FOOT),
+            NOTA, size=PT_FOOT, color=TEXT_HELPER)
+
+
 def left_panel(slide, x, y, w, bottom):
     y = panel_header(slide, x, y, w, 'Resultados-chave', 'Histórico mensal | 2026',
                       icon_fn=bain_icon('barras'))
@@ -572,11 +763,19 @@ R_COLS = [
 PT_RHEAD = 6.5
 
 
-def right_panel(slide, x, y, w, bottom):
-    y = panel_header(slide, x, y, w, 'Status das frentes em andamento', icon_fn=list_icon)
+def right_panel(slide, x, y, w, bottom, status_rows=None, grupos=None, black=False):
+    """grupos: lista de (rotulo, cor, indice inicial, indice final) 1-based,
+    para a pilula vertical a esquerda da tabela que agrupa versoes/pilotos"""
+    status_rows = status_rows if status_rows is not None else STATUS_ROWS
+    y = panel_header(slide, x, y, w, 'Status das frentes em andamento',
+                      icon_fn=None if black else list_icon, black=black)
     y += 0.10
 
-    scale = w / sum(c[1] for c in R_COLS)
+    sidebar_w = 0.26 if grupos else 0.0
+    tbl_x = x + sidebar_w + (0.08 if grupos else 0.0)
+    tbl_w = w - (tbl_x - x)
+
+    scale = tbl_w / sum(c[1] for c in R_COLS)
     widths = [c[1] * scale for c in R_COLS]
 
     head_h = 0.28
@@ -592,7 +791,7 @@ def right_panel(slide, x, y, w, bottom):
 
     for body_pt in BODY_STEPS_STATUS:
         heights = [head_h]
-        for r in STATUS_ROWS:
+        for r in status_rows:
             n_desc = nlines(r['desc'], body_pt, widths[1] - 2 * CELL_MX, True)
             n_prog = bullet_n(r['prog'], body_pt, widths[5] - 2 * CELL_MX)
             n_prox = bullet_n(r['prox'], body_pt, widths[6] - 2 * CELL_MX)
@@ -612,7 +811,7 @@ def right_panel(slide, x, y, w, bottom):
             add = slack / (len(heights) - 1)
             heights = [heights[0]] + [h + add for h in heights[1:]]
 
-    tbl = new_table(slide, x, y, w, len(heights), widths, heights)
+    tbl = new_table(slide, tbl_x, y, tbl_w, len(heights), widths, heights)
     for ci, (name, _w, align) in enumerate(R_COLS):
         c = tbl.cell(0, ci)
         cell_box(c, GRAY_X_LIGHT, (None, None, None, BLACK), lw=1.0)
@@ -623,8 +822,8 @@ def right_panel(slide, x, y, w, bottom):
     for h in heights[1:]:
         row_y.append(row_y[-1] + h)
 
-    for ri, r in enumerate(STATUS_ROWS, start=1):
-        sep = GRAY_MEDIUM if ri == len(STATUS_ROWS) else GRAY_LIGHT
+    for ri, r in enumerate(status_rows, start=1):
+        sep = GRAY_MEDIUM if ri == len(status_rows) else GRAY_LIGHT
         base = (None, None, None, sep)
 
         c = tbl.cell(ri, 0)
@@ -658,10 +857,16 @@ def right_panel(slide, x, y, w, bottom):
         if selos:
             d, gap = 0.16, 0.04
             total = len(selos) * d + (len(selos) - 1) * gap
-            bx0 = x + (widths[0] - total) / 2.0
+            bx0 = tbl_x + (widths[0] - total) / 2.0
             by = row_y[ri - 1] + heights[ri] - d - 0.06
             for si, letra in enumerate(selos):
                 badge(slide, bx0 + si * (d + gap), by, d, letra)
+
+    if grupos:
+        for rotulo, cor, txt_color, i0, i1 in grupos:
+            gy0, gy1 = row_y[i0 - 1], row_y[i1]
+            vertical_pill(slide, x, gy0 + 0.03, sidebar_w, gy1 - gy0 - 0.06,
+                          cor, rotulo, txt_color, 6.5)
 
     return y + sum(heights)
 
@@ -683,12 +888,30 @@ def build(prs, frentes):
     return slide
 
 
+def build_page2(prs, frentes):
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    rect(slide, 0, 0, SW, SH, fill=WHITE)
+
+    y = header(slide, frentes, titulo=TITULO_P2, lideres=LIDERES_P2)
+
+    gap = 0.18
+    left_w = CW * 0.365
+    right_w = CW - left_w - gap
+    right_x = ML + left_w + gap
+
+    left_panel_p2(slide, ML, y, left_w, BOTTOM)
+    right_panel(slide, right_x, y, right_w, BOTTOM,
+                status_rows=STATUS_ROWS_P2, grupos=GRUPOS_P2, black=True)
+    return slide
+
+
 def main():
     frentes = json.load(open('frentes.json'))
     prs = Presentation()
     prs.slide_width, prs.slide_height = Inches(SW), Inches(SH)
     build(prs, frentes)
-    prs.core_properties.title = 'Tratamento, priorização e alocação de leads (1/2)'
+    build_page2(prs, frentes)
+    prs.core_properties.title = 'Tratamento, priorização e alocação de leads (1/2 e 2/2)'
     prs.save(OUT)
     print('ok:', OUT)
 
