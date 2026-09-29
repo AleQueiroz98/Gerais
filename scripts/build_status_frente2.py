@@ -39,6 +39,51 @@ def bain_icon(kind):
     """adapta icon(slide, kind, ...) de icons_bain.py para o icon_fn(slide,x,y,s,color)"""
     return lambda slide, x, y, s, color: icon(slide, kind, x, y, s, color)
 
+
+def _badge_icon(glyph_fn):
+    """distintivo circular colorido com um glifo branco por cima (robo, balao)"""
+    def draw(slide, x, y, s, color):
+        rect(slide, x, y, s, s, fill=color, shape=MSO_SHAPE.OVAL)
+        glyph_fn(slide, x, y, s, WHITE, color)
+    return draw
+
+
+def _robot_glyph(slide, x, y, s, white, bg):
+    hs = s * 0.52
+    hx, hy = x + (s - hs) / 2, y + (s - hs) * 0.40
+    rect(slide, hx, hy, hs, hs * 0.82, fill=white,
+         shape=MSO_SHAPE.ROUNDED_RECTANGLE, adj=0.35)
+    er = s * 0.065
+    for fx in (0.24, 0.76):
+        rect(slide, hx + hs * fx - er, hy + hs * 0.40 - er, er * 2, er * 2,
+             fill=bg, shape=MSO_SHAPE.OVAL)
+    rect(slide, x + s * 0.465, y + s * 0.06, s * 0.07, s * 0.13, fill=white)
+    rect(slide, x + s * 0.44, y + s * 0.015, s * 0.12, s * 0.12, fill=white,
+         shape=MSO_SHAPE.OVAL)
+
+
+def _chat_glyph(slide, x, y, s, white, bg):
+    bw, bh = s * 0.60, s * 0.44
+    bx, by = x + (s - bw) / 2, y + (s - bh) * 0.36
+    rect(slide, bx, by, bw, bh, fill=white,
+         shape=MSO_SHAPE.ROUNDED_RECTANGLE, adj=0.35)
+    fb = slide.shapes.build_freeform(Inches(bx + bw * 0.20), Inches(by + bh - s * 0.01))
+    fb.add_line_segments([(Inches(bx + bw * 0.10), Inches(by + bh + s * 0.14)),
+                          (Inches(bx + bw * 0.36), Inches(by + bh - s * 0.01))], close=True)
+    sh = fb.convert_to_shape()
+    sh.fill.solid(); sh.fill.fore_color.rgb = white
+    sh.line.fill.background()
+    no_shadow(sh)
+    dr = bh * 0.10
+    for frac in (0.30, 0.5, 0.70):
+        cx = bx + bw * frac
+        rect(slide, cx - dr, by + bh * 0.5 - dr, dr * 2, dr * 2, fill=bg,
+             shape=MSO_SHAPE.OVAL)
+
+
+robot_icon = _badge_icon(_robot_glyph)
+chatbubble_icon = _badge_icon(_chat_glyph)
+
 OUT = '../output/260925__Status_frente2_resultados.pptx'
 
 # ------------------------------------------------------------------ conteudo
@@ -56,7 +101,7 @@ TIME = 'Priscila Martins, Yure Cangussu, Thais Pimenta, Luma Gomes'
 
 MESES = ['Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set*']
 
-# icone (chave de icons_bain.py), cor, rotulo, legenda, valores mensais
+# icone (callable icon_fn(slide,x,y,s,color)), cor, rotulo, legenda, valores mensais
 AZUL_ICO = RGBColor(0x2F, 0x5B, 0xA8)
 LARANJA_ICO = RGBColor(0xE0, 0x6C, 0x3C)
 VERDE_ICO = RGBColor(0x2F, 0x8F, 0x5B)
@@ -64,17 +109,17 @@ QUALIDADE = {
     'titulo': 'Qualidade dos leads',
     'sub': '% de leads sem CEP (menor é melhor)',
     'linhas': [
-        ('monitor',    BLACK,     'Site',    '% leads sem CEP', ['-', '-', '24%', '24%', '23%', '22%', '13%', '10%']),
-        ('engrenagem', AZUL_ICO,  'Liza',    '% leads sem CEP', ['-', '-', '54%', '85%', '80%', '69%', '49%', '52%']),
-        ('rede',       AZUL_ICO,  'Chatbot', '% leads sem CEP', ['-', '-', '57%', '58%', '56%', '54%', '41%', '24%']),
+        (bain_icon('monitor'), BLACK,    'Site',    '% leads sem CEP', ['-', '-', '24%', '24%', '23%', '22%', '13%', '10%']),
+        (robot_icon,           AZUL_ICO, 'Liza',    '% leads sem CEP', ['-', '-', '54%', '85%', '80%', '69%', '49%', '52%']),
+        (chatbubble_icon,      AZUL_ICO, 'Chatbot', '% leads sem CEP', ['-', '-', '57%', '58%', '56%', '54%', '41%', '24%']),
     ],
 }
 VOLUME = {
     'titulo': 'Volume e conversão',
     'sub': 'Leads classificados e taxa de conversão (Classif. → vendas)',
     'linhas': [
-        ('pessoas', LARANJA_ICO, 'Leads Classif.', '', ['80', '79', '77', '93', '64', '68', '69', '14']),
-        ('alvo',    VERDE_ICO,   'Conversão',      'Classif. → vendas',
+        (bain_icon('pessoas_cheio'), LARANJA_ICO, 'Leads Classif.', '', ['80', '79', '77', '93', '64', '68', '69', '14']),
+        (bain_icon('alvo'),         VERDE_ICO,   'Conversão',      'Classif. → vendas',
          ['0,39%', '0,41%', '0,35%', '0,31%', '0,40%', '0,38%', '0,33%', '0,18%']),
     ],
 }
@@ -140,9 +185,9 @@ STATUS_ROWS = [
 # escala de 3 cores classica (Excel), interpolada: verde (minimo da linha) ->
 # amarelo (meio) -> vermelho (maximo da linha), igual a formatacao condicional
 # de "escala de cores" do Excel/Sheets aplicada linha a linha
-HEAT_GREEN = (RGBColor(0xC6, 0xEF, 0xCE), RGBColor(0x00, 0x61, 0x00))
-HEAT_YELLOW = (RGBColor(0xFF, 0xEB, 0x9C), RGBColor(0x9C, 0x65, 0x00))
-HEAT_RED = (RGBColor(0xFF, 0xC7, 0xCE), RGBColor(0x9C, 0x00, 0x06))
+HEAT_GREEN = (RGBColor(0xD4, 0xE9, 0xD1), RGBColor(0x2E, 0x7D, 0x32))
+HEAT_YELLOW = (RGBColor(0xF7, 0xEA, 0xC7), RGBColor(0xA6, 0x7C, 0x00))
+HEAT_RED = (RGBColor(0xF6, 0xC9, 0xCB), RGBColor(0xB0, 0x2A, 0x37))
 
 
 def _lerp_color(a, b, t):
@@ -465,18 +510,18 @@ def mini_table(slide, x, y, w, bloco, heat_fn):
         cell_text(c, [(mes, True)], PT_HEAD, TEXT_HELPER, align=PP_ALIGN.CENTER,
                   anchor=MSO_ANCHOR.MIDDLE)
 
-    icon_s = 0.13
+    icon_s = 0.17
     row_y = y + head_h
-    for ri, (kind, cor, nome, legenda, vals) in enumerate(bloco['linhas'], start=1):
+    for ri, (icon_fn, cor, nome, legenda, vals) in enumerate(bloco['linhas'], start=1):
         sep = GRAY_MEDIUM if ri == len(bloco['linhas']) else GRAY_LIGHT
         c = tbl.cell(ri, 0)
         cell_box(c, WHITE, (None, None, None, sep), lw=0.5)
         paras = [(PT_BODY, [(nome, True, TEXT_DARK)])]
         if legenda:
             paras.append((PT_HEAD - 0.5, [(legenda, False, TEXT_HELPER)]))
-        cell_paras(c, paras, anchor=MSO_ANCHOR.MIDDLE, mx=0.24)
+        cell_paras(c, paras, anchor=MSO_ANCHOR.MIDDLE, mx=0.28)
         icon_y = row_y + (row_h - icon_s) / 2.0
-        icon(slide, kind, x + 0.06, icon_y, icon_s, cor, bg=WHITE)
+        icon_fn(slide, x + 0.06, icon_y, icon_s, cor)
 
         cores = heat_fn(vals)
         for ci, (val, heat) in enumerate(zip(vals, cores), start=1):
