@@ -34,6 +34,11 @@ from deckstyle import (
 )
 from icons_bain import icon
 
+
+def bain_icon(kind):
+    """adapta icon(slide, kind, ...) de icons_bain.py para o icon_fn(slide,x,y,s,color)"""
+    return lambda slide, x, y, s, color: icon(slide, kind, x, y, s, color)
+
 OUT = '../output/260925__Status_frente2_resultados.pptx'
 
 # ------------------------------------------------------------------ conteudo
@@ -51,22 +56,25 @@ TIME = 'Priscila Martins, Yure Cangussu, Thais Pimenta, Luma Gomes'
 
 MESES = ['Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set*']
 
-# icone (chave de icons_bain.py), rotulo, legenda, valores mensais
+# icone (chave de icons_bain.py), cor, rotulo, legenda, valores mensais
+AZUL_ICO = RGBColor(0x2F, 0x5B, 0xA8)
+LARANJA_ICO = RGBColor(0xE0, 0x6C, 0x3C)
+VERDE_ICO = RGBColor(0x2F, 0x8F, 0x5B)
 QUALIDADE = {
     'titulo': 'Qualidade dos leads',
     'sub': '% de leads sem CEP (menor é melhor)',
     'linhas': [
-        ('monitor',     'Site',    '% leads sem CEP', ['-', '-', '24%', '24%', '23%', '22%', '13%', '10%']),
-        ('engrenagem',  'Liza',    '% leads sem CEP', ['-', '-', '54%', '85%', '80%', '69%', '49%', '52%']),
-        ('rede',        'Chatbot', '% leads sem CEP', ['-', '-', '57%', '58%', '56%', '54%', '41%', '24%']),
+        ('monitor',    BLACK,     'Site',    '% leads sem CEP', ['-', '-', '24%', '24%', '23%', '22%', '13%', '10%']),
+        ('engrenagem', AZUL_ICO,  'Liza',    '% leads sem CEP', ['-', '-', '54%', '85%', '80%', '69%', '49%', '52%']),
+        ('rede',       AZUL_ICO,  'Chatbot', '% leads sem CEP', ['-', '-', '57%', '58%', '56%', '54%', '41%', '24%']),
     ],
 }
 VOLUME = {
     'titulo': 'Volume e conversão',
     'sub': 'Leads classificados e taxa de conversão (Classif. → vendas)',
     'linhas': [
-        ('pessoas', 'Leads Classif.', '', ['80', '79', '77', '93', '64', '68', '69', '14']),
-        ('alvo',    'Conversão',      'Classif. → vendas',
+        ('pessoas', LARANJA_ICO, 'Leads Classif.', '', ['80', '79', '77', '93', '64', '68', '69', '14']),
+        ('alvo',    VERDE_ICO,   'Conversão',      'Classif. → vendas',
          ['0,39%', '0,41%', '0,35%', '0,31%', '0,40%', '0,38%', '0,33%', '0,18%']),
     ],
 }
@@ -129,29 +137,55 @@ STATUS_ROWS = [
 ]
 
 # ------------------------------------------------------------------ heatmap
-# escala de 3 cores classica (Excel): fundo claro + texto escuro da mesma familia
-HEAT = {
-    'verde':   (RGBColor(0xC6, 0xEF, 0xCE), RGBColor(0x00, 0x61, 0x00)),
-    'amarelo': (RGBColor(0xFF, 0xEB, 0x9C), RGBColor(0x9C, 0x65, 0x00)),
-    'vermelho': (RGBColor(0xFF, 0xC7, 0xCE), RGBColor(0x9C, 0x00, 0x06)),
-}
+# escala de 3 cores classica (Excel), interpolada: verde (minimo da linha) ->
+# amarelo (meio) -> vermelho (maximo da linha), igual a formatacao condicional
+# de "escala de cores" do Excel/Sheets aplicada linha a linha
+HEAT_GREEN = (RGBColor(0xC6, 0xEF, 0xCE), RGBColor(0x00, 0x61, 0x00))
+HEAT_YELLOW = (RGBColor(0xFF, 0xEB, 0x9C), RGBColor(0x9C, 0x65, 0x00))
+HEAT_RED = (RGBColor(0xFF, 0xC7, 0xCE), RGBColor(0x9C, 0x00, 0x06))
 
 
-def heat_pct(val, is_last):
-    """cor da celula de % (menor e melhor: verde <=15, amarelo <=50, vermelho > 50)"""
-    if val == '-':
-        return None
-    pct = float(val.replace('%', '').replace(',', '.'))
-    if pct <= 15:
-        return HEAT['verde']
-    if pct <= 50:
-        return HEAT['amarelo']
-    return HEAT['vermelho']
+def _lerp_color(a, b, t):
+    return RGBColor(*(int(a[i] + (b[i] - a[i]) * t) for i in range(3)))
 
 
-def heat_last_only(val, is_last):
+def _heat_at(t):
+    """t=0 -> verde, t=0.5 -> amarelo, t=1 -> vermelho"""
+    if t <= 0.5:
+        (bg0, fg0), (bg1, fg1), u = HEAT_GREEN, HEAT_YELLOW, t / 0.5
+    else:
+        (bg0, fg0), (bg1, fg1), u = HEAT_YELLOW, HEAT_RED, (t - 0.5) / 0.5
+    return _lerp_color(bg0, bg1, u), _lerp_color(fg0, fg1, u)
+
+
+HEAT_SPAN = 45.0   # pontos percentuais do minimo da linha at vermelho pleno
+
+
+def heat_pct(vals):
+    """verde no minimo da propria linha, vermelho a HEAT_SPAN p.p. dali.
+
+    Ancorado no minimo de cada linha (nao no maximo) e com um passo fixo em
+    pontos percentuais, para linhas com pouca variacao (Site, 10-24%) ficarem
+    em tons proximos de verde/amarelo e linhas mais criticas (Liza, 49-85%)
+    alcancarem o vermelho — em vez de esticar sempre verde->vermelho entre o
+    minimo e o maximo de cada linha, o que faria o pior mes de qualquer linha
+    parecer igualmente grave.
+    """
+    nums = [(i, float(v.replace('%', '').replace(',', '.')))
+            for i, v in enumerate(vals) if v != '-']
+    out = [None] * len(vals)
+    if not nums:
+        return out
+    mn = min(v for _, v in nums)
+    for i, v in nums:
+        t = max(0.0, min(1.0, (v - mn) / HEAT_SPAN))
+        out[i] = _heat_at(t)
+    return out
+
+
+def heat_last_only(vals):
     """sem heatmap mes a mes; so marca a coluna Set* (mes parcial) em vermelho"""
-    return HEAT['vermelho'] if is_last else None
+    return [HEAT_RED if i == len(vals) - 1 else None for i in range(len(vals))]
 
 
 # ------------------------------------------------------------------ geometria
@@ -169,7 +203,9 @@ PT_HEAD, PT_BODY, PT_FOOT = 7.5, 8.0, 7.0
 BODY_STEPS_STATUS = (8.0, 7.5, 7.0, 6.5, 6.0)
 
 PANEL_GREEN = RGBColor(0x1F, 0x4E, 0x3D)
-PANEL_GREEN_LT = RGBColor(0xCF, 0xE8, 0xDD)
+PANEL_GREEN_LT = RGBColor(0x9F, 0xD4, 0xB8)
+CHIP_BG = RGBColor(0xE9, 0xEC, 0xF4)
+CHIP_SET_BG = RGBColor(0xDD, 0xE1, 0xEC)
 BAR = 0.075
 
 
@@ -188,7 +224,7 @@ def textbox(slide, x, y, w, h, text, size=9, color=TEXT_DARK, bold=False,
 
 
 def rect(slide, x, y, w, h, fill=None, line=None, lw=0.75,
-         shape=MSO_SHAPE.RECTANGLE):
+         shape=MSO_SHAPE.RECTANGLE, adj=None):
     s = slide.shapes.add_shape(shape, Inches(x), Inches(y), Inches(w), Inches(h))
     if fill is None:
         s.fill.background()
@@ -199,9 +235,36 @@ def rect(slide, x, y, w, h, fill=None, line=None, lw=0.75,
     else:
         s.line.color.rgb = line; s.line.width = Pt(lw)
     no_shadow(s)
+    if adj is not None:
+        try: s.adjustments[0] = adj
+        except (IndexError, ValueError): pass
     tf = s.text_frame
     tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
     return s
+
+
+def funnel_icon(slide, x, y, s, color):
+    """funil (filtro): trapezio + haste, para o titulo de "Qualidade dos leads" """
+    top_w, bot_w, body_h = s, s * 0.30, s * 0.55
+    pts = [(x, y), (x + top_w, y),
+           (x + top_w / 2 + bot_w / 2, y + body_h),
+           (x + top_w / 2 - bot_w / 2, y + body_h)]
+    fb = slide.shapes.build_freeform(Inches(pts[0][0]), Inches(pts[0][1]))
+    fb.add_line_segments([(Inches(px), Inches(py)) for px, py in pts[1:]], close=True)
+    sh = fb.convert_to_shape()
+    sh.fill.solid(); sh.fill.fore_color.rgb = color
+    sh.line.fill.background()
+    no_shadow(sh)
+    rect(slide, x + top_w / 2 - bot_w * 0.22, y + body_h, bot_w * 0.44, s * 0.28, fill=color)
+
+
+def list_icon(slide, x, y, s, color):
+    """3 marcadores + 3 linhas, para o titulo de "Status das frentes em andamento" """
+    dr = s * 0.09
+    for frac in (0.12, 0.44, 0.76):
+        cy = y + s * frac
+        rect(slide, x, cy, dr * 2, dr * 2, fill=color, shape=MSO_SHAPE.OVAL)
+        rect(slide, x + dr * 3, cy + dr * 0.3, s * 0.62, dr * 1.4, fill=color)
 
 
 def new_table(slide, x, y, w, nrows, widths, heights):
@@ -253,19 +316,40 @@ def bullet_list(cell, items, size, color, bold_map=None):
     cell_paras(cell, paras, anchor=MSO_ANCHOR.MIDDLE, space=2.0)
 
 
-def panel_header(slide, x, y, w, title, right_text=None):
+def panel_header(slide, x, y, w, title, right_text=None, icon_fn=None):
     """faixa verde-escura do painel, como tabela 1x2 (editavel, nao textbox)"""
     h = 0.30
     tbl = new_table(slide, x, y, w, 1, [w * 0.55, w * 0.45] if right_text else [w], [h])
     c = tbl.cell(0, 0)
     cell_box(c, PANEL_GREEN)
-    cell_text(c, [(title, True)], PT_PANEL, WHITE, anchor=MSO_ANCHOR.MIDDLE, mx=0.12)
+    mx = 0.40 if icon_fn else 0.12
+    cell_text(c, [(title, True)], PT_PANEL, WHITE, anchor=MSO_ANCHOR.MIDDLE, mx=mx)
+    if icon_fn:
+        icon_s = 0.20
+        icon_fn(slide, x + 0.12, y + (h - icon_s) / 2.0, icon_s, PANEL_GREEN_LT)
     if right_text:
         c2 = tbl.cell(0, 1)
         cell_box(c2, PANEL_GREEN)
         cell_text(c2, [(right_text, False)], PT_SUBSECT, PANEL_GREEN_LT,
                   align=PP_ALIGN.RIGHT, anchor=MSO_ANCHOR.MIDDLE, mx=0.12)
     return y + h
+
+
+def section_header(slide, x, y, w, icon_fn, icon_color, titulo, sub):
+    """chip claro com icone, titulo e subtitulo, como no print (tabela 1x1
+    para o fundo arredondado, com o icone e os dois textos por cima)"""
+    tit_n = nlines(titulo, PT_SECT, w - 0.55, True)
+    sub_n = nlines(sub, PT_SUBSECT, w - 0.55)
+    h = tit_n * lh(PT_SECT) + sub_n * lh(PT_SUBSECT) + 0.16
+    rect(slide, x, y, w, h, fill=CHIP_BG, shape=MSO_SHAPE.ROUNDED_RECTANGLE, adj=0.12)
+    icon_s = 0.24
+    icon_fn(slide, x + 0.16, y + (h - icon_s) / 2.0, icon_s, icon_color)
+    tx = x + 0.16 + icon_s + 0.14
+    textbox(slide, tx, y + 0.08, w - (tx - x) - 0.12, tit_n * lh(PT_SECT),
+            titulo, size=PT_SECT, color=BLACK, bold=True)
+    textbox(slide, tx, y + 0.08 + tit_n * lh(PT_SECT), w - (tx - x) - 0.12,
+            sub_n * lh(PT_SUBSECT), sub, size=PT_SUBSECT, color=TEXT_HELPER)
+    return y + h + 0.10
 
 
 def status_pill(cell, key, label, size):
@@ -376,14 +460,14 @@ def mini_table(slide, x, y, w, bloco, heat_fn):
     cell_box(tbl.cell(0, 0), GRAY_X_LIGHT, (None, None, None, GRAY_MEDIUM), lw=0.5)
     for ci, mes in enumerate(MESES, start=1):
         c = tbl.cell(0, ci)
-        cell_box(c, GRAY_X_LIGHT if ci < n_meses else PANEL_GREEN_LT,
+        cell_box(c, GRAY_X_LIGHT if ci < n_meses else CHIP_SET_BG,
                   (None, None, None, GRAY_MEDIUM), lw=0.5)
         cell_text(c, [(mes, True)], PT_HEAD, TEXT_HELPER, align=PP_ALIGN.CENTER,
                   anchor=MSO_ANCHOR.MIDDLE)
 
     icon_s = 0.13
     row_y = y + head_h
-    for ri, (kind, nome, legenda, vals) in enumerate(bloco['linhas'], start=1):
+    for ri, (kind, cor, nome, legenda, vals) in enumerate(bloco['linhas'], start=1):
         sep = GRAY_MEDIUM if ri == len(bloco['linhas']) else GRAY_LIGHT
         c = tbl.cell(ri, 0)
         cell_box(c, WHITE, (None, None, None, sep), lw=0.5)
@@ -392,12 +476,11 @@ def mini_table(slide, x, y, w, bloco, heat_fn):
             paras.append((PT_HEAD - 0.5, [(legenda, False, TEXT_HELPER)]))
         cell_paras(c, paras, anchor=MSO_ANCHOR.MIDDLE, mx=0.24)
         icon_y = row_y + (row_h - icon_s) / 2.0
-        icon(slide, kind, x + 0.06, icon_y, icon_s, GREEN_DEEP, bg=WHITE)
+        icon(slide, kind, x + 0.06, icon_y, icon_s, cor, bg=WHITE)
 
-        n = len(vals)
-        for ci, val in enumerate(vals, start=1):
+        cores = heat_fn(vals)
+        for ci, (val, heat) in enumerate(zip(vals, cores), start=1):
             cc = tbl.cell(ri, ci)
-            heat = heat_fn(val, ci == n)
             if heat:
                 bg, fg = heat
                 cell_box(cc, bg, (WHITE, WHITE, None, sep), lw=1.0)
@@ -411,20 +494,17 @@ def mini_table(slide, x, y, w, bloco, heat_fn):
 
 
 def left_panel(slide, x, y, w, bottom):
-    y = panel_header(slide, x, y, w, 'Resultados-chave', 'Histórico mensal | 2026')
+    y = panel_header(slide, x, y, w, 'Resultados-chave', 'Histórico mensal | 2026',
+                      icon_fn=bain_icon('barras'))
     y += 0.10
 
-    textbox(slide, x, y, w, 0.16, QUALIDADE['titulo'], size=PT_SECT, color=BLACK, bold=True)
-    y += lh(PT_SECT) + 0.01
-    textbox(slide, x, y, w, 0.14, QUALIDADE['sub'], size=PT_SUBSECT, color=TEXT_HELPER)
-    y += lh(PT_SUBSECT) + 0.06
+    y = section_header(slide, x, y, w, funnel_icon, PANEL_GREEN,
+                        QUALIDADE['titulo'], QUALIDADE['sub'])
     y = mini_table(slide, x, y, w, QUALIDADE, heat_pct)
     y += 0.16
 
-    textbox(slide, x, y, w, 0.16, VOLUME['titulo'], size=PT_SECT, color=BLACK, bold=True)
-    y += lh(PT_SECT) + 0.01
-    textbox(slide, x, y, w, 0.14, VOLUME['sub'], size=PT_SUBSECT, color=TEXT_HELPER)
-    y += lh(PT_SUBSECT) + 0.06
+    y = section_header(slide, x, y, w, bain_icon('barras'), PANEL_GREEN,
+                        VOLUME['titulo'], VOLUME['sub'])
     y = mini_table(slide, x, y, w, VOLUME, heat_last_only)
     y += 0.12
 
@@ -448,7 +528,7 @@ PT_RHEAD = 6.5
 
 
 def right_panel(slide, x, y, w, bottom):
-    y = panel_header(slide, x, y, w, 'Status das frentes em andamento')
+    y = panel_header(slide, x, y, w, 'Status das frentes em andamento', icon_fn=list_icon)
     y += 0.10
 
     scale = w / sum(c[1] for c in R_COLS)
