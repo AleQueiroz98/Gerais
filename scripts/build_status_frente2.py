@@ -360,15 +360,19 @@ def header(slide, frentes):
 
 # ------------------------------------------------------------------ painel esquerdo
 def mini_table(slide, x, y, w, bloco, heat_fn):
+    def fh(pt):
+        return pt * 1.30 / 72.0
+
     n_meses = len(MESES)
     lab_w = w * 0.30
     col_w = (w - lab_w) / n_meses
     widths = [lab_w] + [col_w] * n_meses
-    nrows = 1 + len(bloco['linhas'])
-    row_h = 0.205
-    heights = [row_h] * nrows
+    head_h = fh(PT_HEAD) + 0.14
+    tem_legenda = any(l[2] for l in bloco['linhas'])
+    row_h = fh(PT_BODY) + (fh(PT_HEAD - 0.5) + 0.04 if tem_legenda else 0) + 0.22
+    heights = [head_h] + [row_h] * len(bloco['linhas'])
 
-    tbl = new_table(slide, x, y, w, nrows, widths, heights)
+    tbl = new_table(slide, x, y, w, len(heights), widths, heights)
     cell_box(tbl.cell(0, 0), GRAY_X_LIGHT, (None, None, None, GRAY_MEDIUM), lw=0.5)
     for ci, mes in enumerate(MESES, start=1):
         c = tbl.cell(0, ci)
@@ -378,6 +382,7 @@ def mini_table(slide, x, y, w, bloco, heat_fn):
                   anchor=MSO_ANCHOR.MIDDLE)
 
     icon_s = 0.13
+    row_y = y + head_h
     for ri, (kind, nome, legenda, vals) in enumerate(bloco['linhas'], start=1):
         sep = GRAY_MEDIUM if ri == len(bloco['linhas']) else GRAY_LIGHT
         c = tbl.cell(ri, 0)
@@ -386,7 +391,7 @@ def mini_table(slide, x, y, w, bloco, heat_fn):
         if legenda:
             paras.append((PT_HEAD - 0.5, [(legenda, False, TEXT_HELPER)]))
         cell_paras(c, paras, anchor=MSO_ANCHOR.MIDDLE, mx=0.24)
-        icon_y = y + row_h * ri + (row_h - icon_s) / 2.0
+        icon_y = row_y + (row_h - icon_s) / 2.0
         icon(slide, kind, x + 0.06, icon_y, icon_s, GREEN_DEEP, bg=WHITE)
 
         n = len(vals)
@@ -401,6 +406,7 @@ def mini_table(slide, x, y, w, bloco, heat_fn):
                 fg = PLACEHOLDER if val == '-' else TEXT_DARK
             cell_text(cc, [(val, heat is not None)], PT_BODY, fg,
                       align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+        row_y += row_h
     return y + sum(heights)
 
 
@@ -429,15 +435,16 @@ def left_panel(slide, x, y, w, bottom):
 
 # ------------------------------------------------------------------ painel direito
 R_COLS = [
-    ('#', 0.42, PP_ALIGN.LEFT),
-    ('Entregável', 1.95, PP_ALIGN.LEFT),
-    ('Responsável', 1.05, PP_ALIGN.LEFT),
-    ('Prazo', 0.55, PP_ALIGN.LEFT),
+    ('#', 0.55, PP_ALIGN.LEFT),
+    ('Entregável', 1.70, PP_ALIGN.LEFT),
+    ('Responsável', 1.30, PP_ALIGN.LEFT),
+    ('Prazo', 0.70, PP_ALIGN.LEFT),
     ('Status', 1.00, PP_ALIGN.CENTER),
-    ('Progresso recente', 1.55, PP_ALIGN.LEFT),
-    ('Próximos passos', 1.55, PP_ALIGN.LEFT),
-    ('Pontos a escalar', 1.55, PP_ALIGN.LEFT),
+    ('Progresso recente', 1.60, PP_ALIGN.LEFT),
+    ('Próximos passos', 1.60, PP_ALIGN.LEFT),
+    ('Pontos a escalar', 1.60, PP_ALIGN.LEFT),
 ]
+PT_RHEAD = 6.5
 
 
 def right_panel(slide, x, y, w, bottom):
@@ -484,7 +491,7 @@ def right_panel(slide, x, y, w, bottom):
     for ci, (name, _w, align) in enumerate(R_COLS):
         c = tbl.cell(0, ci)
         cell_box(c, GRAY_X_LIGHT, (None, None, None, BLACK), lw=1.0)
-        cell_text(c, [(name.upper(), True)], PT_HEAD, TEXT_HELPER, align=align,
+        cell_text(c, [(name.upper(), True)], PT_RHEAD, TEXT_HELPER, align=align,
                   anchor=MSO_ANCHOR.MIDDLE)
 
     row_y = [y + heights[0]]
@@ -499,6 +506,7 @@ def right_panel(slide, x, y, w, bottom):
         cell_box(c, None, base, lw=0.5)
         cell_text(c, [(r['id'], True)], body_pt - 0.5, TEXT_HELPER,
                   anchor=MSO_ANCHOR.TOP, mt=0.05)
+        c.text_frame.word_wrap = False
 
         c = tbl.cell(ri, 1)
         cell_box(c, None, base, lw=0.5)
