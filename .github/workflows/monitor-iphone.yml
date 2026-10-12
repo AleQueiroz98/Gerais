@@ -1,7 +1,7 @@
 name: Monitor iPhone 18 Pro Max
 
-# Checa o estoque a cada ~5 min. Quando o 18 Pro Max 256GB/512GB aparece disponivel em
-# loja perto de Miami, o job FALHA de proposito para o GitHub mandar e-mail de aviso.
+# Checa o estoque a cada ~5 min. Quando o 18 Pro Max 256GB aparece disponivel em
+# Brickell City Centre ou Miami Worldcenter, o job FALHA de proposito para o GitHub mandar e-mail de aviso.
 on:
   schedule:
     - cron: "*/5 * * * *"
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Checar estoque
-        run: python3 scripts/monitor_iphone.py --uma-vez --falhar-se-disponivel
+        run: python3 scripts/monitor_iphone.py --uma-vez --falhar-se-disponivel --modelo "18 Pro Max 256GB" --lojas Brickell --lojas Worldcenter
       - name: Push no celular (opcional, secret NTFY_TOPICO)
         if: failure() && env.NTFY_TOPICO != ''
         run: |

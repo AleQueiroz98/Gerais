@@ -71,7 +71,7 @@ def consulta(part, cep):
         return json.loads(r.read())["body"]["PickupMessage"]["stores"]
 
 
-def disponiveis(cep, filtros):
+def disponiveis(cep, filtros, lojas=None):
     with ThreadPoolExecutor(8) as ex:
         resultados = list(ex.map(lambda p: consulta(p, cep), NOMES))
     achados = set()
@@ -79,7 +79,8 @@ def disponiveis(cep, filtros):
         for s in stores:
             for part, info in s["partsAvailability"].items():
                 nome = NOMES.get(part, part)
-                if info.get("pickupDisplay") == "available" and any(f in nome.lower() for f in filtros):
+                if (info.get("pickupDisplay") == "available" and any(f in nome.lower() for f in filtros)
+                        and (not lojas or any(l in s["storeName"].lower() for l in lojas))):
                     achados.add(f"{nome} @ {s['storeName']}")
     return achados
 
@@ -106,6 +107,8 @@ def main():
     ap.add_argument("--intervalo", type=float, default=5, help="minutos entre checagens (padrao: 5)")
     ap.add_argument("--modelo", action="append",
                     help='trecho do nome a monitorar, repetivel (padrao: "18 Pro Max 256GB" e "18 Pro Max 512GB")')
+    ap.add_argument("--lojas", action="append",
+                    help='trecho do nome da loja, repetivel (padrao: todas). Ex: --lojas Brickell --lojas Worldcenter')
     ap.add_argument("--ntfy", help="topico ntfy.sh para push no celular")
     ap.add_argument("--uma-vez", action="store_true", help="checa uma vez e sai")
     ap.add_argument("--falhar-se-disponivel", action="store_true",
@@ -116,7 +119,7 @@ def main():
     avisados = set()
     while True:
         try:
-            agora = disponiveis(a.cep, filtros)
+            agora = disponiveis(a.cep, filtros, [l.lower() for l in a.lojas] if a.lojas else None)
             novos = agora - avisados
             if novos:
                 avisar("; ".join(sorted(novos)), a.ntfy)
