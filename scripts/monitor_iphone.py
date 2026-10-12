@@ -12,6 +12,9 @@ Uso (Windows: py no lugar de python3):
   py scripts/monitor_iphone.py --ntfy meu-topico-secreto-123
   py scripts/monitor_iphone.py --cep "Miami, FL" --intervalo 5 --modelo "18 Pro Max 256GB" --modelo "18 Pro Max 512GB"
   py scripts/monitor_iphone.py --uma-vez        (uma checagem e sai; bom para testar)
+
+Na nuvem: .github/workflows/monitor-iphone.yml roda --uma-vez --falhar-se-disponivel a cada
+5 min; quando acha estoque o job falha e o GitHub avisa por e-mail (nao precisa deixar nada ligado).
 """
 import argparse
 import json
@@ -105,6 +108,8 @@ def main():
                     help='trecho do nome a monitorar, repetivel (padrao: "18 Pro Max 256GB" e "18 Pro Max 512GB")')
     ap.add_argument("--ntfy", help="topico ntfy.sh para push no celular")
     ap.add_argument("--uma-vez", action="store_true", help="checa uma vez e sai")
+    ap.add_argument("--falhar-se-disponivel", action="store_true",
+                    help="com --uma-vez, sai com codigo 1 quando achar estoque (usado pelo GitHub Actions)")
     a = ap.parse_args()
     filtros = [m.lower() for m in (a.modelo or ["18 Pro Max 256GB", "18 Pro Max 512GB"])]
 
@@ -118,6 +123,8 @@ def main():
             elif not agora:
                 print(f"[{datetime.now():%H:%M:%S}] indisponivel", flush=True)
             avisados = agora  # se sumir e voltar, avisa de novo
+            if a.uma_vez and a.falhar_se_disponivel and agora:
+                sys.exit(1)
         except Exception as e:
             print(f"[{datetime.now():%H:%M:%S}] erro: {e}", file=sys.stderr, flush=True)
         if a.uma_vez:
