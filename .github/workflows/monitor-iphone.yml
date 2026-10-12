@@ -15,12 +15,15 @@ jobs:
   checar:
     runs-on: ubuntu-latest
     timeout-minutes: 3
+    env:
+      NTFY_TOPICO: ${{ secrets.NTFY_TOPICO }}
     steps:
       - uses: actions/checkout@v4
       - name: Checar estoque
         run: python3 scripts/monitor_iphone.py --uma-vez --falhar-se-disponivel
       - name: Push no celular (opcional, secret NTFY_TOPICO)
         if: failure() && env.NTFY_TOPICO != ''
-        env:
-          NTFY_TOPICO: ${{ secrets.NTFY_TOPICO }}
-        run: curl -s -H "Title: iPhone disponivel" -H "Priority: high" -d "iPhone 18 Pro Max 256/512GB disponivel - veja o log do GitHub Actions" "https://ntfy.sh/$NTFY_TOPICO"
+        run: |
+          curl -s -H "Title: iPhone disponivel" -H "Priority: high" \
+            -d "iPhone 18 Pro Max 256/512GB disponivel - veja o log do GitHub Actions" \
+            "https://ntfy.sh/$NTFY_TOPICO"
